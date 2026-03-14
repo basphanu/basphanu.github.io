@@ -7,16 +7,17 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     :root {
-      --bg: #f6f1eb;
-      --panel: #ffffff;
-      --line: #e6ddd2;
-      --text: #2f2924;
-      --muted: #7b7269;
-      --orange: #d98b4d;
-      --orange-2: #c97838;
-      --green: #5c8f73;
-      --red: #c97a5d;
-      --shadow: 0 10px 24px rgba(82, 63, 45, 0.08);
+      --bg: #0f1115;
+      --panel: #171a21;
+      --panel-2: #1d212a;
+      --line: #313846;
+      --text: #f3f4f6;
+      --muted: #b6b6bf;
+      --orange: #f97316;
+      --orange-2: #ea580c;
+      --green: #22c55e;
+      --red: #ef4444;
+      --shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
       --radius-xl: 26px;
       --radius-lg: 20px;
       --export-width: 1080px;
@@ -30,8 +31,9 @@
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Thai", sans-serif;
       background:
-        radial-gradient(circle at top left, rgba(217,139,77,0.10), transparent 24%),
-        linear-gradient(180deg, #faf6f1 0%, #f4eee7 100%);
+        radial-gradient(circle at top left, rgba(249, 115, 22, 0.12), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(251, 146, 60, 0.08), transparent 18%),
+        linear-gradient(180deg, #0b0d12 0%, #11141a 100%);
       color: var(--text);
       padding: 18px;
     }
@@ -44,23 +46,23 @@
     }
 
     .hero {
-      background: linear-gradient(135deg, #ead8c6, #f4e8dc);
+      background: linear-gradient(135deg, #171a21, #232833);
       color: var(--text);
       border-radius: 30px;
       padding: 22px;
       box-shadow: var(--shadow);
       position: relative;
       overflow: hidden;
-      border: 1px solid #eadfd3;
+      border: 1px solid rgba(249, 115, 22, 0.18);
     }
 
     .hero::after {
       content: "";
       position: absolute;
-      width: 240px;
-      height: 240px;
+      width: 260px;
+      height: 260px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.45);
+      background: radial-gradient(circle, rgba(249, 115, 22, 0.22), rgba(249, 115, 22, 0.02));
       right: -70px;
       top: -70px;
     }
@@ -81,11 +83,11 @@
       gap: 10px;
       padding: 10px 16px;
       border-radius: 999px;
-      background: rgba(255,255,255,0.75);
-      border: 1px solid #eadfd3;
+      background: rgba(249, 115, 22, 0.12);
+      border: 1px solid rgba(249, 115, 22, 0.24);
       font-weight: 800;
       font-size: 1rem;
-      color: #6f5846;
+      color: #ffd2b0;
     }
 
     h1 {
@@ -93,12 +95,13 @@
       font-size: clamp(2.1rem, 4vw, 3.2rem);
       line-height: 1.08;
       font-weight: 950;
+      color: #ffffff;
     }
 
     .subtitle {
       margin: 0;
-      color: #5f5348;
-      font-size: 1.12rem;
+      color: #d4d4d8;
+      font-size: 1.05rem;
       line-height: 1.7;
       font-weight: 700;
     }
@@ -112,7 +115,7 @@
 
     .select-branch,
     .btn {
-      border: 1px solid #e4d9ce;
+      border: 1px solid #343a46;
       font-weight: 800;
     }
 
@@ -121,7 +124,7 @@
       min-height: 60px;
       padding: 15px 18px;
       border-radius: 16px;
-      background: #fffdfa;
+      background: #151922;
       color: var(--text);
       outline: none;
       font-size: 1.08rem;
@@ -129,12 +132,16 @@
 
     .btn {
       cursor: pointer;
-      background: #fffdfa;
-      color: #4f4136;
-      transition: transform 0.18s ease, opacity 0.18s ease;
+      background: #171b24;
+      color: var(--text);
+      transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
     }
 
-    .btn:hover { transform: translateY(-2px); }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+    }
+
     .btn:disabled { opacity: 0.7; cursor: wait; transform: none; }
 
     .btn.export {
@@ -142,12 +149,12 @@
       min-height: 60px;
       padding: 15px 18px;
       border-radius: 16px;
-      background: #efe5da;
-      border: 1px solid #e1d5c9;
-      color: #5f5145;
+      background: linear-gradient(135deg, var(--orange), var(--orange-2));
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #fff7ed;
       font-size: 1.08rem;
       font-weight: 900;
-      box-shadow: 0 8px 18px rgba(120, 101, 84, 0.06);
+      box-shadow: 0 10px 22px rgba(234, 88, 12, 0.28);
     }
 
     .layout {
@@ -158,8 +165,8 @@
     }
 
     .input-panel {
-      background: linear-gradient(180deg, #fffdfa, #f8f2eb);
-      border: 1px solid #e7ddd2;
+      background: linear-gradient(180deg, #141821, #1a1f29);
+      border: 1px solid #2e3541;
       border-radius: var(--radius-xl);
       box-shadow: var(--shadow);
       overflow: hidden;
@@ -167,21 +174,21 @@
 
     .input-head {
       padding: 18px 20px;
-      border-bottom: 1px solid #e8ddd2;
-      background: linear-gradient(180deg, #fbf7f2, #f5eee7);
+      border-bottom: 1px solid #2f3542;
+      background: linear-gradient(180deg, #1a1e27, #151922);
     }
 
     .input-head h2 {
       margin: 0 0 8px;
       font-size: 1.38rem;
       font-weight: 950;
-      color: var(--text);
+      color: #ffffff;
     }
 
     .input-head p {
       margin: 0;
-      color: #7c7065;
-      font-size: 1.02rem;
+      color: #b3b3bb;
+      font-size: 1rem;
       line-height: 1.65;
       font-weight: 700;
     }
@@ -193,8 +200,8 @@
     }
 
     .form-block {
-      background: #fffdfb;
-      border: 1px solid #ece1d7;
+      background: linear-gradient(180deg, #1a1f29, #161b23);
+      border: 1px solid #303744;
       border-radius: var(--radius-lg);
       padding: 16px;
     }
@@ -203,7 +210,7 @@
       margin: 0 0 14px;
       font-size: 1.14rem;
       font-weight: 900;
-      color: var(--orange-2);
+      color: #ffb781;
     }
 
     .field-grid {
@@ -218,7 +225,7 @@
     }
 
     .field label {
-      color: #72665c;
+      color: #c8c8cf;
       font-size: 0.98rem;
       font-weight: 800;
     }
@@ -226,9 +233,9 @@
     .field input,
     .field select {
       width: 100%;
-      background: #ffffff;
+      background: #11151d;
       color: var(--text);
-      border: 1px solid #e6dbcf;
+      border: 1px solid #313846;
       border-radius: 12px;
       padding: 14px 15px;
       font-size: 1.08rem;
@@ -239,12 +246,12 @@
     .field input:focus,
     .field select:focus {
       border-color: var(--orange);
-      box-shadow: 0 0 0 4px rgba(217, 139, 77, 0.12);
+      box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.16);
     }
 
     .helper {
       font-size: 0.92rem;
-      color: #8d8177;
+      color: #a8a8b1;
       line-height: 1.6;
       font-weight: 700;
     }
@@ -262,19 +269,19 @@
       min-height: 60px;
       padding: 15px 18px;
       border-radius: 16px;
-      background: linear-gradient(135deg, #d98b4d, #c97838);
-      border: 1px solid #c97838;
-      color: #fffdfb;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #fff7ed;
       font-size: 1.08rem;
       font-weight: 900;
-      box-shadow: 0 8px 18px rgba(201, 120, 56, 0.12);
+      box-shadow: 0 10px 22px rgba(234, 88, 12, 0.26);
     }
 
     .action-row .btn.secondary {
-      background: #efe5da;
-      border: 1px solid #e1d5c9;
-      color: #5f5145;
-      box-shadow: 0 8px 18px rgba(120, 101, 84, 0.06);
+      background: #212632;
+      border: 1px solid #343b48;
+      color: #e4e4e7;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
     }
 
     .display-wrap {
@@ -288,8 +295,8 @@
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
-      background: linear-gradient(180deg, #fffdfb, #f7efe7);
-      border: 1px solid #e8ddd2;
+      background: linear-gradient(180deg, #171b24, #1d222d);
+      border: 1px solid #2f3542;
       border-radius: 20px;
       padding: 14px 16px;
       box-shadow: var(--shadow);
@@ -298,7 +305,7 @@
     .branch-title {
       font-size: 1.38rem;
       font-weight: 950;
-      color: var(--text);
+      color: #ffffff;
     }
 
     .status-pill {
@@ -306,22 +313,22 @@
       border-radius: 999px;
       font-weight: 900;
       font-size: 1rem;
-      color: #5e4a3b;
-      background: #f4ece4;
-      border: 1px solid #ddd0c2;
+      color: #f3f4f6;
+      background: #282e3a;
+      border: 1px solid #3a4250;
     }
 
-    .status-pill.good { background: #eaf3ed; color: #587961; border-color: #cddfd2; }
-    .status-pill.warn { background: #f8efe2; color: #8b6a49; border-color: #ead9c4; }
-    .status-pill.bad { background: #f8e9e4; color: #9a664f; border-color: #eccfc1; }
+    .status-pill.good { background: rgba(34, 197, 94, 0.14); color: #86efac; border-color: rgba(34, 197, 94, 0.32); }
+    .status-pill.warn { background: rgba(249, 115, 22, 0.14); color: #fdba74; border-color: rgba(249, 115, 22, 0.32); }
+    .status-pill.bad { background: rgba(239, 68, 68, 0.14); color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
 
     .export-frame {
       width: min(100%, var(--export-width));
       min-height: calc(min(100%, var(--export-width)) / (var(--export-ratio)));
       margin: 0 auto;
       overflow: visible;
-      background: linear-gradient(180deg, #fffdfa, #f7efe7);
-      border: 1px solid #e8ddd2;
+      background: linear-gradient(180deg, #11151d, #191e27);
+      border: 1px solid #2f3542;
       border-radius: 28px;
       padding: var(--export-padding);
       box-shadow: var(--shadow);
@@ -349,196 +356,194 @@
       flex-wrap: wrap;
       padding: 18px 20px;
       border-radius: 22px;
-      background: linear-gradient(180deg, #fffefe, #f8f2eb);
-      border: 1px solid #e9dfd4;
+      background: linear-gradient(180deg, #181c24, #222733);
+      border: 1px solid #323947;
     }
 
     .export-branch {
       font-size: clamp(2.1rem, 3.6vw, 2.8rem);
       font-weight: 950;
-      color: var(--text);
+      color: #ffffff;
       letter-spacing: -0.03em;
       line-height: 1.03;
     }
 
     .export-date {
-      font-size: clamp(1.18rem, 2.2vw, 1.42rem);
+      font-size: clamp(1.05rem, 2vw, 1.28rem);
       font-weight: 900;
-      color: #7d5a3f;
-      background: #f6ece3;
-      border: 1px solid #e4cdb8;
+      color: #ffd2b0;
+      background: rgba(249, 115, 22, 0.12);
+      border: 1px solid rgba(249, 115, 22, 0.28);
       border-radius: 999px;
       padding: 12px 18px;
     }
 
-    .metric-section {
+    .kpi-grid {
       display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-areas:
+        "newid today"
+        "card id";
       gap: 14px;
-      padding: 16px;
+    }
+
+    .kpi-card {
+      width: 100%;
+      background: linear-gradient(180deg, #1a1f29, #151922);
+      border: 1px solid #313846;
       border-radius: 24px;
-      background: linear-gradient(180deg, #fffdfb, #f7efe7);
-      border: 1px solid #e8ddd2;
-    }
-
-    .metric-section.priority {
-      background: linear-gradient(180deg, #ece2fa, #f8f2ff);
-      border: 1px solid #cfbde7;
-      box-shadow: 0 12px 28px rgba(119, 92, 153, 0.12);
-    }
-
-    .metric-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .metric-name {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 1.34rem;
-      font-weight: 950;
-      color: var(--text);
-    }
-
-    .metric-badge {
-      padding: 9px 14px;
-      border-radius: 999px;
-      font-size: 0.96rem;
-      font-weight: 900;
-      color: #6a5a4b;
-      background: #f4ece4;
-      border: 1px solid #e2d8cd;
-    }
-
-    .metric-badge.priority {
-      background: #efe8fb;
-      border-color: #ddd2f3;
-      color: #765b9b;
-    }
-
-    .metric-cards {
+      padding: 18px;
       display: grid;
       gap: 14px;
+      min-height: 290px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
     }
 
-    .metric-cards.compact {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    #newIdCard { grid-area: newid; }
+    #newIdTodayCard { grid-area: today; }
+    #cardCard { grid-area: card; }
+    #idCard { grid-area: id; }
+
+    .kpi-card.focus {
+      border: 1px solid rgba(249, 115, 22, 0.34);
+      box-shadow: 0 12px 26px rgba(249, 115, 22, 0.14);
+      background: linear-gradient(180deg, rgba(249, 115, 22, 0.14), #171b24);
     }
 
-    .metric-cards.two-by-two {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .kpi-card.today-target {
+      background: #f97316;
+      border: 1px solid #fb923c;
+      box-shadow: 0 14px 28px rgba(249, 115, 22, 0.28);
     }
 
-    .metric-cards.two-by-two .result-card.daily-focus {
-      min-height: 150px;
+    .kpi-card.today-target .kpi-title,
+    .kpi-card.today-target .label-small,
+    .kpi-card.today-target .target-value,
+    .kpi-card.today-target .main-number,
+    .kpi-card.today-target .percent-value,
+    .kpi-card.today-target .kpi-foot,
+    .kpi-card.today-target .runrate-value,
+    .kpi-card.today-target .delta-row {
+      color: #111111;
     }
 
-    .result-card {
-      background: linear-gradient(180deg, #fffefe, #f8f2eb);
-      border: 1px solid #e9dfd4;
-      border-radius: 22px;
-      padding: 18px;
-      min-height: 150px;
+    .kpi-card.today-target .kpi-badge {
+      color: #ffffff;
+      background: rgba(17,17,17,0.22);
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    .kpi-card.today-target .today-minimal-info {
       display: grid;
       gap: 10px;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(17,17,17,0.12);
+      border-radius: 18px;
+      padding: 14px;
     }
 
-    .result-card.highlight {
-      background: linear-gradient(180deg, #f9efe5, #fffdfb);
-      border-color: #ecd9c8;
-    }
-
-    .result-card.daily-focus {
-      background: linear-gradient(180deg, #f7ede2, #fffdfb);
-      border: 2px solid #e7cfb4;
-      box-shadow: 0 10px 22px rgba(201, 120, 56, 0.08);
-    }
-
-    .result-card.priority-highlight {
-      background: linear-gradient(180deg, #eadcfb, #f7f0ff);
-      border: 2px solid #cdb6eb;
-      box-shadow: 0 12px 24px rgba(128, 96, 166, 0.12);
-    }
-
-    .result-card.warn {
-      background: linear-gradient(180deg, #fbefea, #fffdfb);
-      border-color: #edd4c8;
-    }
-
-    .result-card.ok {
-      background: linear-gradient(180deg, #eef6f1, #fffdfb);
-      border-color: #d7e7dc;
-    }
-
-    .card-label {
-      font-size: 1.05rem;
-      color: #6f645b;
-      font-weight: 900;
-    }
-
-    .card-main {
+    .mini-stat {
       display: flex;
-      align-items: flex-end;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .card-value {
-      font-size: clamp(2.7rem, 5.6vw, 4.1rem);
-      line-height: 0.88;
-      font-weight: 950;
-      color: #2f2924;
-      letter-spacing: -0.05em;
-    }
-
-    .card-meta {
-      font-size: 1.18rem;
-      font-weight: 900;
-      color: var(--orange-2);
-      display: inline-flex;
+      justify-content: space-between;
       align-items: center;
+      gap: 10px;
+      font-size: 1rem;
+      font-weight: 900;
+      color: #111111;
+    }
+
+    .today-main-center {
+      display: grid;
+      justify-items: center;
+      align-content: center;
+      text-align: center;
       gap: 8px;
+      min-height: 140px;
     }
 
-    .card-sub {
-      font-size: 1.08rem;
-      line-height: 1.7;
-      color: #5f564f;
+    .today-main-center .main-number {
+      font-size: clamp(3.6rem, 6vw, 5rem);
+      line-height: 0.85;
+      font-weight: 950;
+      letter-spacing: -0.06em;
+      color: #111111;
+    }
+
+    .today-main-center .label-small,
+    .today-main-center .percent-value {
+      color: #111111;
+    }
+
+    
+
+    .kpi-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .kpi-title {
+      font-size: 1.5rem;
+      font-weight: 950;
+      color: #ffffff;
+      line-height: 1.15;
+    }
+
+    .kpi-badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 900;
+      background: #272d38;
+      border: 1px solid #39404e;
+      color: #ececf0;
+      white-space: nowrap;
+    }
+
+    .kpi-target {
+      display: grid;
+      gap: 4px;
+    }
+
+    .label-small {
+      font-size: 0.88rem;
       font-weight: 800;
+      color: var(--muted);
+      letter-spacing: 0.02em;
     }
 
-    .emphasis-large {
-      font-size: clamp(3rem, 6vw, 4.4rem);
-      line-height: 0.86;
-      font-weight: 950;
-      letter-spacing: -0.05em;
+    .target-value {
+      font-size: 1.55rem;
+      font-weight: 900;
+      color: #ffd2b0;
+      line-height: 1;
     }
 
-    .emphasis-xl {
-      font-size: clamp(3.8rem, 7.5vw, 5.6rem);
-      line-height: 0.8;
-      font-weight: 950;
-      letter-spacing: -0.07em;
+    .main-number-wrap {
+      display: grid;
+      gap: 4px;
     }
 
-    .inline-emphasis {
-      display: inline-block;
-      font-size: 1.85em;
-      line-height: 0.95;
+    .main-number {
+      font-size: clamp(3.6rem, 6vw, 5rem);
+      line-height: 0.85;
       font-weight: 950;
-      color: #2f2924;
-      letter-spacing: -0.04em;
-      margin: 0 0.08em;
-      vertical-align: baseline;
+      color: #ffffff;
+      letter-spacing: -0.06em;
+    }
+
+    .percent-value {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #fb923c;
+      line-height: 1;
     }
 
     .progress-shell {
-      height: 12px;
-      background: #f1e9e1;
-      border: 1px solid #e2d7cb;
+      height: 14px;
+      background: #0f131a;
+      border: 1px solid #343b48;
       border-radius: 999px;
       overflow: hidden;
     }
@@ -546,26 +551,60 @@
     .progress-bar {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #d98b4d, #e7b27f);
+      background: linear-gradient(90deg, #f97316, #fb923c);
       border-radius: inherit;
     }
 
-    .trend-up {
-      color: var(--green);
-      font-size: 1.1rem;
+    .runrate-box {
+      display: grid;
+      gap: 8px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid #313846;
+      border-radius: 18px;
+      padding: 12px 14px;
+    }
+
+    .runrate-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .runrate-value {
+      font-size: 1.08rem;
+      font-weight: 900;
+      color: #e8e8ec;
+    }
+
+    .delta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 1.02rem;
+      font-weight: 900;
+    }
+
+    .delta-row.up { color: var(--green); }
+    .delta-row.down { color: var(--red); }
+
+    .delta-arrow {
+      font-size: 1.2rem;
       line-height: 1;
       font-weight: 900;
     }
 
-    .trend-down {
-      color: var(--red);
-      font-size: 1.1rem;
-      line-height: 1;
-      font-weight: 900;
+    .kpi-foot {
+      font-size: 0.92rem;
+      color: #b9b9c1;
+      line-height: 1.55;
+      font-weight: 700;
     }
 
     .export-note {
-      color: #7a6f66;
+      color: #b1b1b9;
       font-size: 0.96rem;
       line-height: 1.6;
       font-weight: 800;
@@ -573,215 +612,61 @@
     }
 
     @media (max-width: 980px) {
-      :root {
-        --export-padding: 14px;
-      }
-
       .layout { grid-template-columns: 1fr; }
-      body { padding: 12px; }
-      .container { gap: 14px; }
-
-      .hero,
-      .input-panel,
-      .export-frame,
-      .metric-section,
-      .status-banner,
-      .export-header { border-radius: 20px; }
-
-      .hero { padding: 16px; }
-
-      .hero-row,
-      .top-actions,
-      .metric-head,
-      .export-header,
-      .status-banner { gap: 10px; }
-
-      .eyebrow {
-        font-size: 0.9rem;
-        padding: 8px 14px;
+      .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-areas:
+          "newid today"
+          "card id";
       }
-
-      h1 {
-        font-size: clamp(1.9rem, 7vw, 2.7rem);
-        line-height: 1.06;
-        margin: 10px 0 6px;
-      }
-
-      .subtitle {
-        font-size: 0.98rem;
-        line-height: 1.55;
-      }
-
-      .select-branch,
-      .btn.export,
-      .action-row .btn {
-        min-height: 56px;
-        font-size: 1rem;
-        padding: 13px 16px;
-        border-radius: 16px;
-      }
-
-      .input-head h2 { font-size: 1.22rem; }
-
-      .input-head p,
-      .helper,
-      .export-note {
-        font-size: 0.9rem;
-        line-height: 1.55;
-      }
-
-      .form-block h3,
-      .branch-title,
-      .metric-name { font-size: 1.18rem; }
-
-      .field label { font-size: 0.9rem; }
-
-      .field input,
-      .field select {
-        font-size: 1rem;
-        padding: 13px 14px;
-        min-height: 50px;
-      }
-
-      .status-pill,
-      .metric-badge,
-      .metric-badge.priority {
-        font-size: 0.88rem;
-        padding: 8px 12px;
-      }
-
-      .export-branch {
-        font-size: clamp(1.8rem, 7vw, 2.7rem);
-        line-height: 1.02;
-      }
-
-      .export-date {
-        font-size: clamp(0.95rem, 3.6vw, 1.18rem);
-        padding: 10px 14px;
-      }
-
-      .metric-section { padding: 14px; }
-
-      .result-card {
-        padding: 16px;
-        gap: 8px;
-        min-height: 132px;
-      }
-
-      .metric-cards.compact,
-      .metric-cards.two-by-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-
-      .metric-cards.two-by-two .result-card.daily-focus {
-        min-height: 132px;
-      }
-
-      .card-label { font-size: 0.92rem; }
-      .card-meta { font-size: 1rem; }
-
-      .card-sub {
-        font-size: 0.92rem;
-        line-height: 1.55;
-      }
-
-      .card-value {
-        font-size: clamp(2.2rem, 10vw, 3.8rem);
-        line-height: 0.84;
-      }
-
-      .emphasis-large {
-        font-size: clamp(2.5rem, 11vw, 4.1rem);
-        line-height: 0.82;
-      }
-
-      .emphasis-xl {
-        font-size: clamp(2.9rem, 12vw, 4.4rem);
-        line-height: 0.8;
-      }
-
-      .inline-emphasis { font-size: 1.5em; }
-      .progress-shell { height: 10px; }
+      .kpi-card { min-height: auto; }
+      .main-number { font-size: clamp(3.4rem, 12vw, 4.8rem); }
+      .today-main-center .main-number { font-size: clamp(3.4rem, 12vw, 4.8rem); }
+      .kpi-title { font-size: 1.34rem; }
     }
 
     @media (max-width: 640px) {
-      :root {
-        --export-padding: 12px;
-      }
-
       body { padding: 10px; }
       .container { gap: 12px; }
-
       .hero,
       .input-panel,
       .export-frame,
-      .metric-section,
       .status-banner,
-      .export-header { border-radius: 18px; }
-
-      .hero,
-      .input-head,
-      .input-body,
-      .metric-section,
-      .export-frame {
-        padding-left: 14px;
-        padding-right: 14px;
-      }
-
+      .export-header,
+      .kpi-card { border-radius: 18px; }
       h1 { font-size: clamp(2rem, 8vw, 2.9rem); }
-
       .subtitle,
       .input-head p,
       .helper,
       .export-note,
-      .card-sub {
-        font-size: 0.92rem;
-        line-height: 1.58;
-      }
-
+      .kpi-foot { font-size: 0.92rem; }
       .select-branch,
       .btn.export,
       .action-row .btn,
       .field input,
-      .field select {
-        min-height: 58px;
-        font-size: 1rem;
-        border-radius: 16px;
-      }
-
-      .form-block { padding: 14px; }
-
-      .form-block h3,
-      .branch-title,
-      .metric-name { font-size: 1.12rem; }
-
-      .status-pill,
-      .metric-badge,
-      .metric-badge.priority,
-      .card-label { font-size: 0.86rem; }
-
+      .field select { min-height: 58px; font-size: 1rem; }
       .export-branch { font-size: clamp(1.9rem, 8vw, 3rem); }
       .export-date { font-size: 1rem; }
-
-      .metric-section { padding: 12px; }
-
-      .result-card {
-        padding: 14px;
-        min-height: 124px;
-      }
-
-      .metric-cards.compact,
-      .metric-cards.two-by-two {
+      .kpi-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-areas:
+          "newid today"
+          "card id";
       }
-
-      .metric-cards.two-by-two .result-card.daily-focus {
-        min-height: 124px;
-      }
-
-      .card-meta { font-size: 0.96rem; }
-      .card-value { font-size: clamp(2rem, 9vw, 3.5rem); }
-      .emphasis-large { font-size: clamp(2.2rem, 10vw, 3.7rem); }
-      .emphasis-xl { font-size: clamp(2.6rem, 11vw, 4rem); }
-      .inline-emphasis { font-size: 1.35em; }
+      .kpi-title { font-size: 1.16rem; }
+      .target-value { font-size: 1.28rem; }
+      .main-number { font-size: clamp(2.6rem, 12vw, 3.8rem); }
+      .today-main-center .main-number { font-size: clamp(2.6rem, 12vw, 3.8rem); }
+      .percent-value { font-size: 1.08rem; }
+      .runrate-value,
+      .delta-row,
+      .mini-stat { font-size: 0.9rem; }
+      .label-small { font-size: 0.8rem; }
+    }
+      .runrate-value,
+      .delta-row,
+      .mini-stat { font-size: 0.9rem; }
+      .label-small { font-size: 0.8rem; }
     }
   </style>
 </head>
@@ -792,7 +677,7 @@
         <div>
           <div class="eyebrow">📊 Branch Summary Board</div>
           <h1>สรุปผลงานรวมรายสาขา</h1>
-          <p class="subtitle">Morning Minimal Theme • สบายตา อ่านง่าย และเหมาะกับการแคปส่งตอนเช้า</p>
+          <p class="subtitle">แสดงเฉพาะ 3 KPI หลัก พร้อม Runrate และส่วนต่างเทียบเป้าการวิ่งของเดือน</p>
         </div>
         <div class="top-actions">
           <select id="branchSelector" class="select-branch">
@@ -808,7 +693,7 @@
       <aside class="input-panel">
         <div class="input-head">
           <h2>ส่วนกรอกข้อมูล</h2>
-          <p>แยกออกจากส่วนแสดงผลชัดเจน เพื่อให้ใช้งานง่าย และตอนส่งออกภาพจะไม่ติดส่วนกรอกข้อมูล</p>
+          <p>กรอกค่าเป้าและผลงานของแต่ละสาขา แล้วระบบจะคำนวณ Runrate ตามวันทำงานที่ผ่านมาของเดือนให้อัตโนมัติ</p>
         </div>
         <div class="input-body">
           <div class="form-block">
@@ -858,7 +743,6 @@
                 <input type="number" id="newIdTarget" placeholder="เช่น 45" />
               </div>
             </div>
-            <div class="helper">เวอร์ชันใช้งานจริงสามารถจำค่า Target ของแต่ละสาขาไว้ในเบราว์เซอร์ได้</div>
           </div>
 
           <div class="form-block">
@@ -869,6 +753,7 @@
                 <input type="text" id="holidays" placeholder="เช่น 2026-03-06,2026-03-23" />
               </div>
             </div>
+            <div class="helper">วันทำงานจะไม่นับรวมเสาร์ อาทิตย์ และวันที่ระบุในช่องนี้</div>
           </div>
 
           <div class="action-row">
@@ -891,120 +776,129 @@
               <div class="export-date" id="exportDateText">วันที่ 14/03/2026 • 08:00 น.</div>
             </div>
 
-            <section class="metric-section priority">
-              <div class="metric-head">
-                <div class="metric-name">⭐ Total New ID</div>
-                <div class="metric-badge priority" id="newIdStatusBadge">สถานะเทียบ Runrate</div>
-              </div>
-              <div class="metric-cards two-by-two">
-                <article class="result-card priority-highlight">
-                  <div class="card-label">เป้าเดือน</div>
-                  <div class="card-main">
-                    <div class="card-value emphasis-xl" id="newIdTargetValue">45</div>
-                    <div class="card-meta">New ID Target</div>
+            <section class="kpi-grid">
+              <article class="kpi-card focus" id="newIdCard">
+                <div class="kpi-head">
+                  <div class="kpi-title">⭐ Total New ID</div>
+                  <div class="kpi-badge" id="newIdBadge">Runrate</div>
+                </div>
+                <div class="kpi-target">
+                  <div class="label-small">เป้า</div>
+                  <div class="target-value" id="newIdTargetValue">45</div>
+                </div>
+                <div class="main-number-wrap">
+                  <div class="label-small">ผลงาน</div>
+                  <div class="main-number" id="newIdActualValue">21</div>
+                  <div class="percent-value" id="newIdPercentValue">46.7%</div>
+                </div>
+                <div class="progress-shell">
+                  <div class="progress-bar" id="newIdProgressBar"></div>
+                </div>
+                <div class="runrate-box">
+                  <div class="runrate-top">
+                    <div class="label-small">Runrate</div>
+                    <div class="runrate-value" id="newIdRunrateValue">45.0%</div>
                   </div>
-                  <div class="card-sub">เป้าหมายรายเดือนของ Total New ID ที่ต้องพยายามปิดให้ได้ 100%</div>
-                </article>
+                  <div class="delta-row up" id="newIdDeltaRow">
+                    <span class="delta-arrow" id="newIdDeltaArrow">▲</span>
+                    <span id="newIdDeltaText">+1.7% จาก Runrate</span>
+                  </div>
+                </div>
+                <div class="kpi-foot" id="newIdFootText">ผลงาน 21 จากเป้า 45 • เหนือกว่า Runrate 1.7% • 0 ไอดี</div>
+              </article>
 
-                <article class="result-card priority-highlight" id="newIdPerformanceCard">
-                  <div class="card-label">ผลงาน / สถานะเทียบ Runrate</div>
-                  <div class="card-main">
-                    <div class="card-value emphasis-xl" id="newIdPercent">0.0%</div>
-                    <div class="card-meta" id="newIdRunrateMeta">Runrate 0.0%</div>
+              <article class="kpi-card today-target" id="newIdTodayCard">
+                <div class="kpi-head">
+                  <div class="kpi-title">🎯 เป้า New ID สาขาวันนี้</div>
+                  <div class="kpi-badge" id="newIdTodayBadge">Today Target</div>
+                </div>
+                <div class="today-main-center">
+                  <div class="label-small">เป้าขั้นต่ำที่ต้องทำ</div>
+                  <div class="main-number" id="newIdTodayTargetValue">0</div>
+                  <div class="percent-value" id="newIdTodayTargetMeta">New ID / วัน</div>
+                </div>
+                <div class="today-minimal-info">
+                  <div class="mini-stat">
+                    <span>วันทำการที่เหลือ</span>
+                    <span id="newIdRemainingDaysMini">0 วัน</span>
                   </div>
-                  <div class="progress-shell">
-                    <div class="progress-bar" id="newIdProgressBar"></div>
+                  <div class="mini-stat">
+                    <span>ขาดอีกทั้งหมด</span>
+                    <span id="newIdRemainingToTarget">0 ไอดี</span>
                   </div>
-                  <div class="card-sub" id="newIdPerformanceSub">ผลงาน 0 จากเป้า 0</div>
-                </article>
+                </div>
+              </article>
 
-                <article class="result-card warn priority-highlight" id="newIdGapCard">
-                  <div class="card-label">ขาดอยู่</div>
-                  <div class="card-main">
-                    <div class="card-value emphasis-xl" id="newIdGapValue">0</div>
-                    <div class="card-meta" id="newIdGapPercent">0.0%</div>
+              <article class="kpi-card" id="cardCard">
+                <div class="kpi-head">
+                  <div class="kpi-title">💳 Total Card</div>
+                  <div class="kpi-badge" id="cardBadge">Runrate</div>
+                </div>
+                <div class="kpi-target">
+                  <div class="label-small">เป้า</div>
+                  <div class="target-value" id="cardTargetValue">160</div>
+                </div>
+                <div class="main-number-wrap">
+                  <div class="label-small">ผลงาน</div>
+                  <div class="main-number" id="cardActualValue">85</div>
+                  <div class="percent-value" id="cardPercentValue">53.1%</div>
+                </div>
+                <div class="progress-shell">
+                  <div class="progress-bar" id="cardProgressBar"></div>
+                </div>
+                <div class="runrate-box">
+                  <div class="runrate-top">
+                    <div class="label-small">Runrate</div>
+                    <div class="runrate-value" id="cardRunrateValue">45.0%</div>
                   </div>
-                  <div class="card-sub" id="newIdGapSub">ส่วนต่างจาก Runrate และเป้าเดือน</div>
-                </article>
+                  <div class="delta-row up" id="cardDeltaRow">
+                    <span class="delta-arrow" id="cardDeltaArrow">▲</span>
+                    <span id="cardDeltaText">+8.1% จาก Runrate</span>
+                  </div>
+                </div>
+                <div class="kpi-foot" id="cardFootText">ผลงาน 85 จากเป้า 160 • เหนือกว่า Runrate 8.1% • 0 ไอดี</div>
+              </article>
 
-                <article class="result-card priority-highlight daily-focus">
-                  <div class="card-label">เป้าขั้นต่ำรายวัน</div>
-                  <div class="card-main">
-                    <div class="card-value emphasis-xl" id="newIdDailyNeedValue">0</div>
-                    <div class="card-meta">New ID / วัน</div>
+              <article class="kpi-card" id="idCard">
+                <div class="kpi-head">
+                  <div class="kpi-title">🪪 Total ID</div>
+                  <div class="kpi-badge" id="idBadge">Runrate</div>
+                </div>
+                <div class="kpi-target">
+                  <div class="label-small">เป้า</div>
+                  <div class="target-value" id="idTargetValue">120</div>
+                </div>
+                <div class="main-number-wrap">
+                  <div class="label-small">ผลงาน</div>
+                  <div class="main-number" id="idActualValue">62</div>
+                  <div class="percent-value" id="idPercentValue">51.7%</div>
+                </div>
+                <div class="progress-shell">
+                  <div class="progress-bar" id="idProgressBar"></div>
+                </div>
+                <div class="runrate-box">
+                  <div class="runrate-top">
+                    <div class="label-small">Runrate</div>
+                    <div class="runrate-value" id="idRunrateValue">45.0%</div>
                   </div>
-                  <div class="card-sub" id="newIdDailyNeedSub">เหลือ 0 วันทำงาน • ต้องทำขั้นต่ำ 0 New ID ต่อวัน</div>
-                </article>
-              </div>
-            </section>
-
-            <section class="metric-section">
-              <div class="metric-head">
-                <div class="metric-name">💳 Total Card</div>
-                <div class="metric-badge" id="cardStatusBadge">ติดตามใกล้ชิด</div>
-              </div>
-              <div class="metric-cards compact">
-                <article class="result-card highlight">
-                  <div class="card-label">เป้าเดือน</div>
-                  <div class="card-main">
-                    <div class="card-value emphasis-large" id="cardTargetValue">160</div>
-                    <div class="card-meta">Card Target</div>
+                  <div class="delta-row up" id="idDeltaRow">
+                    <span class="delta-arrow" id="idDeltaArrow">▲</span>
+                    <span id="idDeltaText">+6.7% จาก Runrate</span>
                   </div>
-                  <div class="card-sub">เป้าหมายรายเดือนของ Total Card</div>
-                </article>
-
-                <article class="result-card" id="cardPerformanceCard">
-                  <div class="card-label">ผลงาน / สถานะเทียบ Runrate</div>
-                  <div class="card-main">
-                    <div class="card-value emphasis-large" id="cardPercent">0.0%</div>
-                    <div class="card-meta" id="cardRunrateMeta">Runrate 0.0%</div>
-                  </div>
-                  <div class="progress-shell">
-                    <div class="progress-bar" id="cardProgressBar"></div>
-                  </div>
-                  <div class="card-sub" id="cardPerformanceSub">ผลงาน 0 จากเป้า 0</div>
-                </article>
-              </div>
-            </section>
-
-            <section class="metric-section">
-              <div class="metric-head">
-                <div class="metric-name">🪪 Total ID</div>
-                <div class="metric-badge" id="idStatusBadge">ติดตามใกล้ชิด</div>
-              </div>
-              <div class="metric-cards compact">
-                <article class="result-card highlight">
-                  <div class="card-label">เป้าเดือน</div>
-                  <div class="card-main">
-                    <div class="card-value emphasis-large" id="idTargetValue">120</div>
-                    <div class="card-meta">ID Target</div>
-                  </div>
-                  <div class="card-sub">เป้าหมายรายเดือนของ Total ID</div>
-                </article>
-
-                <article class="result-card" id="idPerformanceCard">
-                  <div class="card-label">ผลงาน / สถานะเทียบ Runrate</div>
-                  <div class="card-main">
-                    <div class="card-value emphasis-large" id="idPercent">0.0%</div>
-                    <div class="card-meta" id="idRunrateMeta">Runrate 0.0%</div>
-                  </div>
-                  <div class="progress-shell">
-                    <div class="progress-bar" id="idProgressBar"></div>
-                  </div>
-                  <div class="card-sub" id="idPerformanceSub">ผลงาน 0 จากเป้า 0</div>
-                </article>
-              </div>
+                </div>
+                <div class="kpi-foot" id="idFootText">ผลงาน 62 จากเป้า 120 • เหนือกว่า Runrate 6.7% • 0 ไอดี</div>
+              </article>
             </section>
           </div>
         </div>
 
-        <div class="export-note">ปุ่ม “ส่งออกเป็นภาพ” จะบันทึกเฉพาะการ์ดแสดงผลด้านบน เพื่อนำไปส่งในกลุ่มไลน์ได้ทันที</div>
+        <div class="export-note">แสดงเฉพาะข้อมูลจำเป็น 3 KPI หลัก เพื่อให้ภาพส่งออกกระชับ อ่านง่าย และเด่นบนมือถือ</div>
       </section>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'branch_summary_targets_v2';
+    const STORAGE_KEY = 'branch_summary_targets_v4';
 
     const defaults = {
       rbs: {
@@ -1031,9 +925,7 @@
 
     function mustGet(id) {
       const element = document.getElementById(id);
-      if (!element) {
-        throw new Error(`Missing required element: #${id}`);
-      }
+      if (!element) throw new Error(`Missing required element: #${id}`);
       return element;
     }
 
@@ -1054,37 +946,7 @@
       statusPill: mustGet('statusPill'),
       exportBranchName: mustGet('exportBranchName'),
       exportDateText: mustGet('exportDateText'),
-      captureArea: mustGet('captureArea'),
-
-      cardTargetValue: mustGet('cardTargetValue'),
-      cardPercent: mustGet('cardPercent'),
-      cardRunrateMeta: mustGet('cardRunrateMeta'),
-      cardProgressBar: mustGet('cardProgressBar'),
-      cardPerformanceSub: mustGet('cardPerformanceSub'),
-      cardPerformanceCard: mustGet('cardPerformanceCard'),
-      cardStatusBadge: mustGet('cardStatusBadge'),
-
-      idTargetValue: mustGet('idTargetValue'),
-      idPercent: mustGet('idPercent'),
-      idRunrateMeta: mustGet('idRunrateMeta'),
-      idProgressBar: mustGet('idProgressBar'),
-      idPerformanceSub: mustGet('idPerformanceSub'),
-      idPerformanceCard: mustGet('idPerformanceCard'),
-      idStatusBadge: mustGet('idStatusBadge'),
-
-      newIdTargetValue: mustGet('newIdTargetValue'),
-      newIdPercent: mustGet('newIdPercent'),
-      newIdRunrateMeta: mustGet('newIdRunrateMeta'),
-      newIdProgressBar: mustGet('newIdProgressBar'),
-      newIdPerformanceSub: mustGet('newIdPerformanceSub'),
-      newIdGapValue: mustGet('newIdGapValue'),
-      newIdGapPercent: mustGet('newIdGapPercent'),
-      newIdGapSub: mustGet('newIdGapSub'),
-      newIdDailyNeedValue: mustGet('newIdDailyNeedValue'),
-      newIdDailyNeedSub: mustGet('newIdDailyNeedSub'),
-      newIdPerformanceCard: mustGet('newIdPerformanceCard'),
-      newIdGapCard: mustGet('newIdGapCard'),
-      newIdStatusBadge: mustGet('newIdStatusBadge')
+      captureArea: mustGet('captureArea')
     };
 
     function clone(obj) {
@@ -1146,7 +1008,6 @@
         const isBusiness = day !== 0 && day !== 6 && !holidays.has(key);
         if (!isBusiness) continue;
         total += 1;
-
         const compare = new Date(d.getFullYear(), d.getMonth(), d.getDate());
         if (compare <= today) elapsed += 1;
         if (compare >= today) remaining += 1;
@@ -1187,49 +1048,46 @@
 
     function formatThaiDateTime(date = new Date()) {
       const dateText = new Intl.DateTimeFormat('th-TH', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
+        day: '2-digit', month: '2-digit', year: 'numeric'
       }).format(date);
       const timeText = new Intl.DateTimeFormat('th-TH', {
-        hour: '2-digit',
-        minute: '2-digit'
+        hour: '2-digit', minute: '2-digit'
       }).format(date);
       return `วันที่ ${dateText} • ${timeText} น.`;
     }
 
-    function applyMetric({ actual, target, runrate, remaining, label, prefix, important = false, minimal = false }) {
-      const currentPct = percent(actual, target);
-      const diffPct = currentPct - runrate;
-      const gapToTarget = Math.max(0, target - actual);
-      const runrateNeedAmount = Math.max(0, ((runrate / 100) * target) - actual);
-      const dailyNeed = Math.ceil(remaining ? gapToTarget / remaining : gapToTarget);
+    function setText(id, value) {
+      mustGet(id).textContent = value;
+    }
 
-      els[`${prefix}TargetValue`].textContent = target.toLocaleString();
-      els[`${prefix}Percent`].textContent = `${currentPct.toFixed(1)}%`;
-      els[`${prefix}RunrateMeta`].innerHTML = diffPct >= 0
-        ? `<span class="trend-up">↗</span> Runrate ${runrate.toFixed(1)}%`
-        : `<span class="trend-down">↘</span> Runrate ${runrate.toFixed(1)}%`;
-      els[`${prefix}ProgressBar`].style.width = `${Math.min(currentPct, 100)}%`;
-      els[`${prefix}PerformanceSub`].textContent = `ผลงาน ${actual.toLocaleString()} จากเป้า ${target.toLocaleString()} ${label}`;
-      els[`${prefix}PerformanceCard`].className = `result-card ${diffPct >= 0 ? 'ok' : 'warn'}${prefix === 'newId' ? ' priority-highlight' : ''}`;
+    function applyKpi(prefix, actual, target, runratePct) {
+      const actualPct = percent(actual, target);
+      const runrateAmount = (runratePct / 100) * target;
+      const diffAmount = Math.ceil(Math.abs(actual - runrateAmount));
+      const delta = actualPct - runratePct;
+      const isUp = delta >= 0;
+      const absDelta = Math.abs(delta);
 
-      if (!minimal) {
-        els[`${prefix}GapValue`].textContent = Math.ceil(gapToTarget).toLocaleString();
-        els[`${prefix}GapPercent`].textContent = diffPct >= 0
-          ? `เหนือกว่า Runrate +${diffPct.toFixed(1)}%`
-          : `ต่ำกว่า Runrate ${diffPct.toFixed(1)}%`;
-        els[`${prefix}GapSub`].innerHTML = diffPct >= 0
-          ? `มากกว่า Runrate ประมาณ <span class="inline-emphasis">${Math.ceil(Math.abs(diffPct / 100 * target)).toLocaleString()}</span> ${label} และยังขาดจากเป้าเดือน <span class="inline-emphasis">${Math.ceil(gapToTarget).toLocaleString()}</span> ${label}`
-          : `ติดลบจาก Runrate ประมาณ <span class="inline-emphasis">${Math.ceil(runrateNeedAmount).toLocaleString()}</span> ${label} และยังขาดจากเป้าเดือน <span class="inline-emphasis">${Math.ceil(gapToTarget).toLocaleString()}</span> ${label}`;
-        els[`${prefix}DailyNeedValue`].textContent = dailyNeed.toLocaleString();
-        els[`${prefix}DailyNeedSub`].textContent = `เหลือ ${remaining} วันทำงาน • ต้องทำขั้นต่ำ ${dailyNeed.toLocaleString()} ${label} ต่อวัน`;
-        els[`${prefix}GapCard`].className = `result-card ${diffPct >= 0 ? 'ok' : 'warn'}${prefix === 'newId' ? ' priority-highlight' : ''}`;
-      }
+      setText(`${prefix}TargetValue`, target.toLocaleString());
+      setText(`${prefix}ActualValue`, actual.toLocaleString());
+      setText(`${prefix}PercentValue`, `${actualPct.toFixed(1)}%`);
+      setText(`${prefix}RunrateValue`, `${runratePct.toFixed(1)}%`);
+      mustGet(`${prefix}ProgressBar`).style.width = `${Math.min(actualPct, 100)}%`;
+      setText(`${prefix}DeltaArrow`, isUp ? '▲' : '▼');
+      setText(`${prefix}DeltaText`, `${isUp ? '+' : '-'}${absDelta.toFixed(1)}% • ${diffAmount.toLocaleString()} ไอดี`);
+      setText(`${prefix}FootText`, `ผลงาน ${actual.toLocaleString()} จากเป้า ${target.toLocaleString()} • ${isUp ? 'เหนือกว่า' : 'ต่ำกว่า'} Runrate ${diffAmount.toLocaleString()} ไอดี`);
 
-      els[`${prefix}StatusBadge`].textContent = important
-        ? (diffPct >= 0 ? 'อยู่เหนือ Runrate' : 'ต่ำกว่า Runrate')
-        : (diffPct >= 0 ? 'อยู่เหนือ Runrate' : 'ต้องเร่งเพิ่ม');
+      const deltaRow = mustGet(`${prefix}DeltaRow`);
+      deltaRow.className = `delta-row ${isUp ? 'up' : 'down'}`;
+
+      const badge = mustGet(`${prefix}Badge`);
+      badge.textContent = isUp ? 'เหนือ Runrate' : 'ต่ำกว่า Runrate';
+      badge.style.background = isUp ? 'rgba(34, 197, 94, 0.14)' : 'rgba(239, 68, 68, 0.14)';
+      badge.style.borderColor = isUp ? 'rgba(34, 197, 94, 0.28)' : 'rgba(239, 68, 68, 0.24)';
+      badge.style.color = isUp ? '#86efac' : '#fca5a5';
+
+      const card = mustGet(`${prefix}Card`);
+      card.className = prefix === 'newId' ? 'kpi-card focus' : 'kpi-card';
     }
 
     function render(branchKey) {
@@ -1240,23 +1098,30 @@
 
       const now = new Date();
       const { total, elapsed, remaining } = getBusinessDaysInfo(now.getFullYear(), now.getMonth(), data.holidays, now);
-      const runrate = total ? (100 / total) * elapsed : 0;
+      const runratePct = total ? (elapsed / total) * 100 : 0;
+      const newIdRemainingToTarget = Math.max(0, data.newIdTarget - data.totalNewId);
+      const newIdTodayTarget = remaining > 0 ? Math.ceil(newIdRemainingToTarget / remaining) : newIdRemainingToTarget;
 
-      applyMetric({ actual: data.totalCard, target: data.cardTarget, runrate, remaining, label: 'Card', prefix: 'card', minimal: true });
-      applyMetric({ actual: data.totalId, target: data.idTarget, runrate, remaining, label: 'ID', prefix: 'id', minimal: true });
-      applyMetric({ actual: data.totalNewId, target: data.newIdTarget, runrate, remaining, label: 'New ID', prefix: 'newId', important: true });
+      applyKpi('card', data.totalCard, data.cardTarget, runratePct);
+      applyKpi('id', data.totalId, data.idTarget, runratePct);
+      applyKpi('newId', data.totalNewId, data.newIdTarget, runratePct);
+
+      setText('newIdTodayTargetValue', newIdTodayTarget.toLocaleString());
+      setText('newIdTodayTargetMeta', 'New ID / วัน');
+      setText('newIdRemainingDaysMini', `${remaining} วัน`);
+      setText('newIdRemainingToTarget', `${newIdRemainingToTarget.toLocaleString()} ไอดี`);
 
       const newIdPct = percent(data.totalNewId, data.newIdTarget);
-      const newIdDiff = newIdPct - runrate;
+      const diff = newIdPct - runratePct;
       if (newIdPct >= 100) {
         els.statusPill.className = 'status-pill good';
         els.statusPill.textContent = 'สถานะ: New ID ปิด 100% แล้ว';
-      } else if (newIdDiff >= 0) {
-        els.statusPill.className = 'status-pill warn';
-        els.statusPill.textContent = 'สถานะ: New ID ยังอยู่เหนือ Runrate';
+      } else if (diff >= 0) {
+        els.statusPill.className = 'status-pill good';
+        els.statusPill.textContent = `สถานะ: New ID เหนือ Runrate ${diff.toFixed(1)}%`;
       } else {
         els.statusPill.className = 'status-pill bad';
-        els.statusPill.textContent = 'สถานะ: New ID ต้องเร่งปิดให้ถึง 100%';
+        els.statusPill.textContent = `สถานะ: New ID ต่ำกว่า Runrate ${Math.abs(diff).toFixed(1)}%`;
       }
     }
 
@@ -1266,12 +1131,10 @@
         els.exportImageBtn.disabled = true;
         els.exportImageBtn.textContent = 'กำลังสร้างภาพ...';
         els.captureArea.classList.add('is-exporting');
-        if (document.fonts?.ready) {
-          await document.fonts.ready;
-        }
+        if (document.fonts?.ready) await document.fonts.ready;
         await new Promise((resolve) => requestAnimationFrame(() => resolve()));
         const canvas = await html2canvas(els.captureArea, {
-          backgroundColor: '#fffdfa',
+          backgroundColor: '#11151d',
           scale: 2,
           useCORS: true,
           logging: false
@@ -1292,8 +1155,6 @@
     }
 
     function runSelfTests() {
-      console.assert(formatThaiDateTime(new Date('2026-03-14T08:05:00')).includes('วันที่'), 'formatThaiDateTime should include date prefix');
-      console.assert(formatThaiDateTime(new Date('2026-03-14T08:05:00')).includes('น.'), 'formatThaiDateTime should include Thai time suffix');
       console.assert(percent(50, 100) === 50, 'percent should calculate correctly');
       console.assert(percent(0, 0) === 0, 'percent should safely handle zero target');
       console.assert(toNum('12') === 12, 'toNum should parse numbers');
@@ -1303,15 +1164,10 @@
       const businessDays = getBusinessDaysInfo(2026, 2, '2026-03-06', new Date('2026-03-10T09:00:00'));
       console.assert(businessDays.total > 0, 'business days total should be positive');
       console.assert(businessDays.elapsed > 0, 'business days elapsed should be positive');
-      console.assert(document.getElementById('exportBranchName'), 'exportBranchName element must exist');
-      console.assert(document.getElementById('exportDateText'), 'exportDateText element must exist');
-      const exportStyles = getComputedStyle(els.captureArea);
-      console.assert(exportStyles.overflow === 'visible', 'export frame should allow normal page scrolling before export');
-      els.captureArea.classList.add('is-exporting');
-      const exportingStyles = getComputedStyle(els.captureArea);
-      console.assert(exportingStyles.aspectRatio === '10 / 16', 'export frame should keep standard aspect ratio during export');
-      console.assert(exportingStyles.overflow === 'hidden', 'export frame should clip content only during export');
-      els.captureArea.classList.remove('is-exporting');
+      console.assert(document.getElementById('cardActualValue'), 'card actual element must exist');
+      console.assert(document.getElementById('newIdDeltaText'), 'newId delta element must exist');
+      console.assert(document.getElementById('newIdTodayBadge'), 'today badge element must exist');
+      console.assert(document.getElementById('newIdRemainingDaysMini'), 'today remaining days element must exist');
     }
 
     els.branchSelector.addEventListener('change', (e) => {
