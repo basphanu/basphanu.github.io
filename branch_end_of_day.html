@@ -329,9 +329,9 @@
     }
 
     .export-frame.is-exporting {
-      aspect-ratio: var(--export-ratio);
+      aspect-ratio: auto;
       min-height: unset;
-      overflow: hidden;
+      overflow: visible;
     }
 
     .export-frame-inner {
@@ -449,7 +449,19 @@
     }
 
     .target-card {
+      min-height: 104px;
+      align-content: start;
       background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(240, 162, 90, 0.04));
+    }
+
+    .target-card .card-main {
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .target-card .card-value.compact {
+      font-size: clamp(2rem, 3.8vw, 2.8rem);
+      line-height: 0.95;
     }
 
     .highlight-days {
@@ -932,7 +944,6 @@
                     <div class="card-value compact" id="displayCardTarget">330</div>
                     <div class="card-meta">Cards</div>
                   </div>
-                  <div class="card-sub">เป้ารวมของ Card ภายในเดือนนี้</div>
                 </article>
 
                 <article class="result-card target-card">
@@ -941,7 +952,6 @@
                     <div class="card-value compact" id="displayIdTarget">320</div>
                     <div class="card-meta">IDs</div>
                   </div>
-                  <div class="card-sub">เป้ารวมของ Total ID ภายในเดือนนี้</div>
                 </article>
 
                 <article class="result-card target-card">
@@ -950,7 +960,6 @@
                     <div class="card-value compact" id="displayNewIdTarget">190</div>
                     <div class="card-meta">New IDs</div>
                   </div>
-                  <div class="card-sub">เป้ารวมของ Total New ID ภายในเดือนนี้</div>
                 </article>
 
                 <article class="result-card target-card highlight-days">
@@ -959,7 +968,7 @@
                     <div class="card-value compact" id="remainingDaysValue">0</div>
                     <div class="card-meta">วัน</div>
                   </div>
-                  <div class="card-sub" id="remainingDaysSub">ไม่รวมเสาร์ อาทิตย์ วันหยุด และลบเพิ่มอีก 1 วันสำหรับการสรุปยอดสิ้นวัน</div>
+                  <div class="card-sub" id="remainingDaysSub">ไม่นับรวมวันหยุด</div>
                 </article>
               </div>
             </section>
@@ -1476,7 +1485,7 @@
         setRunrateInline(els.resultIdRunrate, 0, targets.idTarget, '2026-03-01', appState.holidays);
         setRunrateInline(els.resultNewIdRunrate, 0, targets.newIdTarget, '2026-03-01', appState.holidays);
         els.remainingDaysValue.textContent = '0';
-        els.remainingDaysSub.textContent = 'ยังคำนวณวันทำการไม่ได้ เพราะยังไม่มีวันที่จาก CSV';
+        els.remainingDaysSub.textContent = 'ไม่นับรวมวันหยุด';
         els.runrateCard.className = 'result-card runrate-card neutral';
         els.runrateEmoji.textContent = '😐';
         els.runrateStatusText.textContent = 'สถานการณ์ทรงตัว';
@@ -1525,7 +1534,7 @@
       setRunrateInline(els.resultIdRunrate, latest.resultTotalId, targets.idTarget, latest.date, appState.holidays);
       setRunrateInline(els.resultNewIdRunrate, latest.resultNewId, targets.newIdTarget, latest.date, appState.holidays);
       els.remainingDaysValue.textContent = remainingDays.toLocaleString();
-      els.remainingDaysSub.textContent = `หลังวันสรุป ${latest.date} ยังเหลือ ${remainingDays.toLocaleString()} วันทำการ (ไม่รวมเสาร์ อาทิตย์ วันหยุด และลบเพิ่มอีก 1 วัน)`;
+      els.remainingDaysSub.textContent = 'ไม่นับรวมวันหยุด';
       renderRunrateCard(latest.resultNewId, targets.newIdTarget, latest.date, appState.holidays);
       els.todayApprovedDateText.textContent = `ข้อมูลวันที่ ${latest.date}`;
       els.todayApprovedValue.textContent = todayApprovedNewId.toLocaleString();
@@ -1559,11 +1568,21 @@
         els.captureArea.classList.add('is-exporting');
         if (document.fonts?.ready) await document.fonts.ready;
         await new Promise((resolve) => requestAnimationFrame(resolve));
-        const canvas = await html2canvas(els.captureArea, {
+        await new Promise((resolve) => setTimeout(resolve, 60));
+        const target = els.captureArea;
+        const exportWidth = Math.ceil(target.scrollWidth);
+        const exportHeight = Math.ceil(target.scrollHeight);
+        const canvas = await html2canvas(target, {
           backgroundColor: '#11161d',
           scale: 2,
           useCORS: true,
-          logging: false
+          logging: false,
+          width: exportWidth,
+          height: exportHeight,
+          windowWidth: exportWidth,
+          windowHeight: exportHeight,
+          scrollX: 0,
+          scrollY: 0
         });
         const link = document.createElement('a');
         link.download = `${els.branchSelector.value.replace(/\s+/g, '_').toLowerCase()}_end_of_day.png`;
@@ -1645,7 +1664,7 @@
       console.assert(exportStyles.overflow === 'visible', 'export frame should allow page scrolling before export');
       els.captureArea.classList.add('is-exporting');
       const exportingStyles = getComputedStyle(els.captureArea);
-      console.assert(exportingStyles.overflow === 'hidden', 'export frame should clip only during export');
+      console.assert(exportingStyles.overflow === 'visible', 'export frame should keep full content visible during export');
       els.captureArea.classList.remove('is-exporting');
     }
 
