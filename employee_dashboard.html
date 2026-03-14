@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ระบบสรุปผลงานพนักงาน</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    body { font-family: 'Prompt', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-gray-800">
+  <div id="root"></div>
+
+  <script>
+    (function () {
+      function runSelfTests() {
+        const results = [];
+
+        function parseCSVForTest(str) {
+          const rows = [];
+          let row = [];
+          let cell = '';
+          let inQuotes = false;
+
+          for (let i = 0; i < str.length; i++) {
+            const ch = str[i];
+            const next = str[i + 1];
+
+            if (ch === '"') {
+              if (inQuotes && next === '"') {
+                cell += '"';
+                i += 1;
+              } else {
+                inQuotes = !inQuotes;
+              }
+              continue;
+            }
+
+            if (!inQuotes && ch === ',') {
+              row.push(cell);
+              cell = '';
+              continue;
+            }
+
+            if (!inQuotes && ch === '\r' && next === '\n') {
+              row.push(cell);
+              rows.push(row);
+              row = [];
+              cell = '';
+              i += 1;
+              continue;
+            }
+
+            if (!inQuotes && (ch === '\n' || ch === '\r')) {
+              row.push(cell);
+              rows.push(row);
+              row = [];
+              cell = '';
+              continue;
+            }
+
+            cell += ch;
+          }
+
+          row.push(cell);
+          rows.push(row);
+          return rows.filter(function (r) { return !(r.length === 1 && r[0] === ''); });
+        }
+
+        function normalizeDateForTest(value) {
+          if (!value) return '';
+          const trimmed = String(value).trim();
+          if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+          const firstPart = trimmed.split(' ')[0];
+          if (firstPart.indexOf('/') > -1) {
+            const parts = firstPart.split('/');
+            if (parts.length === 3) {
+              if (parts[0].length === 4) {
+                return parts[0] + '-' + parts[1].padStart(2, '0') + '-' + parts[2].padStart(2, '0');
+              }
+              return parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
+            }
+          }
+          return trimmed;
+        }
+
+        try {
+          const t1 = parseCSVForTest('a,b\n1,2');
+          results.push(t1.length === 2 && t1[1][1] === '2');
+
+          const t2 = parseCSVForTest('name,note\n"Bas","hello,world"');
+          results.push(t2[1][1] === 'hello,world');
+
+          const t3 = parseCSVForTest('name,note\n"Bas","line1\nline2"');
+          results.push(t3[1][1] === 'line1\nline2');
+
+          const t4 = normalizeDateForTest('14/03/2026 10:00') === '2026-03-14';
+          results.push(t4);
+
+          const t5 = normalizeDateForTest('2026/03/14') === '2026-03-14';
+          results.push(t5);
+
+          const t6 = normalizeDateForTest('2026-03-14') === '2026-03-14';
+          results.push(t6);
+        } catch (err) {
+          console.error('Self-test exception:', err);
+          results.push(false);
+        }
+
+        const passed = results.every(Boolean);
+        if (!passed) {
+          console.error('Self-tests failed:', results);
+        }
+        return passed;
+      }
+
+      runSelfTests();
+
+      const state = {
+        rawData: [],
+        startDate: '',
+        endDate: '',
+        selectedBranch: 'All',
+        error: '',
+        isExporting: false,
+        previewImage: null,
+        leaders: [
+          'ณภัค แจ้งอารมณ์',
+          'ฐิติรัตน์ นันทเขตต์',
+          'ธกร สวัสดิ์ศรี',
+          'ภคมณ ป้อมแก้ว'
+        ],
+        newLeader: '',
+        showSettings: false
+      };
+
+      const rankingThemes = {
+        'จำนวนที่คุยกับลูกค้าสูงสุด': { card: 'from-sky-50 via-white to-cyan-50', line: 'from-sky-500 via-cyan-500 to-blue-600', icon: 'from-sky-500 to-cyan-500', badge: 'from-sky-500 to-cyan-400', shadow: 'shadow-sky-500/15', emoji: '💬' },
+        'ส่งใบสมัครสูงสุด': { card: 'from-violet-50 via-white to-fuchsia-50', line: 'from-violet-500 via-fuchsia-500 to-pink-500', icon: 'from-violet-500 to-fuchsia-500', badge: 'from-violet-500 to-fuchsia-400', shadow: 'shadow-fuchsia-500/15', emoji: '📝' },
+        'ผลอนุมัติสูงสุด': { card: 'from-emerald-50 via-white to-teal-50', line: 'from-emerald-500 via-teal-500 to-green-500', icon: 'from-emerald-500 to-teal-500', badge: 'from-emerald-500 to-teal-400', shadow: 'shadow-emerald-500/15', emoji: '✅' },
+        'ยอดขายประกันสูงสุด': { card: 'from-amber-50 via-white to-orange-50', line: 'from-amber-400 via-orange-500 to-rose-500', icon: 'from-amber-400 to-orange-500', badge: 'from-amber-400 to-orange-500', shadow: 'shadow-orange-500/15', emoji: '🛡️' }
+      };
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function parseCSV(str) {
+        const rows = [];
+        let row = [];
+        let cell = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < str.length; i++) {
+          const ch = str[i];
+          const next = str[i + 1];
+
+          if (ch === '"') {
+            if (inQuotes && next === '"') {
+              cell += '"';
+              i += 1;
+            } else {
+              inQuotes = !inQuotes;
+            }
+            continue;
+          }
+
+          if (!inQuotes && ch === ',') {
+            row.push(cell);
+            cell = '';
+            continue;
+          }
+
+          if (!inQuotes && ch === '\r' && next === '\n') {
+            row.push(cell);
+            rows.push(row);
+            row = [];
+            cell = '';
+            i += 1;
+            continue;
+          }
+
+          if (!inQuotes && (ch === '\n' || ch === '\r')) {
+            row.push(cell);
+            rows.push(row);
+            row = [];
+            cell = '';
+            continue;
+          }
+
+          cell += ch;
+        }
+
+        row.push(cell);
+        rows.push(row);
+        return rows.filter(function (r) { return !(r.length === 1 && r[0] === ''); });
+      }
+
+      function normalizeDate(value) {
+        if (!value) return '';
+        const trimmed = String(value).trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+        const firstPart = trimmed.split(' ')[0];
+        if (firstPart.indexOf('/') > -1) {
+          const parts = firstPart.split('/');
+          if (parts.length === 3) {
+            if (parts[0].length === 4) {
+              return parts[0] + '-' + parts[1].padStart(2, '0') + '-' + parts[2].padStart(2, '0');
+            }
+            return parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
+          }
+        }
+        return trimmed;
+      }
+
+      function processData(csvText) {
+        const lines = parseCSV(csvText);
+        if (lines.length < 2) throw new Error('ไฟล์ CSV ไม่มีข้อมูล หรือรูปแบบไม่ถูกต้อง');
+
+        const headers = lines[0].map(function (h) { return (h || '').trim(); });
+        const result = [];
+
+        for (let i = 1; i < lines.length; i++) {
+          if (lines[i].length < 2 && !lines[i][0]) continue;
+          const rowData = {};
+          for (let j = 0; j < headers.length; j++) {
+            rowData[headers[j]] = lines[i][j] ? lines[i][j].trim() : '';
+          }
+
+          if (rowData['ชื่อ-สกุล พนักงาน'] && rowData['วันที่ปฏิบัติงาน']) {
+            result.push({
+              name: rowData['ชื่อ-สกุล พนักงาน'],
+              branch: rowData['สาขา'] || 'ไม่ระบุสาขา',
+              role: rowData['วันนี้ ปฏิบัติงาน ประเภทได'] || '-',
+              team: rowData['Team'] || 'ไม่ระบุทีม',
+              date: normalizeDate(rowData['วันที่ปฏิบัติงาน']),
+              talked: parseInt(rowData['วันนี้คุยลูกค้าทั้งหมดกี่คน'], 10) || 0,
+              submitted: parseInt(rowData['ยื่นสมัคร ลูกค้าใหม่ กี่คน'], 10) || 0,
+              approved: parseInt(rowData['ผ่าน/อนุมัติกี่คน'], 10) || 0,
+              pending: parseInt(rowData['รอผลกี่คน'], 10) || 0,
+              insuranceTotal: parseFloat(rowData['จำนวนเบี้ยรวม ที่ขายประกันได้']) || 0,
+              insuranceCases: parseInt(rowData['ขายประกันได้กี่เคส'], 10) || 0
+            });
+          }
+        }
+
+        return result;
+      }
+
+      function formatNumber(num) {
+        return new Intl.NumberFormat('th-TH').format(num || 0);
+      }
+
+      function formatDateThai(dateString) {
+        if (!dateString) return '';
+        try {
+          const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+          const parts = dateString.split('-');
+          return parseInt(parts[2], 10) + ' ' + months[parseInt(parts[1], 10) - 1] + ' ' + (parseInt(parts[0], 10) + 543);
+        } catch (e) {
+          return dateString;
+        }
+      }
+
+      function getFirstName(fullName) {
+        return fullName ? fullName.trim().split(' ')[0] : '';
+      }
+
+      function computeDerived() {
+        const branchesSet = new Set(state.rawData.map(function (d) { return d.branch; }));
+        const branches = ['All'].concat(Array.from(branchesSet).sort());
+
+        const filteredData = state.rawData.filter(function (d) {
+          if (state.startDate && d.date < state.startDate) return false;
+          if (state.endDate && d.date > state.endDate) return false;
+          if (state.selectedBranch !== 'All' && d.branch !== state.selectedBranch) return false;
+          return true;
+        });
+
+        const statsMap = {};
+        filteredData.forEach(function (d) {
+          if (!statsMap[d.name]) {
+            statsMap[d.name] = {
+              name: d.name,
+              team: d.team,
+              branch: d.branch,
+              role: d.role,
+              talked: 0,
+              submitted: 0,
+              approved: 0,
+              pending: 0,
+              insuranceTotal: 0,
+              insuranceCases: 0
+            };
+          }
+          statsMap[d.name].talked += d.talked;
+          statsMap[d.name].submitted += d.submitted;
+          statsMap[d.name].approved += d.approved;
+          statsMap[d.name].pending += d.pending;
+          statsMap[d.name].insuranceTotal += d.insuranceTotal;
+          statsMap[d.name].insuranceCases += d.insuranceCases;
+        });
+        const employeeStats = Object.values(statsMap);
+
+        let talked = 0;
+        let submitted = 0;
+        let approved = 0;
+        let insuranceTotal = 0;
+        filteredData.forEach(function (d) {
+          const isLeader = state.leaders.includes(d.name.trim());
+          if (!isLeader) {
+            talked += d.talked;
+            submitted += d.submitted;
+            approved += d.approved;
+          }
+          insuranceTotal += d.insuranceTotal;
+        });
+        const branchSummary = { talked, submitted, approved, insuranceTotal };
+
+        const nonLeaderStats = employeeStats.filter(function (emp) { return !state.leaders.includes(emp.name.trim()); });
+        const topTalked = nonLeaderStats.slice().sort(function (a, b) { return b.talked - a.talked; }).slice(0, 3);
+        const topSubmitted = nonLeaderStats.slice().sort(function (a, b) { return b.submitted - a.submitted; }).slice(0, 3);
+        const topApproved = nonLeaderStats.slice().sort(function (a, b) { return b.approved - a.approved; }).slice(0, 3);
+        const topInsurance = employeeStats.slice().filter(function (emp) { return emp.insuranceTotal > 0 || emp.insuranceCases > 0; }).sort(function (a, b) {
+          return (b.insuranceTotal - a.insuranceTotal) || (b.insuranceCases - a.insuranceCases);
+        }).slice(0, 3);
+
+        const teamMap = {};
+        filteredData.forEach(function (d) {
+          if (!teamMap[d.team]) teamMap[d.team] = { team: d.team, talked: 0, submitted: 0, approved: 0 };
+          const isLeader = state.leaders.includes(d.name.trim());
+          if (!isLeader) {
+            teamMap[d.team].talked += d.talked;
+            teamMap[d.team].submitted += d.submitted;
+            teamMap[d.team].approved += d.approved;
+          }
+        });
+        const teamStats = Object.values(teamMap).sort(function (a, b) { return b.talked - a.talked; });
+        const maxChartValue = Math.max.apply(null, [10].concat(teamStats.map(function (t) {
+          return Math.max(t.talked, t.submitted, t.approved);
+        })));
+
+        return {
+          branches,
+          filteredData,
+          employeeStats,
+          branchSummary,
+          topTalked,
+          topSubmitted,
+          topApproved,
+          topInsurance,
+          teamStats,
+          maxChartValue
+        };
+      }
+
+      function renderStatCard(title, value, unit, iconSvg, emoji, gradient, border) {
+        return '' +
+          '<div class="group relative overflow-hidden rounded-[28px] border ' + border + ' bg-gradient-to-br ' + gradient + ' p-5 text-white shadow-[0_22px_60px_-28px_rgba(15,23,42,0.28)]">' +
+            '<div class="absolute right-4 top-4 rounded-2xl bg-white/15 p-2.5 backdrop-blur-sm shadow-sm">' + iconSvg + '</div>' +
+            '<div class="pointer-events-none absolute -right-5 -bottom-6 text-[86px] opacity-[0.12] select-none">' + emoji + '</div>' +
+            '<div class="text-sm sm:text-base font-semibold text-white/85">' + escapeHtml(title) + '</div>' +
+            '<div class="mt-4 text-3xl sm:text-4xl font-black tracking-tight">' + escapeHtml(value) + '</div>' +
+            '<div class="mt-1 text-sm sm:text-base text-white/85">' + escapeHtml(unit) + '</div>' +
+          '</div>';
+      }
+
+      function iconSvg(name) {
+        const icons = {
+          users: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
+          file: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>',
+          check: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+          shield: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>',
+          bar: '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>',
+          upload: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>',
+          image: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>',
+          x: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>',
+          settings: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
+          download: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>'
+        };
+        return icons[name] || '';
+      }
+
+      function renderRankingCard(title, iconName, data, dataKey, unit, formatter) {
+        const theme = rankingThemes[title] || { card: 'from-slate-50 via-white to-slate-100', line: 'from-sky-500 via-indigo-500 to-cyan-400', icon: 'from-sky-500 to-indigo-500', badge: 'from-slate-500 to-slate-400', shadow: 'shadow-slate-500/10', emoji: '🏅' };
+        let items = '';
+        if (!data.length) {
+          items = '<div class="rounded-2xl border border-dashed border-slate-200 bg-white/70 px-4 py-6 text-center text-sm sm:text-base text-slate-400">ไม่มีข้อมูล</div>';
+        } else {
+          items = data.map(function (emp, index) {
+            const rankBadge = index === 0 ? '🥇' : String(index + 1);
+            const value = formatter ? formatter(emp[dataKey]) : formatNumber(emp[dataKey]);
+            const rankBg = index === 0 ? 'bg-gradient-to-br from-amber-400 to-yellow-500' : index === 1 ? 'bg-gradient-to-br from-slate-400 to-slate-500' : 'bg-gradient-to-br from-orange-400 to-rose-500';
+            return '' +
+              '<div class="flex items-start justify-between gap-3 rounded-[22px] border border-white/80 bg-white/85 px-4 py-3.5 shadow-md backdrop-blur transition-all hover:-translate-y-0.5 hover:shadow-lg ' + theme.shadow + '">' +
+                '<div class="flex min-w-0 flex-1 items-start gap-3">' +
+                  '<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl font-bold text-sm text-white shadow-md ' + rankBg + '">' + rankBadge + '</div>' +
+                  '<div class="flex min-w-0 flex-1 items-start gap-2.5">' +
+                    '<div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white shadow-sm bg-gradient-to-br ' + theme.badge + '">' + escapeHtml((getFirstName(emp.name).slice(0, 1) || '-')) + '</div>' +
+                    '<div class="min-w-0 flex-1">' +
+                      '<div class="text-sm sm:text-base font-extrabold text-slate-800 leading-snug break-words whitespace-normal">' + escapeHtml(getFirstName(emp.name)) + '</div>' +
+                    '</div>' +
+                  '</div>' +
+                '</div>' +
+                '<div class="shrink-0 text-right">' +
+                  '<div class="text-lg sm:text-xl font-black tracking-tight text-slate-900">' + escapeHtml(value) + '</div>' +
+                  '<div class="text-xs sm:text-sm font-semibold text-slate-500">' + escapeHtml(unit) + '</div>' +
+                '</div>' +
+              '</div>';
+          }).join('');
+        }
+
+        return '' +
+          '<div class="group relative h-full overflow-hidden rounded-[30px] border border-white/70 bg-gradient-to-br ' + theme.card + ' p-5 sm:p-6 shadow-[0_24px_70px_-28px_rgba(15,23,42,0.32)]">' +
+            '<div class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ' + theme.line + '"></div>' +
+            '<div class="pointer-events-none absolute right-3 top-3 text-[64px] leading-none opacity-[0.08] select-none">' + theme.emoji + '</div>' +
+            '<div class="pointer-events-none absolute -right-8 -bottom-8 h-28 w-28 rounded-full bg-white/60 blur-2xl"></div>' +
+            '<div class="relative mb-5 flex items-start gap-3">' +
+              '<div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] bg-gradient-to-br text-white shadow-lg ' + theme.icon + '">' + iconSvg(iconName) + '</div>' +
+              '<div class="min-w-0 flex-1 pr-8">' +
+                '<h3 class="text-base sm:text-lg font-extrabold tracking-tight text-slate-800 leading-snug break-words whitespace-normal">' + escapeHtml(title) + '</h3>' +
+                '<p class="mt-1 text-xs sm:text-sm font-medium text-slate-500">Top Performance</p>' +
+              '</div>' +
+            '</div>' +
+            '<div class="relative flex flex-col gap-3.5">' + items + '</div>' +
+          '</div>';
+      }
+
+      function render() {
+        const root = document.getElementById('root');
+        const d = computeDerived();
+
+        const teamChart = d.teamStats.length === 0
+          ? '<div class="absolute inset-0 flex items-center justify-center text-base sm:text-lg text-slate-400">ไม่มีข้อมูลทีม</div>'
+          : d.teamStats.map(function (team) {
+              const talkedHeight = (team.talked / d.maxChartValue) * 100;
+              const submittedHeight = (team.submitted / d.maxChartValue) * 100;
+              const approvedHeight = (team.approved / d.maxChartValue) * 100;
+              return '' +
+                '<div class="group relative flex h-full flex-1 flex-col items-center">' +
+                  '<div class="flex h-[calc(100%-3.5rem)] w-full items-end justify-center gap-1 px-1 sm:gap-2">' +
+                    '<div class="relative w-1/3 max-w-[2.2rem] rounded-t-[18px] bg-gradient-to-t from-fuchsia-600 via-violet-500 to-pink-400 shadow-[0_14px_34px_-16px_rgba(217,70,239,0.95)] transition-all duration-300 group-hover:opacity-95" style="height:' + Math.max(talkedHeight, 1) + '%" title="คุยลูกค้า: ' + escapeHtml(formatNumber(team.talked)) + '"><div class="absolute inset-x-0 top-0 h-2 rounded-t-[18px] bg-white/30"></div><div class="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] sm:text-sm font-black text-fuchsia-700">' + escapeHtml(formatNumber(team.talked)) + '</div></div>' +
+                    '<div class="relative w-1/3 max-w-[2.2rem] rounded-t-[18px] bg-gradient-to-t from-amber-500 via-orange-400 to-yellow-300 shadow-[0_14px_34px_-16px_rgba(245,158,11,0.95)] transition-all duration-300 group-hover:opacity-95" style="height:' + Math.max(submittedHeight, 1) + '%" title="ส่งใบสมัคร: ' + escapeHtml(formatNumber(team.submitted)) + '"><div class="absolute inset-x-0 top-0 h-2 rounded-t-[18px] bg-white/30"></div><div class="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] sm:text-sm font-black text-amber-700">' + escapeHtml(formatNumber(team.submitted)) + '</div></div>' +
+                    '<div class="relative w-1/3 max-w-[2.2rem] rounded-t-[18px] bg-gradient-to-t from-emerald-600 via-green-500 to-lime-300 shadow-[0_14px_34px_-16px_rgba(16,185,129,0.95)] transition-all duration-300 group-hover:opacity-95" style="height:' + Math.max(approvedHeight, 1) + '%" title="อนุมัติ: ' + escapeHtml(formatNumber(team.approved)) + '"><div class="absolute inset-x-0 top-0 h-2 rounded-t-[18px] bg-white/30"></div><div class="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] sm:text-sm font-black text-emerald-700">' + escapeHtml(formatNumber(team.approved)) + '</div></div>' +
+                  '</div>' +
+                  '<div class="mt-3 flex h-14 w-full items-start justify-center px-1 text-center"><span class="text-[11px] sm:text-sm font-semibold leading-tight text-slate-700 break-words whitespace-normal">' + escapeHtml(team.team) + '</span></div>' +
+                '</div>';
+            }).join('');
+
+        const employeeRows = d.employeeStats.length === 0
+          ? '<tr><td colSpan="7" class="py-10 text-center text-sm sm:text-base text-slate-500">ไม่พบข้อมูล</td></tr>'
+          : d.employeeStats.slice().sort(function (a, b) {
+              return (b.approved !== a.approved) ? (b.approved - a.approved) : (b.talked - a.talked);
+            }).map(function (emp, idx) {
+              const isZeroApproved = emp.approved === 0;
+              const isBranchServiceNoInsurance = (emp.role === 'Branch Service' || (emp.role && emp.role.toLowerCase().indexOf('branch service') > -1)) && emp.insuranceTotal === 0;
+              const isAlertRow = isZeroApproved || isBranchServiceNoInsurance;
+              return '' +
+                '<tr class="' + (isAlertRow ? 'bg-red-50/80 hover:bg-red-100/80' : 'bg-white hover:bg-slate-50') + ' transition-colors">' +
+                  '<td class="px-3 py-3 sm:px-4 sm:py-4 font-semibold text-slate-800"><div class="flex items-center gap-1.5 whitespace-nowrap">' +
+                    escapeHtml(getFirstName(emp.name)) +
+                    (state.leaders.includes(emp.name.trim()) ? '<span title="หัวหน้าทีม" class="text-base leading-none">👑</span>' : '') +
+                    (isZeroApproved ? '<span title="ยังไม่มีอนุมัติ" class="flex items-center text-red-500">⚠️</span>' : '') +
+                    (!isZeroApproved && isBranchServiceNoInsurance ? '<span title="Branch Service ยังไม่มียอดประกัน" class="flex items-center text-orange-500">⚠️</span>' : '') +
+                  '</div></td>' +
+                  '<td class="whitespace-nowrap px-3 py-3 sm:px-4 sm:py-4 ' + (isAlertRow ? 'text-slate-700' : 'text-slate-600') + '">' + escapeHtml(emp.team) + '</td>' +
+                  '<td class="whitespace-nowrap px-3 py-3 sm:px-4 sm:py-4 ' + (isAlertRow ? 'text-slate-700' : 'text-slate-600') + '">' + escapeHtml(emp.role) + '</td>' +
+                  '<td class="px-3 py-3 sm:px-4 sm:py-4 text-right font-semibold text-slate-800">' + escapeHtml(formatNumber(emp.talked)) + '</td>' +
+                  '<td class="px-3 py-3 sm:px-4 sm:py-4 text-right font-semibold text-sky-700">' + escapeHtml(formatNumber(emp.submitted)) + '</td>' +
+                  '<td class="px-3 py-3 sm:px-4 sm:py-4 text-right font-bold">' + (isZeroApproved ? '<span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-xs sm:text-sm text-red-600">0</span>' : '<span class="text-emerald-600">' + escapeHtml(formatNumber(emp.approved)) + '</span>') + '</td>' +
+                  '<td class="px-3 py-3 sm:px-4 sm:py-4 text-right font-semibold text-slate-800">' + (isBranchServiceNoInsurance ? '<span class="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-1 text-xs sm:text-sm text-orange-600">0</span>' : escapeHtml(formatNumber(emp.insuranceTotal))) + '</td>' +
+                '</tr>';
+            }).join('');
+
+        root.innerHTML = '' +
+          '<div class="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_#dbeafe_0%,_#f8fafc_25%,_#eef2ff_58%,_#f8fafc_100%)] px-3 py-4 sm:px-4 md:px-8 md:py-8 font-sans text-slate-800">' +
+            '<div class="pointer-events-none absolute inset-0 opacity-80">' +
+              '<div class="absolute -left-24 top-0 h-72 w-72 rounded-full bg-sky-200/40 blur-3xl"></div>' +
+              '<div class="absolute right-0 top-24 h-80 w-80 rounded-full bg-indigo-200/35 blur-3xl"></div>' +
+              '<div class="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-cyan-100/40 blur-3xl"></div>' +
+            '</div>' +
+
+            '<div class="relative mx-auto max-w-7xl space-y-5 sm:space-y-6">' +
+              '<div class="overflow-hidden rounded-[32px] border border-white/60 bg-white/85 shadow-[0_24px_80px_-28px_rgba(15,23,42,0.35)] backdrop-blur-xl">' +
+                '<div class="bg-gradient-to-r from-slate-900 via-sky-900 to-indigo-900 px-5 py-5 sm:px-6 sm:py-6 text-white">' +
+                  '<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">' +
+                    '<div>' +
+                      '<h1 class="flex items-center gap-3 text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">' +
+                        '<div class="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-white/12 ring-1 ring-white/15 backdrop-blur">' + iconSvg('bar') + '</div>' +
+                        '<span>ระบบสรุปผลงานพนักงาน</span>' +
+                      '</h1>' +
+                      '<p class="mt-2 max-w-2xl text-sm sm:text-base text-sky-100/90">อัปโหลดไฟล์ CSV สรุปงานประจำวัน เพื่อดูข้อมูลภาพรวมและผลการจัดอันดับในรูปแบบที่อ่านง่ายและเหมาะกับมือถือ</p>' +
+                    '</div>' +
+                    '<div class="flex w-full flex-col gap-3 sm:flex-row md:w-auto md:flex-wrap md:justify-end">' +
+                      '<button id="uploadBtn" class="flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm sm:text-base font-semibold text-slate-900 shadow-lg shadow-slate-950/10 transition hover:-translate-y-0.5 hover:bg-slate-100 sm:w-auto">' + iconSvg('upload') + ' แนบไฟล์ CSV</button>' +
+                      '<input id="fileInput" type="file" accept=".csv" class="hidden" />' +
+                      (state.rawData.length > 0
+                        ? '<button id="exportBtn" class="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 text-sm sm:text-base font-semibold text-white shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-emerald-600 sm:w-auto">' + iconSvg('image') + ' ' + (state.isExporting ? 'กำลังสร้างรูป...' : 'ส่งออกรูปภาพ') + '</button><button id="clearBtn" class="flex w-full items-center justify-center gap-2 rounded-2xl bg-white/12 px-5 py-3 text-sm sm:text-base font-semibold text-white ring-1 ring-white/15 transition hover:bg-white/20 sm:w-auto">' + iconSvg('x') + ' ล้างข้อมูล</button>'
+                        : '') +
+                    '</div>' +
+                  '</div>' +
+                '</div>' +
+                '<div class="p-4 sm:p-6">' +
+                  (state.error ? '<div class="mb-4 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-red-700 shadow-sm"><span class="mt-0.5 shrink-0">⚠️</span><span class="text-sm sm:text-base font-medium">' + escapeHtml(state.error) + '</span></div>' : '') +
+                  (state.rawData.length > 0 ? '' +
+                    '<div class="space-y-4">' +
+                      '<div class="grid gap-4 xl:grid-cols-[1fr_auto]">' +
+                        '<div class="rounded-[24px] border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 shadow-sm">' +
+                          '<div class="mb-4 flex items-center gap-2 text-slate-800 font-semibold text-sm sm:text-base">📅 <span>ตัวกรองข้อมูล</span></div>' +
+                          '<div class="grid gap-3 sm:gap-4 lg:grid-cols-2">' +
+                            '<div class="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200">' +
+                              '<label class="mb-2 block text-sm sm:text-base font-medium text-slate-600">สาขา</label>' +
+                              '<select id="branchSelect" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm sm:text-base font-medium text-slate-800 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100">' +
+                                d.branches.map(function (b) {
+                                  return '<option value="' + escapeHtml(b) + '" ' + (state.selectedBranch === b ? 'selected' : '') + '>' + escapeHtml(b === 'All' ? 'ทุกสาขา' : b) + '</option>';
+                                }).join('') +
+                              '</select>' +
+                            '</div>' +
+                            '<div class="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200">' +
+                              '<label class="mb-2 block text-sm sm:text-base font-medium text-slate-600">ช่วงเวลา</label>' +
+                              '<div class="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center">' +
+                                '<input id="startDateInput" type="date" value="' + escapeHtml(state.startDate) + '" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm sm:text-base font-medium text-slate-800 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100" />' +
+                                '<span class="hidden text-center text-slate-400 sm:block">-</span>' +
+                                '<input id="endDateInput" type="date" value="' + escapeHtml(state.endDate) + '" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm sm:text-base font-medium text-slate-800 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100" />' +
+                              '</div>' +
+                            '</div>' +
+                          '</div>' +
+                        '</div>' +
+                        '<div class="flex flex-col gap-3 rounded-[24px] border border-slate-200 bg-slate-900 p-4 text-white shadow-sm xl:min-w-[280px]">' +
+                          '<div><div class="text-sm sm:text-base text-slate-300">ข้อมูลที่แสดง</div><div class="mt-1 text-3xl sm:text-4xl font-bold tracking-tight">' + escapeHtml(String(d.filteredData.length)) + '</div><div class="text-sm sm:text-base text-slate-300">รายการ</div></div>' +
+                          '<button id="settingsBtn" class="mt-auto flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-3 text-sm sm:text-base font-semibold text-white ring-1 ring-white/15 transition hover:bg-white/15">' + iconSvg('settings') + ' ตั้งค่ารายชื่อหัวหน้าทีม</button>' +
+                        '</div>' +
+                      '</div>' +
+                      (state.showSettings ? '' +
+                        '<div class="rounded-[24px] border border-slate-200 bg-white p-4 sm:p-5 shadow-[0_18px_50px_-28px_rgba(15,23,42,0.35)]">' +
+                          '<h3 class="mb-3 flex items-center gap-2 text-sm sm:text-base font-bold text-slate-800">👥 รายชื่อหัวหน้าทีม (จะไม่ถูกนำยอดมารวมเป็นผลงานสาขาและทีม ยกเว้นยอดประกัน)</h3>' +
+                          '<div class="mb-4 flex flex-wrap gap-2">' +
+                            (state.leaders.length ? state.leaders.map(function (leader, idx) {
+                              return '<div class="flex items-center gap-1.5 rounded-full border border-sky-100 bg-gradient-to-r from-sky-50 to-indigo-50 px-3 py-2 text-sm sm:text-base font-medium text-slate-700 shadow-sm">' + escapeHtml(leader) + '<button class="remove-leader ml-1 text-slate-400 transition hover:text-red-500 focus:outline-none" data-index="' + idx + '">✕</button></div>';
+                            }).join('') : '<span class="py-1.5 text-sm sm:text-base text-slate-400">ไม่มีรายชื่อหัวหน้าทีม</span>') +
+                          '</div>' +
+                          '<div class="flex flex-col gap-2 sm:flex-row sm:items-center">' +
+                            '<input id="newLeaderInput" type="text" value="' + escapeHtml(state.newLeader) + '" placeholder="เพิ่มชื่อ-สกุลหัวหน้าทีม..." class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm sm:text-base text-slate-800 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100 sm:max-w-md" />' +
+                            '<button id="addLeaderBtn" class="flex items-center justify-center gap-1 rounded-2xl bg-slate-900 px-4 py-3 text-sm sm:text-base font-semibold text-white transition hover:bg-slate-800">＋ เพิ่มรายชื่อ</button>' +
+                          '</div>' +
+                        '</div>' : '') +
+                    '</div>' : '') +
+                '</div>' +
+              '</div>' +
+
+              (state.rawData.length === 0 && !state.error ? '' +
+                '<div class="flex h-72 flex-col items-center justify-center rounded-[30px] border border-dashed border-slate-300 bg-white/90 p-8 text-center shadow-[0_18px_50px_-30px_rgba(15,23,42,0.35)] backdrop-blur">' +
+                  '<div class="mb-5 flex h-20 w-20 items-center justify-center rounded-[28px] bg-gradient-to-br from-sky-50 to-indigo-100 text-sky-600 shadow-sm">' + iconSvg('upload') + '</div>' +
+                  '<h3 class="mb-2 text-xl sm:text-2xl font-bold text-slate-800">ยังไม่มีข้อมูลสำหรับแสดงผล</h3>' +
+                  '<p class="max-w-xl text-sm sm:text-base leading-relaxed text-slate-500">กรุณากดปุ่ม <b>แนบไฟล์ CSV</b> ด้านบน เพื่อนำเข้าข้อมูลฟอร์มสรุปงานประจำวันของพนักงาน</p>' +
+                '</div>' : '') +
+
+              (state.rawData.length > 0 ? '' +
+                '<div id="dashboard-content" class="space-y-5 sm:space-y-6 pb-4">' +
+                  '<div class="overflow-hidden rounded-[32px] border border-white/60 bg-white/90 shadow-[0_24px_80px_-28px_rgba(15,23,42,0.32)] backdrop-blur">' +
+                    '<div class="relative bg-gradient-to-r from-sky-600 via-indigo-600 to-cyan-500 px-5 py-4 sm:px-6 sm:py-5 text-white">' +
+                      '<div class="pointer-events-none absolute right-3 top-2 text-[70px] opacity-[0.08]">📊</div>' +
+                      '<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">' +
+                        '<div><h2 class="text-2xl sm:text-3xl font-black tracking-tight">รายงานสรุปผลงานประจำวัน</h2><div class="mt-2 flex flex-wrap items-center gap-2"><span class="text-sm sm:text-base text-white/80">สาขา:</span><span class="rounded-full bg-white/18 px-3 py-1 text-sm sm:text-base font-semibold ring-1 ring-white/20 backdrop-blur">' + escapeHtml(state.selectedBranch === 'All' ? 'รวมทุกสาขา' : state.selectedBranch) + '</span></div></div>' +
+                        '<div class="rounded-2xl bg-white/14 px-4 py-3 text-left ring-1 ring-white/15 backdrop-blur md:text-right"><div class="text-sm sm:text-base text-white/80">ช่วงเวลาที่แสดงผล</div><div class="mt-1 text-base sm:text-lg font-bold">' + escapeHtml(state.startDate ? formatDateThai(state.startDate) : 'ไม่ระบุ') + (state.startDate !== state.endDate && state.endDate ? ' - ' + escapeHtml(formatDateThai(state.endDate)) : '') + '</div></div>' +
+                      '</div>' +
+                    '</div>' +
+                  '</div>' +
+
+                  '<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">' +
+                    renderStatCard('จำนวนที่คุยกับลูกค้าทั้งหมด', formatNumber(d.branchSummary.talked), 'คน', iconSvg('users'), '💬', 'from-sky-500 via-cyan-500 to-blue-600', 'border-sky-200/70') +
+                    renderStatCard('ส่งเอกสารสมัครทั้งหมด', formatNumber(d.branchSummary.submitted), 'คน', iconSvg('file'), '📝', 'from-violet-500 via-fuchsia-500 to-pink-500', 'border-fuchsia-200/70') +
+                    renderStatCard('ผลอนุมัติทั้งหมด', formatNumber(d.branchSummary.approved), 'คน', iconSvg('check'), '✅', 'from-emerald-500 via-teal-500 to-green-500', 'border-emerald-200/70') +
+                    renderStatCard('ยอดขายประกันทั้งหมด', '฿' + formatNumber(d.branchSummary.insuranceTotal), 'บาท', iconSvg('shield'), '🛡️', 'from-amber-400 via-orange-500 to-rose-500', 'border-amber-200/70') +
+                  '</div>' +
+
+                  '<div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 xl:gap-5">' +
+                    renderRankingCard('จำนวนที่คุยกับลูกค้าสูงสุด', 'users', d.topTalked, 'talked', 'คน') +
+                    renderRankingCard('ส่งใบสมัครสูงสุด', 'file', d.topSubmitted, 'submitted', 'คน') +
+                    renderRankingCard('ผลอนุมัติสูงสุด', 'check', d.topApproved, 'approved', 'คน') +
+                    renderRankingCard('ยอดขายประกันสูงสุด', 'shield', d.topInsurance, 'insuranceTotal', 'บาท', function (val) { return val > 0 ? '฿' + formatNumber(val) : '-'; }) +
+                  '</div>' +
+
+                  '<div class="rounded-[30px] border border-white/60 bg-white/92 p-5 sm:p-6 shadow-[0_24px_80px_-30px_rgba(15,23,42,0.3)] backdrop-blur">' +
+                    '<div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">' +
+                      '<div><h2 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-800">สรุปผลงานระดับทีม</h2><p class="mt-2 text-sm sm:text-base leading-relaxed text-slate-500">เปรียบเทียบสถิติ จำนวนที่คุยกับลูกค้า, ส่งใบสมัคร และอนุมัติ ของแต่ละทีม (ไม่รวมหัวหน้าทีม)</p></div>' +
+                      '<div class="flex flex-wrap items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm sm:text-base ring-1 ring-slate-200"><div class="flex items-center gap-2 text-slate-700"><div class="h-3.5 w-3.5 rounded-sm bg-fuchsia-500 shadow-[0_0_14px_rgba(217,70,239,0.55)]"></div><span>คุยกับลูกค้า</span></div><div class="flex items-center gap-2 text-slate-700"><div class="h-3.5 w-3.5 rounded-sm bg-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.55)]"></div><span>ใบสมัคร</span></div><div class="flex items-center gap-2 text-slate-700"><div class="h-3.5 w-3.5 rounded-sm bg-emerald-500 shadow-[0_0_14px_rgba(16,185,129,0.55)]"></div><span>อนุมัติ</span></div></div>' +
+                    '</div>' +
+                    '<div class="relative mt-2 flex h-[22rem] w-full rounded-[26px] bg-gradient-to-b from-slate-50 to-white px-2 pt-12 sm:px-4 overflow-hidden">' +
+                      '<div class="pointer-events-none absolute left-0 top-12 -z-10 flex h-[calc(100%-3.5rem)] w-full flex-col justify-between px-3 sm:px-4"><div class="w-full border-t border-slate-200 border-dashed"></div><div class="w-full border-t border-slate-200 border-dashed"></div><div class="w-full border-t border-slate-200 border-dashed"></div><div class="w-full border-t border-slate-200 border-dashed"></div><div class="w-full border-t border-slate-300"></div></div>' +
+                      teamChart +
+                    '</div>' +
+                  '</div>' +
+
+                  '<div class="rounded-[30px] border border-white/60 bg-white/90 p-5 sm:p-6 shadow-[0_24px_80px_-30px_rgba(15,23,42,0.3)] backdrop-blur overflow-hidden">' +
+                    '<h2 class="mb-4 flex items-center gap-2 text-2xl sm:text-3xl font-black tracking-tight text-slate-800">' + iconSvg('file') + ' ตารางผลงานพนักงาน</h2>' +
+                    '<div class="overflow-x-auto rounded-[24px] border border-slate-200 bg-white shadow-inner">' +
+                      '<table class="w-full border-collapse text-sm sm:text-base">' +
+                        '<thead><tr class="bg-gradient-to-r from-slate-100 to-slate-50 text-slate-700 border-b border-slate-200"><th class="whitespace-nowrap px-3 py-3 sm:px-4 sm:py-4 text-left font-bold">ชื่อพนักงาน</th><th class="whitespace-nowrap px-3 py-3 sm:px-4 sm:py-4 text-left font-bold">ทีม</th><th class="whitespace-nowrap px-3 py-3 sm:px-4 sm:py-4 text-left font-bold">หน้าที่</th><th class="whitespace-nowrap px-3 py-3 sm:px-4 sm:py-4 text-right font-bold">คุย (คน)</th><th class="whitespace-nowrap px-3 py-3 sm:px-4 sm:py-4 text-right font-bold">สมัคร (คน)</th><th class="whitespace-nowrap px-3 py-3 sm:px-4 sm:py-4 text-right font-bold">อนุมัติ (คน)</th><th class="whitespace-nowrap px-3 py-3 sm:px-4 sm:py-4 text-right font-bold">ประกัน</th></tr></thead>' +
+                        '<tbody class="divide-y divide-slate-100">' + employeeRows + '</tbody>' +
+                      '</table>' +
+                    '</div>' +
+                  '</div>' +
+                '</div>' : '') +
+            '</div>' +
+
+            (state.previewImage ? '' +
+              '<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 p-4 backdrop-blur-md">' +
+                '<div class="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-[30px] border border-white/20 bg-white shadow-2xl">' +
+                  '<div class="flex items-center justify-between border-b border-slate-100 bg-gradient-to-r from-slate-900 to-sky-900 px-5 py-4 text-white sm:px-6"><h3 class="flex items-center gap-2 text-xl sm:text-2xl font-bold">' + iconSvg('image') + ' รูปภาพพร้อมบันทึก</h3><button id="closePreviewBtn" class="rounded-full p-2 text-white/70 transition hover:bg-white/10 hover:text-white">✕</button></div>' +
+                  '<div class="relative flex min-h-[300px] flex-1 items-start justify-center overflow-auto bg-slate-100 p-4"><img src="' + state.previewImage + '" alt="Dashboard Preview" class="h-auto max-w-full rounded-2xl border border-slate-200 shadow-xl" /></div>' +
+                  '<div class="flex flex-col gap-4 border-t border-slate-200 bg-white p-5 sm:flex-row sm:items-center sm:justify-between"><div class="max-w-2xl flex-1 rounded-2xl border border-sky-100 bg-sky-50 p-3 text-sm sm:text-base text-slate-600"><span class="font-semibold text-sky-700">💡 สำหรับผู้ใช้มือถือ (Safari/iOS):</span> หากกดปุ่มดาวน์โหลดไม่ได้ ให้ <span class="font-bold underline text-sky-800">กดค้างที่รูปภาพด้านบน</span> แล้วเลือก <span class="font-bold">บันทึกรูปภาพ</span> ได้เลยครับ</div><div class="flex w-full gap-3 sm:w-auto"><button id="closePreviewBtn2" class="flex-1 rounded-2xl bg-slate-100 px-6 py-3 text-sm sm:text-base font-semibold text-slate-700 transition hover:bg-slate-200 sm:flex-none">ปิดหน้าต่าง</button><button id="downloadBtn" class="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-6 py-3 text-sm sm:text-base font-semibold text-white shadow-lg shadow-emerald-900/20 transition hover:bg-emerald-600 sm:flex-none">' + iconSvg('download') + ' ดาวน์โหลด</button></div></div>' +
+                '</div>' +
+              '</div>' : '') +
+          '</div>';
+
+        bindEvents();
+      }
+
+      function bindEvents() {
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileInput = document.getElementById('fileInput');
+        const exportBtn = document.getElementById('exportBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const branchSelect = document.getElementById('branchSelect');
+        const startDateInput = document.getElementById('startDateInput');
+        const endDateInput = document.getElementById('endDateInput');
+        const newLeaderInput = document.getElementById('newLeaderInput');
+        const addLeaderBtn = document.getElementById('addLeaderBtn');
+        const closePreviewBtn = document.getElementById('closePreviewBtn');
+        const closePreviewBtn2 = document.getElementById('closePreviewBtn2');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        if (uploadBtn && fileInput) {
+          uploadBtn.onclick = function () { fileInput.click(); };
+          fileInput.onchange = function (e) {
+            const file = e.target.files && e.target.files[0];
+            state.error = '';
+            if (!file) return;
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+              state.error = 'กรุณาอัปโหลดไฟล์นามสกุล .csv เท่านั้น';
+              render();
+              return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (event) {
+              try {
+                const text = event.target && event.target.result ? String(event.target.result) : '';
+                const parsedData = processData(text);
+                if (parsedData.length === 0) {
+                  state.error = 'ไม่พบข้อมูลในไฟล์ CSV หรือคอลัมน์ไม่ตรงตามแบบฟอร์ม';
+                  render();
+                  return;
+                }
+                state.rawData = parsedData;
+                const dates = parsedData.map(function (d) { return d.date; }).filter(Boolean).sort();
+                state.startDate = dates[0] || '';
+                state.endDate = dates[dates.length - 1] || '';
+                render();
+              } catch (err) {
+                state.error = 'เกิดข้อผิดพลาดในการอ่านไฟล์: ' + err.message;
+                render();
+              }
+            };
+            reader.onerror = function () {
+              state.error = 'เกิดข้อผิดพลาดในการอ่านไฟล์';
+              render();
+            };
+            reader.readAsText(file);
+          };
+        }
+
+        if (exportBtn) {
+          exportBtn.onclick = async function () {
+            if (!window.html2canvas) {
+              alert('กำลังเตรียมระบบสร้างรูปภาพ กรุณารอสักครู่แล้วลองใหม่อีกครั้ง');
+              return;
+            }
+            state.isExporting = true;
+            render();
+            window.scrollTo(0, 0);
+            try {
+              await new Promise(function (resolve) { setTimeout(resolve, 300); });
+              const element = document.getElementById('dashboard-content');
+              if (!element) throw new Error('ไม่พบส่วนแสดงผลสำหรับส่งออกรูปภาพ');
+              const canvas = await window.html2canvas(element, {
+                scale: 2,
+                backgroundColor: '#f8fafc',
+                logging: false,
+                useCORS: true,
+                allowTaint: true
+              });
+              state.previewImage = canvas.toDataURL('image/png');
+            } catch (err) {
+              console.error('Export failed', err);
+              alert('เกิดข้อผิดพลาดในการสร้างรูปภาพ');
+            } finally {
+              state.isExporting = false;
+              render();
+            }
+          };
+        }
+
+        if (clearBtn) {
+          clearBtn.onclick = function () {
+            state.rawData = [];
+            state.startDate = '';
+            state.endDate = '';
+            state.selectedBranch = 'All';
+            state.error = '';
+            state.previewImage = null;
+            render();
+          };
+        }
+
+        if (settingsBtn) {
+          settingsBtn.onclick = function () {
+            state.showSettings = !state.showSettings;
+            render();
+          };
+        }
+
+        if (branchSelect) {
+          branchSelect.onchange = function (e) {
+            state.selectedBranch = e.target.value;
+            render();
+          };
+        }
+
+        if (startDateInput) {
+          startDateInput.onchange = function (e) {
+            state.startDate = e.target.value;
+            render();
+          };
+        }
+
+        if (endDateInput) {
+          endDateInput.onchange = function (e) {
+            state.endDate = e.target.value;
+            render();
+          };
+        }
+
+        if (newLeaderInput) {
+          newLeaderInput.oninput = function (e) {
+            state.newLeader = e.target.value;
+          };
+          newLeaderInput.onkeydown = function (e) {
+            if (e.key === 'Enter') {
+              const name = state.newLeader.trim();
+              if (name && !state.leaders.includes(name)) {
+                state.leaders.push(name);
+                state.newLeader = '';
+                render();
+              }
+            }
+          };
+        }
+
+        if (addLeaderBtn) {
+          addLeaderBtn.onclick = function () {
+            const name = state.newLeader.trim();
+            if (name && !state.leaders.includes(name)) {
+              state.leaders.push(name);
+              state.newLeader = '';
+              render();
+            }
+          };
+        }
+
+        document.querySelectorAll('.remove-leader').forEach(function (btn) {
+          btn.onclick = function () {
+            const idx = parseInt(btn.getAttribute('data-index'), 10);
+            state.leaders.splice(idx, 1);
+            render();
+          };
+        });
+
+        if (closePreviewBtn) {
+          closePreviewBtn.onclick = function () {
+            state.previewImage = null;
+            render();
+          };
+        }
+        if (closePreviewBtn2) {
+          closePreviewBtn2.onclick = function () {
+            state.previewImage = null;
+            render();
+          };
+        }
+        if (downloadBtn) {
+          downloadBtn.onclick = function () {
+            if (!state.previewImage) return;
+            const link = document.createElement('a');
+            link.download = 'สรุปผลงาน_' + new Date().toISOString().slice(0, 10) + '.png';
+            link.href = state.previewImage;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          };
+        }
+      }
+
+      render();
+    })();
+  </script>
+</body>
+</html>

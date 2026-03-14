@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ระบบสรุปและตรวจสอบการใช้น้ำมันรถ</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --green: #16a34a;
+      --green-soft: #f0fdf4;
+      --orange: #ea580c;
+      --orange-soft: #fff7ed;
+      --red: #dc2626;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Thai", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .page {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .toolbar,
+    .panel,
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .title-wrap h1 {
+      margin: 0;
+      font-size: clamp(1.3rem, 2vw, 1.9rem);
+      line-height: 1.25;
+      color: #1d4ed8;
+    }
+
+    .title-wrap p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #fff;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-upload { background: var(--blue); position: relative; overflow: hidden; }
+    .btn-export { background: var(--green); }
+
+    .btn-upload input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .message {
+      display: none;
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      border: 1px solid #bfdbfe;
+      background: #eff6ff;
+      color: #1e40af;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      padding: 18px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: clamp(1.45rem, 3vw, 2rem);
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .text-red { color: var(--red); }
+    .text-blue { color: var(--blue); }
+    .text-orange { color: var(--orange); }
+
+    .panel-header {
+      padding: 16px 18px;
+      background: #f9fafb;
+      border-bottom: 1px solid var(--border);
+      font-weight: 800;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+      font-size: 0.94rem;
+    }
+
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f9fafb;
+      color: #4b5563;
+      text-align: left;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    tbody tr:hover { background: #fafafa; }
+    .text-right { text-align: right; }
+    .cell-blue { background: rgba(37, 99, 235, 0.06); color: #1d4ed8; font-weight: 700; }
+    .cell-green { background: rgba(22, 163, 74, 0.06); color: #15803d; font-weight: 700; }
+    .cell-orange { background: rgba(234, 88, 12, 0.06); }
+
+    .badge-alert {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ffedd5;
+      color: #c2410c;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 56px 20px;
+      color: #9ca3af;
+    }
+
+    .empty h3 {
+      margin: 0 0 8px;
+      color: #4b5563;
+      font-size: 1.15rem;
+    }
+
+    @media (max-width: 900px) {
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 640px) {
+      .page { padding: 12px; }
+      .toolbar { padding: 16px; }
+      .stats { grid-template-columns: 1fr; }
+      .btn { width: 100%; }
+      .toolbar-actions { width: 100%; }
+      .toolbar-actions > * { flex: 1 1 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="toolbar">
+      <div class="title-wrap">
+        <h1>ระบบสรุปและตรวจสอบการใช้น้ำมันรถ</h1>
+        <p>อัปโหลดไฟล์ CSV จาก Google Form เพื่อประมวลผลทันที เปิดได้ตรงในเบราว์เซอร์</p>
+      </div>
+
+      <div class="toolbar-actions">
+        <label class="btn btn-upload">
+          อัปโหลดไฟล์ CSV
+          <input id="fileInput" type="file" accept=".csv" />
+        </label>
+        <button id="exportBtn" class="btn btn-export" type="button" disabled>ส่งออก CSV</button>
+      </div>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <div id="stats" class="stats" style="display:none;">
+      <div class="stat-card">
+        <div class="stat-label">รายการบันทึกทั้งหมด</div>
+        <div id="statCount" class="stat-value">0 รายการ</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">ค่าน้ำมันรวมทั้งหมด</div>
+        <div id="statFuel" class="stat-value text-red">฿ 0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">ระยะทางรวมทั้งหมด</div>
+        <div id="statDistance" class="stat-value text-blue">0 กม.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">พบความผิดปกติของไมล์</div>
+        <div id="statAnomalies" class="stat-value text-orange">0 รายการ</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">ข้อมูลการใช้น้ำมันรายวัน (จัดกลุ่มตามทะเบียนรถ)</div>
+      <div id="emptyState" class="empty">
+        <h3>ยังไม่มีข้อมูล</h3>
+        <div>กรุณาดาวน์โหลดไฟล์ CSV จาก Google Form และอัปโหลดเข้าระบบเพื่อดูรายงาน</div>
+      </div>
+      <div id="tableWrap" class="table-wrap" style="display:none;">
+        <table>
+          <thead>
+            <tr>
+              <th>วันที่</th>
+              <th>ทะเบียนรถ</th>
+              <th>พนักงาน</th>
+              <th class="text-right">ไมล์เริ่ม</th>
+              <th class="text-right">ไมล์จบ</th>
+              <th class="text-right">ระยะทาง (กม.)</th>
+              <th class="text-right">ค่าน้ำมัน (฿)</th>
+              <th class="text-right">เฉลี่ย (฿/กม.)</th>
+              <th class="text-right">ตรวจสอบไมล์หาย</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      rawData: [],
+      processedData: []
+    };
+
+    function parseNumber(value) {
+      if (value === null || value === undefined || value === '') return 0;
+      const normalized = String(value).replace(/,/g, '').trim();
+      const parsed = Number(normalized);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function parseCSVLine(line) {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < line.length; i += 1) {
+        const char = line[i];
+        const nextChar = line[i + 1];
+
+        if (char === '"') {
+          if (inQuotes && nextChar === '"') {
+            current += '"';
+            i += 1;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === ',' && !inQuotes) {
+          result.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+
+      result.push(current.trim());
+      return result;
+    }
+
+    function normalizeCSVText(text) {
+      return String(text)
+        .replace(/^\uFEFF/, '')
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n');
+    }
+
+    function parseCSVText(text) {
+      const normalizedText = normalizeCSVText(text);
+      const lines = normalizedText.split('\n').filter((line) => line.trim() !== '');
+      if (lines.length < 2) return [];
+
+      const headers = parseCSVLine(lines[0]);
+      const parsedData = [];
+
+      for (let i = 1; i < lines.length; i += 1) {
+        const row = parseCSVLine(lines[i]);
+        if (row.length === 0) continue;
+
+        const rowObj = {};
+        headers.forEach((header, index) => {
+          rowObj[header] = row[index] ?? '';
+        });
+
+        rowObj['เลขไมล์เริ่มต้น'] = parseNumber(rowObj['เลขไมล์เริ่มต้น']);
+        rowObj['เลขไมล์สิ้นสุด'] = parseNumber(rowObj['เลขไมล์สิ้นสุด']);
+        rowObj['ค่าน้ำมันตามใบเสร็จ'] = parseNumber(rowObj['ค่าน้ำมันตามใบเสร็จ']);
+
+        if (rowObj['วันที่ทำกิจกรรม']) {
+          parsedData.push(rowObj);
+        }
+      }
+
+      return parsedData;
+    }
+
+    function formatNumber(num, decimals = 2) {
+      return Number(num || 0).toLocaleString('th-TH', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      if (Number.isNaN(date.getTime())) return String(dateString);
+      return date.toLocaleDateString('th-TH', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+
+    function escapeCSVCell(cell) {
+      return `"${String(cell ?? '').replace(/"/g, '""')}"`;
+    }
+
+    function buildCSVContent(processedData) {
+      const headers = [
+        'ประทับเวลา',
+        'วันที่ทำกิจกรรม',
+        'ชื่อ-สกุล ผู้ทำกิจกรรม',
+        'ประจำสาขา',
+        'หมายเลขทะเบียนรถ',
+        'เลขไมล์เริ่มต้น',
+        'เลขไมล์สิ้นสุด',
+        'ระยะทางที่ใช้ (กม.)',
+        'ค่าน้ำมันตามใบเสร็จ',
+        'เฉลี่ย (บาท/กม.)',
+        'ตรวจสอบไมล์หาย (กม.)'
+      ];
+
+      const rows = processedData.map((row) => [
+        row['ประทับเวลา'] || '',
+        row['วันที่ทำกิจกรรม'] || '',
+        row['ชื่อ-สกุล ผู้ทำกิจกรรม'] || '',
+        row['ประจำสาขา'] || '',
+        row['หมายเลขทะเบียนรถ'] || '',
+        row['เลขไมล์เริ่มต้น'],
+        row['เลขไมล์สิ้นสุด'],
+        row.dailyDistance,
+        row['ค่าน้ำมันตามใบเสร็จ'],
+        Number(row.costPerKm || 0).toFixed(2),
+        row.mileGap
+      ]);
+
+      return [
+        headers.join(','),
+        ...rows.map((row) => row.map(escapeCSVCell).join(','))
+      ].join('\n');
+    }
+
+    function processData(rawData) {
+      const sortedData = [...rawData].sort((a, b) => {
+        const carA = a['หมายเลขทะเบียนรถ'] || '';
+        const carB = b['หมายเลขทะเบียนรถ'] || '';
+
+        if (carA !== carB) {
+          return carA.localeCompare(carB);
+        }
+
+        return new Date(a['วันที่ทำกิจกรรม']).getTime() - new Date(b['วันที่ทำกิจกรรม']).getTime();
+      });
+
+      let previousCar = null;
+      let previousEndMile = null;
+
+      return sortedData.map((row) => {
+        const startMile = parseNumber(row['เลขไมล์เริ่มต้น']);
+        const endMile = parseNumber(row['เลขไมล์สิ้นสุด']);
+        const fuelCost = parseNumber(row['ค่าน้ำมันตามใบเสร็จ']);
+        const currentCar = row['หมายเลขทะเบียนรถ'] || '';
+
+        const dailyDistance = Math.max(0, endMile - startMile);
+        const costPerKm = dailyDistance > 0 ? fuelCost / dailyDistance : 0;
+
+        let mileGap = 0;
+        if (currentCar === previousCar && previousEndMile !== null) {
+          mileGap = Math.max(0, startMile - previousEndMile);
+        }
+
+        previousCar = currentCar;
+        previousEndMile = endMile;
+
+        return { ...row, dailyDistance, costPerKm, mileGap };
+      });
+    }
+
+    function showMessage(text) {
+      const el = document.getElementById('message');
+      el.textContent = text;
+      el.style.display = text ? 'block' : 'none';
+    }
+
+    function updateStats(data) {
+      document.getElementById('statCount').textContent = `${data.length} รายการ`;
+      document.getElementById('statFuel').textContent = `฿ ${formatNumber(data.reduce((sum, row) => sum + parseNumber(row['ค่าน้ำมันตามใบเสร็จ']), 0))}`;
+      document.getElementById('statDistance').textContent = `${formatNumber(data.reduce((sum, row) => sum + parseNumber(row.dailyDistance), 0), 0)} กม.`;
+      document.getElementById('statAnomalies').textContent = `${data.filter((row) => row.mileGap > 0).length} รายการ`;
+      document.getElementById('stats').style.display = data.length ? 'grid' : 'none';
+    }
+
+    function renderTable(data) {
+      const body = document.getElementById('tableBody');
+      const emptyState = document.getElementById('emptyState');
+      const tableWrap = document.getElementById('tableWrap');
+      body.innerHTML = '';
+
+      if (!data.length) {
+        emptyState.style.display = 'block';
+        tableWrap.style.display = 'none';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      tableWrap.style.display = 'block';
+
+      data.forEach((row) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${formatDate(row['วันที่ทำกิจกรรม'])}</td>
+          <td><strong>${row['หมายเลขทะเบียนรถ'] || ''}</strong></td>
+          <td>${row['ชื่อ-สกุล ผู้ทำกิจกรรม'] || ''}</td>
+          <td class="text-right">${formatNumber(row['เลขไมล์เริ่มต้น'], 0)}</td>
+          <td class="text-right">${formatNumber(row['เลขไมล์สิ้นสุด'], 0)}</td>
+          <td class="text-right cell-blue">${formatNumber(row.dailyDistance, 0)}</td>
+          <td class="text-right">${formatNumber(row['ค่าน้ำมันตามใบเสร็จ'])}</td>
+          <td class="text-right cell-green">${formatNumber(row.costPerKm)}</td>
+          <td class="text-right cell-orange">${row.mileGap > 0 ? `<span class="badge-alert">⚠ ${formatNumber(row.mileGap, 0)} กม.</span>` : '<span style="color:#9ca3af;">-</span>'}</td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    function exportToCSV() {
+      if (!state.processedData.length) return;
+
+      try {
+        const csvContent = buildCSVContent(state.processedData);
+        const csvText = `\uFEFF${csvContent}`;
+        const dateStr = new Date().toISOString().split('T')[0];
+        const fileName = `รายงานการใช้น้ำมัน_${dateStr}.csv`;
+        const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(link.href), 1500);
+        showMessage('กำลังดาวน์โหลดไฟล์ CSV');
+      } catch (error) {
+        console.error('Export failed', error);
+        showMessage('ส่งออกไม่สำเร็จ กรุณาลองอีกครั้ง');
+      }
+    }
+
+    function runSelfTests() {
+      const tests = [];
+      tests.push(parseCSVLine('a,b,c').length === 3);
+      tests.push(parseCSVLine('"นาย,สมชาย",123')[0] === 'นาย,สมชาย');
+      tests.push(parseCSVLine('"a""b",x')[0] === 'a"b');
+      tests.push(parseNumber('1,250') === 1250);
+      tests.push(parseNumber('abc') === 0);
+
+      const sampleCSV = [
+        'วันที่ทำกิจกรรม,หมายเลขทะเบียนรถ,เลขไมล์เริ่มต้น,เลขไมล์สิ้นสุด,ค่าน้ำมันตามใบเสร็จ',
+        '2026-03-14,กข1234,1000,1100,500'
+      ].join('\n');
+
+      const parsed = parseCSVText(sampleCSV);
+      tests.push(parsed.length === 1);
+      tests.push(parsed[0]['เลขไมล์เริ่มต้น'] === 1000);
+      tests.push(parsed[0]['เลขไมล์สิ้นสุด'] === 1100);
+      tests.push(parsed[0]['ค่าน้ำมันตามใบเสร็จ'] === 500);
+
+      const quotedCSV = [
+        'วันที่ทำกิจกรรม,ชื่อ-สกุล ผู้ทำกิจกรรม,หมายเลขทะเบียนรถ,เลขไมล์เริ่มต้น,เลขไมล์สิ้นสุด,ค่าน้ำมันตามใบเสร็จ',
+        '2026-03-14,"นาย,สมชาย",กข1234,1000,1100,500'
+      ].join('\n');
+      const quotedParsed = parseCSVText(quotedCSV);
+      tests.push(quotedParsed[0]['ชื่อ-สกุล ผู้ทำกิจกรรม'] === 'นาย,สมชาย');
+
+      const csvOut = buildCSVContent([
+        {
+          ประทับเวลา: '2026-03-14 08:00',
+          วันที่ทำกิจกรรม: '2026-03-14',
+          'ชื่อ-สกุล ผู้ทำกิจกรรม': 'ทดสอบ "A"',
+          ประจำสาขา: 'สระบุรี',
+          'หมายเลขทะเบียนรถ': 'กข1234',
+          'เลขไมล์เริ่มต้น': 1000,
+          'เลขไมล์สิ้นสุด': 1100,
+          dailyDistance: 100,
+          'ค่าน้ำมันตามใบเสร็จ': 500,
+          costPerKm: 5,
+          mileGap: 0
+        }
+      ]);
+      tests.push(csvOut.includes('\n'));
+      tests.push(csvOut.includes('"ทดสอบ ""A"""'));
+      tests.push(csvOut.startsWith('ประทับเวลา,'));
+
+      if (!tests.every(Boolean)) {
+        console.error('Self-tests failed', tests);
+      }
+    }
+
+    document.getElementById('fileInput').addEventListener('change', (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target && e.target.result ? String(e.target.result) : '';
+        state.rawData = parseCSVText(text);
+        state.processedData = processData(state.rawData);
+        renderTable(state.processedData);
+        updateStats(state.processedData);
+        document.getElementById('exportBtn').disabled = state.processedData.length === 0;
+        showMessage('');
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', exportToCSV);
+    runSelfTests();
+  </script>
+</body>
+</html>

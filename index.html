@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Branch Operations Portal</title>
+  <style>
+    :root {
+      --bg-1: #0b1220;
+      --bg-2: #162033;
+      --card: rgba(255, 255, 255, 0.10);
+      --card-border: rgba(255, 255, 255, 0.14);
+      --text: #eef4ff;
+      --muted: #c8d4e8;
+      --accent-1: #2563eb;
+      --accent-2: #60a5fa;
+      --accent-3: #f59e0b;
+      --shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Thai", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.20), transparent 28%),
+        radial-gradient(circle at top right, rgba(245, 158, 11, 0.14), transparent 28%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 1120px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      border-radius: 32px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+      padding: 28px;
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(40px);
+      z-index: 0;
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(40px);
+      z-index: 0;
+    }
+
+    .hero::before {
+      width: 220px;
+      height: 220px;
+      background: rgba(37, 99, 235, 0.18);
+      top: -60px;
+      left: -40px;
+    }
+
+    .hero::after {
+      width: 260px;
+      height: 260px;
+      background: rgba(245, 158, 11, 0.12);
+      right: -70px;
+      bottom: -80px;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.16);
+      border: 1px solid rgba(96, 165, 250, 0.25);
+      color: #eaf2ff;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    h1 {
+      margin: 18px 0 10px;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1.12;
+    }
+
+    .subtitle {
+      max-width: 760px;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.12rem);
+      line-height: 1.7;
+    }
+
+    .grid {
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .app-card {
+      position: relative;
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      border-radius: var(--radius);
+      padding: 22px;
+      min-height: 240px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.08));
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 14px 36px rgba(0,0,0,0.18);
+      overflow: hidden;
+      transform: translateY(0) scale(1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .app-card:hover {
+      transform: translateY(-4px) scale(1.01);
+      box-shadow: 0 22px 46px rgba(0,0,0,0.25);
+      border-color: rgba(255,255,255,0.28);
+      background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.10));
+    }
+
+    .app-card:focus-visible {
+      outline: 3px solid rgba(56, 189, 248, 0.55);
+      outline-offset: 3px;
+    }
+
+    .app-card::before {
+      content: "";
+      position: absolute;
+      inset: auto -20% -40% auto;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      filter: blur(10px);
+    }
+
+    .icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 18px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 8px 20px rgba(0,0,0,0.18);
+    }
+
+    .icon.blue {
+      background: linear-gradient(135deg, rgba(37,99,235,0.98), rgba(96,165,250,0.95));
+    }
+
+    .icon.green {
+      background: linear-gradient(135deg, rgba(245,158,11,0.95), rgba(251,191,36,0.92));
+    }
+
+    .card-title {
+      margin: 0 0 10px;
+      font-size: 1.35rem;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+
+    .card-desc {
+      margin: 0 0 18px;
+      color: #dbe4f1;
+      line-height: 1.65;
+      font-size: 0.98rem;
+    }
+
+    .card-footer {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .card-footer span:last-child {
+      transition: transform 0.2s ease;
+    }
+
+    .app-card:hover .card-footer span:last-child {
+      transform: translateX(4px);
+    }
+
+    .tips {
+      margin-top: 22px;
+      padding: 18px 20px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 0.96rem;
+    }
+
+    .tips strong {
+      color: #ffffff;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        align-items: flex-start;
+      }
+
+      .hero {
+        padding: 20px;
+        border-radius: 24px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .app-card {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="eyebrow">🏢 Branch Operations Portal</div>
+        <h1>ศูนย์รวมระบบงานสาขา สำหรับใช้งานประจำวัน</h1>
+        <p class="subtitle">
+          หน้าแรกนี้ออกแบบให้เหมาะกับการใช้งานในงานบริหารสาขา รายงานผลพนักงาน และการตรวจสอบข้อมูลรถใช้งาน
+          โดยเน้นความชัดเจน ดูน่าเชื่อถือ และกดเข้าแต่ละระบบได้ง่ายทั้งบนมือถือและคอมพิวเตอร์
+        </p>
+
+        <div class="grid">
+          <a class="app-card" href="employee_dashboard.html" target="_blank" rel="noopener noreferrer">
+            <div class="icon blue">👥</div>
+            <h2 class="card-title">Employee Performance Dashboard</h2>
+            <p class="card-desc">
+              ใช้สำหรับติดตามผลการทำงานของพนักงาน ดูสรุปผลงานรายวัน ภาพรวมรายคน และข้อมูลสำคัญสำหรับการบริหารทีมสาขา
+            </p>
+            <div class="card-footer">
+              <span>เข้าสู่ระบบผลงานพนักงาน</span>
+              <span>↗</span>
+            </div>
+          </a>
+
+          <a class="app-card" href="mileage_report.html" target="_blank" rel="noopener noreferrer">
+            <div class="icon green">🚗</div>
+            <h2 class="card-title">Vehicle Mileage & Fuel Check</h2>
+            <p class="card-desc">
+              ใช้สำหรับตรวจสอบเลขไมล์ ระยะทาง และการใช้น้ำมันรถ เพื่อช่วยควบคุมค่าใช้จ่ายและติดตามความผิดปกติของข้อมูลได้รวดเร็ว
+            </p>
+            <div class="card-footer">
+              <span>เข้าสู่ระบบตรวจสอบรถ</span>
+              <span>↗</span>
+            </div>
+          </a>
+        </div>
+
+        <div class="tips">
+          <strong>การใช้งานบน GitHub Pages:</strong> ให้วางไฟล์ <code>index.html</code>, <code>employee_dashboard.html</code> และ <code>mileage_report.html</code>
+          ไว้ในโฟลเดอร์เดียวกัน หน้าแรกนี้จะทำหน้าที่เป็นเมนูหลักสำหรับพาทีมหรือผู้บริหารเข้าสู่แต่ละระบบได้อย่างเป็นระเบียบและดูเป็นมืออาชีพ
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
