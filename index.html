@@ -221,6 +221,84 @@
       transform: translateX(4px);
     }
 
+    .section-label {
+      margin-top: 26px;
+      margin-bottom: 14px;
+      display: inline-flex;
+      align-items: center;
+      padding: 9px 16px;
+      border-radius: 999px;
+      font-size: 0.96rem;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+    }
+
+    .employee-zone {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.22), rgba(96, 165, 250, 0.16));
+      border: 1px solid rgba(96, 165, 250, 0.30);
+      color: #f3f8ff;
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.16);
+    }
+
+    .manager-zone {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(251, 191, 36, 0.14));
+      border: 1px solid rgba(251, 191, 36, 0.26);
+      color: #fff6df;
+      box-shadow: 0 10px 24px rgba(245, 158, 11, 0.14);
+    }
+
+    .employee-grid {
+      margin-top: 12px;
+    }
+
+    .manager-grid {
+      margin-top: 14px;
+    }
+
+    .employee-card {
+      border: 2px solid rgba(96,165,250,0.26);
+      background: linear-gradient(180deg, rgba(37,99,235,0.20), rgba(255,255,255,0.08));
+    }
+
+    .employee-card:hover {
+      border-color: rgba(125,211,252,0.52);
+      box-shadow: 0 24px 50px rgba(37, 99, 235, 0.22);
+    }
+
+    .manager-grid .app-card {
+      border: 2px solid rgba(251,191,36,0.18);
+      background: linear-gradient(180deg, rgba(245,158,11,0.10), rgba(255,255,255,0.08));
+    }
+
+    .manager-grid .app-card:hover {
+      border-color: rgba(251,191,36,0.36);
+      box-shadow: 0 24px 50px rgba(245, 158, 11, 0.18);
+    }
+
+    .menu-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 14px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .menu-badge.employee {
+      background: rgba(147, 197, 253, 0.16);
+      border: 1px solid rgba(147, 197, 253, 0.30);
+      color: #eff6ff;
+    }
+
+    .menu-badge.manager {
+      background: rgba(253, 224, 71, 0.14);
+      border: 1px solid rgba(253, 224, 71, 0.22);
+      color: #fff7e6;
+    }
+
     .tips {
       margin-top: 22px;
       padding: 18px 20px;
@@ -262,17 +340,47 @@
       <div class="hero-inner">
         <div class="eyebrow">🏢 Branch Operations Portal</div>
         <h1>ศูนย์รวมระบบงานสาขา สำหรับใช้งานประจำวัน</h1>
+        <div class="section-label employee-zone">สำหรับพนักงาน</div>
+        <div class="grid employee-grid">
+          <a class="app-card employee-card" href="https://docs.google.com/forms/d/e/1FAIpQLSfYgIiqvvCshveqGOWkAw2p4G5z2pablYq2e6sTjUSqXcd8OA/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">
+            <div class="menu-badge employee">พนักงาน</div>
+            <div class="icon blue">📝</div>
+            <h2 class="card-title">ลงบันทึกผลงานประจำวัน</h2>
+            <p class="card-desc">
+              ปุ่มนี้สำหรับพนักงาน ใช้บันทึกผลงานประจำวัน เพื่อส่งข้อมูลเข้าระบบในแต่ละวัน
+            </p>
+            <div class="card-footer">
+              <span>เปิดฟอร์มบันทึกผลงาน</span>
+              <span>↗</span>
+            </div>
+          </a>
+
+          <a class="app-card employee-card" href="https://docs.google.com/forms/d/e/1FAIpQLSf0fFYbP8tvWNaNiXssNGi9CQzclyCWjZ8BRSwJFJe8_1Gw-g/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">
+            <div class="menu-badge employee">พนักงาน</div>
+            <div class="icon green">🚙</div>
+            <h2 class="card-title">ลงบันทึกการเดินทาง</h2>
+            <p class="card-desc">
+              ปุ่มนี้สำหรับพนักงาน ใช้บันทึกการเดินทาง เลขไมล์ และข้อมูลการใช้รถประจำวัน
+            </p>
+            <div class="card-footer">
+              <span>เปิดฟอร์มบันทึกการเดินทาง</span>
+              <span>↗</span>
+            </div>
+          </a>
+        </div>
+
+        <div class="section-label manager-zone">สำหรับผู้ดูแล / หลังบ้าน</div>
         <p class="subtitle">
-          หน้าแรกนี้ออกแบบให้เหมาะกับการใช้งานในงานบริหารสาขา รายงานผลพนักงาน และการตรวจสอบข้อมูลรถใช้งาน
-          โดยเน้นความชัดเจน ดูน่าเชื่อถือ และกดเข้าแต่ละระบบได้ง่ายทั้งบนมือถือและคอมพิวเตอร์
+          เลือกเมนูให้ตรงกับสิทธิ์การใช้งาน โดยโซนพนักงานและโซนผู้ดูแลระบบถูกแยกสีและป้ายกำกับไว้อย่างชัดเจน
         </p>
 
-        <div class="grid">
+        <div class="grid manager-grid">
           <a class="app-card" href="employee_dashboard.html" target="_blank" rel="noopener noreferrer">
+            <div class="menu-badge manager">ผู้ดูแลระบบ</div>
             <div class="icon blue">👥</div>
             <h2 class="card-title">Employee Performance Dashboard</h2>
             <p class="card-desc">
-              ใช้สำหรับติดตามผลการทำงานของพนักงาน ดูสรุปผลงานรายวัน ภาพรวมรายคน และข้อมูลสำคัญสำหรับการบริหารทีมสาขา
+              ปุ่มนี้สำหรับผู้ดูแลระบบ ใช้ดูสรุปผลงานพนักงานและตัวเลขหลังบ้าน
             </p>
             <div class="card-footer">
               <span>เข้าสู่ระบบผลงานพนักงาน</span>
@@ -281,10 +389,11 @@
           </a>
 
           <a class="app-card" href="mileage_report.html" target="_blank" rel="noopener noreferrer">
+            <div class="menu-badge manager">ผู้ดูแลระบบ</div>
             <div class="icon green">🚗</div>
             <h2 class="card-title">Vehicle Mileage & Fuel Check</h2>
             <p class="card-desc">
-              ใช้สำหรับตรวจสอบเลขไมล์ ระยะทาง และการใช้น้ำมันรถ เพื่อช่วยควบคุมค่าใช้จ่ายและติดตามความผิดปกติของข้อมูลได้รวดเร็ว
+              ปุ่มนี้สำหรับผู้ดูแลระบบ ใช้ดูสรุปการเดินทาง เลขไมล์ และข้อมูลการใช้น้ำมันรถ
             </p>
             <div class="card-footer">
               <span>เข้าสู่ระบบตรวจสอบรถ</span>
@@ -294,8 +403,7 @@
         </div>
 
         <div class="tips">
-          <strong>การใช้งานบน GitHub Pages:</strong> ให้วางไฟล์ <code>index.html</code>, <code>employee_dashboard.html</code> และ <code>mileage_report.html</code>
-          ไว้ในโฟลเดอร์เดียวกัน หน้าแรกนี้จะทำหน้าที่เป็นเมนูหลักสำหรับพาทีมหรือผู้บริหารเข้าสู่แต่ละระบบได้อย่างเป็นระเบียบและดูเป็นมืออาชีพ
+          <strong>หมายเหตุ:</strong> เมนูด้านบนสำหรับพนักงานใช้กรอกข้อมูลประจำวัน ส่วนเมนูด้านล่างสำหรับผู้ดูแลระบบใช้ดูข้อมูลสรุปหลังบ้าน
         </div>
       </div>
     </section>
