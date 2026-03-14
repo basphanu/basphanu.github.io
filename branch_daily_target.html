@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>สรุปผลงานรวมรายสาขา</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --bg: #f6f1eb;
+      --panel: #ffffff;
+      --line: #e6ddd2;
+      --text: #2f2924;
+      --muted: #7b7269;
+      --orange: #d98b4d;
+      --orange-2: #c97838;
+      --green: #5c8f73;
+      --red: #c97a5d;
+      --shadow: 0 10px 24px rgba(82, 63, 45, 0.08);
+      --radius-xl: 26px;
+      --radius-lg: 20px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Thai", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(217,139,77,0.10), transparent 24%),
+        linear-gradient(180deg, #faf6f1 0%, #f4eee7 100%);
+      color: var(--text);
+      padding: 18px;
+    }
+
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #ead8c6, #f4e8dc);
+      color: var(--text);
+      border-radius: 30px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #eadfd3;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.45);
+      right: -70px;
+      top: -70px;
+    }
+
+    .hero-row {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.75);
+      border: 1px solid #eadfd3;
+      font-weight: 800;
+      font-size: 1rem;
+      color: #6f5846;
+    }
+
+    h1 {
+      margin: 14px 0 8px;
+      font-size: clamp(2.1rem, 4vw, 3.2rem);
+      line-height: 1.08;
+      font-weight: 950;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: #5f5348;
+      font-size: 1.12rem;
+      line-height: 1.7;
+      font-weight: 700;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .select-branch,
+    .btn {
+      border: 1px solid #e4d9ce;
+      font-weight: 800;
+    }
+
+    .select-branch {
+      min-width: 220px;
+      min-height: 60px;
+      padding: 15px 18px;
+      border-radius: 16px;
+      background: #fffdfa;
+      color: var(--text);
+      outline: none;
+      font-size: 1.08rem;
+    }
+
+    .btn {
+      cursor: pointer;
+      background: #fffdfa;
+      color: #4f4136;
+      transition: transform 0.18s ease, opacity 0.18s ease;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+    .btn:disabled { opacity: 0.7; cursor: wait; transform: none; }
+
+    .btn.export {
+      min-width: 160px;
+      min-height: 60px;
+      padding: 15px 18px;
+      border-radius: 16px;
+      background: #efe5da;
+      border: 1px solid #e1d5c9;
+      color: #5f5145;
+      font-size: 1.08rem;
+      font-weight: 900;
+      box-shadow: 0 8px 18px rgba(120, 101, 84, 0.06);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .input-panel {
+      background: linear-gradient(180deg, #fffdfa, #f8f2eb);
+      border: 1px solid #e7ddd2;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .input-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid #e8ddd2;
+      background: linear-gradient(180deg, #fbf7f2, #f5eee7);
+    }
+
+    .input-head h2 {
+      margin: 0 0 8px;
+      font-size: 1.38rem;
+      font-weight: 950;
+      color: var(--text);
+    }
+
+    .input-head p {
+      margin: 0;
+      color: #7c7065;
+      font-size: 1.02rem;
+      line-height: 1.65;
+      font-weight: 700;
+    }
+
+    .input-body {
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .form-block {
+      background: #fffdfb;
+      border: 1px solid #ece1d7;
+      border-radius: var(--radius-lg);
+      padding: 16px;
+    }
+
+    .form-block h3 {
+      margin: 0 0 14px;
+      font-size: 1.14rem;
+      font-weight: 900;
+      color: var(--orange-2);
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label {
+      color: #72665c;
+      font-size: 0.98rem;
+      font-weight: 800;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      background: #ffffff;
+      color: var(--text);
+      border: 1px solid #e6dbcf;
+      border-radius: 12px;
+      padding: 14px 15px;
+      font-size: 1.08rem;
+      font-weight: 700;
+      outline: none;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 4px rgba(217, 139, 77, 0.12);
+    }
+
+    .helper {
+      font-size: 0.92rem;
+      color: #8d8177;
+      line-height: 1.6;
+      font-weight: 700;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .action-row .btn {
+      flex: 1;
+      min-width: 150px;
+      min-height: 60px;
+      padding: 15px 18px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #d98b4d, #c97838);
+      border: 1px solid #c97838;
+      color: #fffdfb;
+      font-size: 1.08rem;
+      font-weight: 900;
+      box-shadow: 0 8px 18px rgba(201, 120, 56, 0.12);
+    }
+
+    .action-row .btn.secondary {
+      background: #efe5da;
+      border: 1px solid #e1d5c9;
+      color: #5f5145;
+      box-shadow: 0 8px 18px rgba(120, 101, 84, 0.06);
+    }
+
+    .display-wrap {
+      display: grid;
+      gap: 14px;
+    }
+
+    .status-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      background: linear-gradient(180deg, #fffdfb, #f7efe7);
+      border: 1px solid #e8ddd2;
+      border-radius: 20px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .branch-title {
+      font-size: 1.38rem;
+      font-weight: 950;
+      color: var(--text);
+    }
+
+    .status-pill {
+      padding: 11px 16px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 1rem;
+      color: #5e4a3b;
+      background: #f4ece4;
+      border: 1px solid #ddd0c2;
+    }
+
+    .status-pill.good { background: #eaf3ed; color: #587961; border-color: #cddfd2; }
+    .status-pill.warn { background: #f8efe2; color: #8b6a49; border-color: #ead9c4; }
+    .status-pill.bad { background: #f8e9e4; color: #9a664f; border-color: #eccfc1; }
+
+    #captureArea {
+      background: linear-gradient(180deg, #fffdfa, #f7efe7);
+      border: 1px solid #e8ddd2;
+      border-radius: 28px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .export-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      padding: 18px 20px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #fffefe, #f8f2eb);
+      border: 1px solid #e9dfd4;
+    }
+
+    .export-branch {
+      font-size: clamp(2.1rem, 3.6vw, 2.8rem);
+      font-weight: 950;
+      color: var(--text);
+      letter-spacing: -0.03em;
+      line-height: 1.03;
+    }
+
+    .export-date {
+      font-size: clamp(1.18rem, 2.2vw, 1.42rem);
+      font-weight: 900;
+      color: #7d5a3f;
+      background: #f6ece3;
+      border: 1px solid #e4cdb8;
+      border-radius: 999px;
+      padding: 12px 18px;
+    }
+
+    .metric-section {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #fffdfb, #f7efe7);
+      border: 1px solid #e8ddd2;
+    }
+
+    .metric-section.priority {
+      background: linear-gradient(180deg, #ece2fa, #f8f2ff);
+      border: 1px solid #cfbde7;
+      box-shadow: 0 12px 28px rgba(119, 92, 153, 0.12);
+    }
+
+    .metric-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .metric-name {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.34rem;
+      font-weight: 950;
+      color: var(--text);
+    }
+
+    .metric-badge {
+      padding: 9px 14px;
+      border-radius: 999px;
+      font-size: 0.96rem;
+      font-weight: 900;
+      color: #6a5a4b;
+      background: #f4ece4;
+      border: 1px solid #e2d8cd;
+    }
+
+    .metric-badge.priority {
+      background: #efe8fb;
+      border-color: #ddd2f3;
+      color: #765b9b;
+    }
+
+    .metric-cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .metric-cards.compact {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .metric-cards.two-by-two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .metric-cards.two-by-two .result-card.daily-focus {
+      grid-column: 1 / -1;
+      min-height: 172px;
+      padding: 20px 22px;
+    }
+
+    .result-card {
+      background: linear-gradient(180deg, #fffefe, #f8f2eb);
+      border: 1px solid #e9dfd4;
+      border-radius: 22px;
+      padding: 18px;
+      min-height: 150px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .result-card.highlight {
+      background: linear-gradient(180deg, #f9efe5, #fffdfb);
+      border-color: #ecd9c8;
+    }
+
+    .result-card.daily-focus {
+      background: linear-gradient(180deg, #f7ede2, #fffdfb);
+      border: 2px solid #e7cfb4;
+      box-shadow: 0 10px 22px rgba(201, 120, 56, 0.08);
+    }
+
+    .result-card.priority-highlight {
+      background: linear-gradient(180deg, #eadcfb, #f7f0ff);
+      border: 2px solid #cdb6eb;
+      box-shadow: 0 12px 24px rgba(128, 96, 166, 0.12);
+    }
+
+    .result-card.warn {
+      background: linear-gradient(180deg, #fbefea, #fffdfb);
+      border-color: #edd4c8;
+    }
+
+    .result-card.ok {
+      background: linear-gradient(180deg, #eef6f1, #fffdfb);
+      border-color: #d7e7dc;
+    }
+
+    .card-label {
+      font-size: 1.05rem;
+      color: #6f645b;
+      font-weight: 900;
+    }
+
+    .card-main {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .card-value {
+      font-size: clamp(2.7rem, 5.6vw, 4.1rem);
+      line-height: 0.88;
+      font-weight: 950;
+      color: #2f2924;
+      letter-spacing: -0.05em;
+    }
+
+    .card-meta {
+      font-size: 1.18rem;
+      font-weight: 900;
+      color: var(--orange-2);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-sub {
+      font-size: 1.08rem;
+      line-height: 1.7;
+      color: #5f564f;
+      font-weight: 800;
+    }
+
+    .emphasis-large {
+      font-size: clamp(3rem, 6vw, 4.4rem);
+      line-height: 0.86;
+      font-weight: 950;
+      letter-spacing: -0.05em;
+    }
+
+    .emphasis-xl {
+      font-size: clamp(3.8rem, 7.5vw, 5.6rem);
+      line-height: 0.8;
+      font-weight: 950;
+      letter-spacing: -0.07em;
+    }
+
+    .inline-emphasis {
+      display: inline-block;
+      font-size: 1.85em;
+      line-height: 0.95;
+      font-weight: 950;
+      color: #2f2924;
+      letter-spacing: -0.04em;
+      margin: 0 0.08em;
+      vertical-align: baseline;
+    }
+
+    .progress-shell {
+      height: 12px;
+      background: #f1e9e1;
+      border: 1px solid #e2d7cb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #d98b4d, #e7b27f);
+      border-radius: inherit;
+    }
+
+    .trend-up {
+      color: var(--green);
+      font-size: 1.1rem;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .trend-down {
+      color: var(--red);
+      font-size: 1.1rem;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .export-note {
+      color: #7a6f66;
+      font-size: 0.96rem;
+      line-height: 1.6;
+      font-weight: 800;
+      padding: 0 6px;
+    }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+      .metric-cards,
+      .metric-cards.compact,
+      .metric-cards.two-by-two { grid-template-columns: 1fr; }
+      .metric-cards.two-by-two .result-card.daily-focus { grid-column: auto; }
+
+      body {
+        padding: 14px;
+      }
+
+      .container {
+        gap: 16px;
+      }
+
+      .hero,
+      .input-panel,
+      #captureArea,
+      .metric-section,
+      .status-banner,
+      .export-header {
+        border-radius: 22px;
+      }
+
+      .hero {
+        padding: 18px;
+      }
+
+      .hero-row,
+      .top-actions,
+      .metric-head,
+      .export-header,
+      .status-banner {
+        gap: 12px;
+      }
+
+      .eyebrow {
+        font-size: 1.02rem;
+        padding: 10px 16px;
+      }
+
+      h1 {
+        font-size: clamp(2.3rem, 8vw, 3.3rem);
+        line-height: 1.04;
+        margin: 12px 0 8px;
+      }
+
+      .subtitle {
+        font-size: 1.16rem;
+        line-height: 1.75;
+      }
+
+      .select-branch,
+      .btn.export,
+      .action-row .btn {
+        min-height: 64px;
+        font-size: 1.12rem;
+        padding: 16px 18px;
+        border-radius: 18px;
+      }
+
+      .input-head h2 {
+        font-size: 1.46rem;
+      }
+
+      .input-head p,
+      .helper,
+      .export-note {
+        font-size: 1rem;
+        line-height: 1.7;
+      }
+
+      .form-block h3,
+      .branch-title,
+      .metric-name {
+        font-size: 1.34rem;
+      }
+
+      .field label {
+        font-size: 1.02rem;
+      }
+
+      .field input,
+      .field select {
+        font-size: 1.12rem;
+        padding: 15px 16px;
+        min-height: 56px;
+      }
+
+      .status-pill,
+      .metric-badge,
+      .metric-badge.priority {
+        font-size: 1rem;
+        padding: 10px 14px;
+      }
+
+      .export-branch {
+        font-size: clamp(2.3rem, 8vw, 3.4rem);
+        line-height: 1.02;
+      }
+
+      .export-date {
+        font-size: clamp(1.2rem, 4.4vw, 1.5rem);
+        padding: 12px 16px;
+      }
+
+      .metric-section {
+        padding: 18px;
+      }
+
+      .result-card {
+        padding: 22px;
+        gap: 12px;
+        min-height: 160px;
+      }
+
+      .metric-cards.two-by-two .result-card.daily-focus {
+        min-height: 180px;
+      }
+
+      .card-label {
+        font-size: 1.12rem;
+      }
+
+      .card-meta {
+        font-size: 1.2rem;
+      }
+
+      .card-sub {
+        font-size: 1.12rem;
+        line-height: 1.76;
+      }
+
+      .card-value {
+        font-size: clamp(3rem, 12vw, 4.8rem);
+        line-height: 0.84;
+      }
+
+      .emphasis-large {
+        font-size: clamp(3.3rem, 13vw, 5rem);
+        line-height: 0.82;
+      }
+
+      .emphasis-xl {
+        font-size: clamp(4.1rem, 15vw, 6.2rem);
+        line-height: 0.78;
+      }
+
+      .inline-emphasis {
+        font-size: 2em;
+      }
+
+      .progress-shell {
+        height: 14px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 12px;
+      }
+
+      .container {
+        gap: 14px;
+      }
+
+      .hero,
+      .input-panel,
+      #captureArea,
+      .metric-section,
+      .status-banner,
+      .export-header {
+        border-radius: 20px;
+      }
+
+      .hero,
+      .input-head,
+      .input-body,
+      .metric-section,
+      #captureArea {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      h1 {
+        font-size: clamp(2.45rem, 9vw, 3.5rem);
+      }
+
+      .subtitle,
+      .input-head p,
+      .helper,
+      .export-note,
+      .card-sub {
+        font-size: 1.14rem;
+        line-height: 1.8;
+      }
+
+      .select-branch,
+      .btn.export,
+      .action-row .btn,
+      .field input,
+      .field select {
+        min-height: 66px;
+        font-size: 1.14rem;
+        border-radius: 18px;
+      }
+
+      .form-block {
+        padding: 18px;
+      }
+
+      .form-block h3,
+      .branch-title,
+      .metric-name {
+        font-size: 1.42rem;
+      }
+
+      .status-pill,
+      .metric-badge,
+      .metric-badge.priority,
+      .card-label {
+        font-size: 1.06rem;
+      }
+
+      .export-branch {
+        font-size: clamp(2.5rem, 10vw, 3.8rem);
+      }
+
+      .export-date {
+        font-size: 1.24rem;
+      }
+
+      .result-card {
+        padding: 24px;
+        min-height: 168px;
+      }
+
+      .card-meta {
+        font-size: 1.24rem;
+      }
+
+      .card-value {
+        font-size: clamp(3.3rem, 14vw, 5.3rem);
+      }
+
+      .emphasis-large {
+        font-size: clamp(3.6rem, 15vw, 5.6rem);
+      }
+
+      .emphasis-xl {
+        font-size: clamp(4.4rem, 17vw, 6.8rem);
+      }
+
+      .inline-emphasis {
+        font-size: 2.1em;
+      }
+    }
+      .metric-cards,
+      .metric-cards.compact,
+      .metric-cards.two-by-two { grid-template-columns: 1fr; }
+      .metric-cards.two-by-two .result-card.daily-focus { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <div class="hero-row">
+        <div>
+          <div class="eyebrow">📊 Branch Summary Board</div>
+          <h1>สรุปผลงานรวมรายสาขา</h1>
+          <p class="subtitle">Morning Minimal Theme • สบายตา อ่านง่าย และเหมาะกับการแคปส่งตอนเช้า</p>
+        </div>
+        <div class="top-actions">
+          <select id="branchSelector" class="select-branch">
+            <option value="rbs">RBS Saraburi</option>
+            <option value="lt">LT Nakhonnayok</option>
+          </select>
+          <button class="btn export" id="exportImageBtn">ส่งออกเป็นภาพ</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <aside class="input-panel">
+        <div class="input-head">
+          <h2>ส่วนกรอกข้อมูล</h2>
+          <p>แยกออกจากส่วนแสดงผลชัดเจน เพื่อให้ใช้งานง่าย และตอนส่งออกภาพจะไม่ติดส่วนกรอกข้อมูล</p>
+        </div>
+        <div class="input-body">
+          <div class="form-block">
+            <h3>เลือกสาขา</h3>
+            <div class="field-grid">
+              <div class="field">
+                <label>สาขาที่ต้องการกรอกข้อมูล</label>
+                <select id="branchFormSelect">
+                  <option value="rbs">RBS Saraburi</option>
+                  <option value="lt">LT Nakhonnayok</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-block">
+            <h3>กรอกผลงานปัจจุบัน</h3>
+            <div class="field-grid">
+              <div class="field">
+                <label>Total Card</label>
+                <input type="number" id="totalCard" placeholder="เช่น 85" />
+              </div>
+              <div class="field">
+                <label>Total ID</label>
+                <input type="number" id="totalId" placeholder="เช่น 62" />
+              </div>
+              <div class="field">
+                <label>Total New ID</label>
+                <input type="number" id="totalNewId" placeholder="เช่น 21" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-block">
+            <h3>Target ประจำเดือน</h3>
+            <div class="field-grid">
+              <div class="field">
+                <label>Card Target</label>
+                <input type="number" id="cardTarget" placeholder="เช่น 160" />
+              </div>
+              <div class="field">
+                <label>Total ID Target</label>
+                <input type="number" id="idTarget" placeholder="เช่น 120" />
+              </div>
+              <div class="field">
+                <label>New ID Target</label>
+                <input type="number" id="newIdTarget" placeholder="เช่น 45" />
+              </div>
+            </div>
+            <div class="helper">เวอร์ชันใช้งานจริงสามารถจำค่า Target ของแต่ละสาขาไว้ในเบราว์เซอร์ได้</div>
+          </div>
+
+          <div class="form-block">
+            <h3>วันหยุดเพิ่มเติม</h3>
+            <div class="field-grid">
+              <div class="field">
+                <label>ใส่วันที่ที่ต้องไม่นับเพิ่มจากเสาร์-อาทิตย์ (คั่นด้วย ,)</label>
+                <input type="text" id="holidays" placeholder="เช่น 2026-03-06,2026-03-23" />
+              </div>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button class="btn" id="saveBtn">บันทึก / คำนวณ</button>
+            <button class="btn secondary" id="resetBtn">ล้างค่า</button>
+          </div>
+        </div>
+      </aside>
+
+      <section class="display-wrap">
+        <div class="status-banner">
+          <div class="branch-title" id="displayBranchName">RBS Saraburi</div>
+          <div class="status-pill warn" id="statusPill">สถานะ: รอคำนวณ</div>
+        </div>
+
+        <div id="captureArea">
+          <div class="export-header">
+            <div class="export-branch" id="exportBranchName">RBS Saraburi</div>
+            <div class="export-date" id="exportDateText">วันที่ 14/03/2026 • 08:00 น.</div>
+          </div>
+
+          <section class="metric-section priority">
+            <div class="metric-head">
+              <div class="metric-name">⭐ Total New ID</div>
+              <div class="metric-badge priority" id="newIdStatusBadge">สถานะเทียบ Runrate</div>
+            </div>
+            <div class="metric-cards two-by-two">
+              <article class="result-card priority-highlight daily-focus">
+                <div class="card-label">เป้าขั้นต่ำรายวัน</div>
+                <div class="card-main">
+                  <div class="card-value emphasis-xl" id="newIdDailyNeedValue">0</div>
+                  <div class="card-meta">New ID / วัน</div>
+                </div>
+                <div class="card-sub" id="newIdDailyNeedSub">เหลือ 0 วันทำงาน • ต้องทำขั้นต่ำ 0 New ID ต่อวัน</div>
+              </article>
+
+              <article class="result-card priority-highlight">
+                <div class="card-label">เป้าเดือน</div>
+                <div class="card-main">
+                  <div class="card-value emphasis-xl" id="newIdTargetValue">45</div>
+                  <div class="card-meta">New ID Target</div>
+                </div>
+                <div class="card-sub">เป้าหมายรายเดือนของ Total New ID ที่ต้องพยายามปิดให้ได้ 100%</div>
+              </article>
+
+              <article class="result-card priority-highlight" id="newIdPerformanceCard">
+                <div class="card-label">ผลงาน / สถานะเทียบ Runrate</div>
+                <div class="card-main">
+                  <div class="card-value emphasis-xl" id="newIdPercent">0.0%</div>
+                  <div class="card-meta" id="newIdRunrateMeta">Runrate 0.0%</div>
+                </div>
+                <div class="progress-shell">
+                  <div class="progress-bar" id="newIdProgressBar"></div>
+                </div>
+                <div class="card-sub" id="newIdPerformanceSub">ผลงาน 0 จากเป้า 0</div>
+              </article>
+
+              <article class="result-card warn priority-highlight" id="newIdGapCard">
+                <div class="card-label">ขาดอยู่</div>
+                <div class="card-main">
+                  <div class="card-value emphasis-xl" id="newIdGapValue">0</div>
+                  <div class="card-meta" id="newIdGapPercent">0.0%</div>
+                </div>
+                <div class="card-sub" id="newIdGapSub">ส่วนต่างจาก Runrate และเป้าเดือน</div>
+              </article>
+            </div>
+          </section>
+
+          <section class="metric-section">
+            <div class="metric-head">
+              <div class="metric-name">💳 Total Card</div>
+              <div class="metric-badge" id="cardStatusBadge">ติดตามใกล้ชิด</div>
+            </div>
+            <div class="metric-cards compact">
+              <article class="result-card highlight">
+                <div class="card-label">เป้าเดือน</div>
+                <div class="card-main">
+                  <div class="card-value emphasis-large" id="cardTargetValue">160</div>
+                  <div class="card-meta">Card Target</div>
+                </div>
+                <div class="card-sub">เป้าหมายรายเดือนของ Total Card</div>
+              </article>
+
+              <article class="result-card" id="cardPerformanceCard">
+                <div class="card-label">ผลงาน / สถานะเทียบ Runrate</div>
+                <div class="card-main">
+                  <div class="card-value emphasis-large" id="cardPercent">0.0%</div>
+                  <div class="card-meta" id="cardRunrateMeta">Runrate 0.0%</div>
+                </div>
+                <div class="progress-shell">
+                  <div class="progress-bar" id="cardProgressBar"></div>
+                </div>
+                <div class="card-sub" id="cardPerformanceSub">ผลงาน 0 จากเป้า 0</div>
+              </article>
+            </div>
+          </section>
+
+          <section class="metric-section">
+            <div class="metric-head">
+              <div class="metric-name">🪪 Total ID</div>
+              <div class="metric-badge" id="idStatusBadge">ติดตามใกล้ชิด</div>
+            </div>
+            <div class="metric-cards compact">
+              <article class="result-card highlight">
+                <div class="card-label">เป้าเดือน</div>
+                <div class="card-main">
+                  <div class="card-value emphasis-large" id="idTargetValue">120</div>
+                  <div class="card-meta">ID Target</div>
+                </div>
+                <div class="card-sub">เป้าหมายรายเดือนของ Total ID</div>
+              </article>
+
+              <article class="result-card" id="idPerformanceCard">
+                <div class="card-label">ผลงาน / สถานะเทียบ Runrate</div>
+                <div class="card-main">
+                  <div class="card-value emphasis-large" id="idPercent">0.0%</div>
+                  <div class="card-meta" id="idRunrateMeta">Runrate 0.0%</div>
+                </div>
+                <div class="progress-shell">
+                  <div class="progress-bar" id="idProgressBar"></div>
+                </div>
+                <div class="card-sub" id="idPerformanceSub">ผลงาน 0 จากเป้า 0</div>
+              </article>
+            </div>
+          </section>
+        </div>
+
+        <div class="export-note">ปุ่ม “ส่งออกเป็นภาพ” จะบันทึกเฉพาะการ์ดแสดงผลด้านบน เพื่อนำไปส่งในกลุ่มไลน์ได้ทันที</div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'branch_summary_targets_v2';
+
+    const defaults = {
+      rbs: {
+        name: 'RBS Saraburi',
+        totalCard: 85,
+        totalId: 62,
+        totalNewId: 21,
+        cardTarget: 160,
+        idTarget: 120,
+        newIdTarget: 45,
+        holidays: ''
+      },
+      lt: {
+        name: 'LT Nakhonnayok',
+        totalCard: 97,
+        totalId: 74,
+        totalNewId: 26,
+        cardTarget: 150,
+        idTarget: 118,
+        newIdTarget: 40,
+        holidays: ''
+      }
+    };
+
+    const els = {
+      branchSelector: document.getElementById('branchSelector'),
+      branchFormSelect: document.getElementById('branchFormSelect'),
+      totalCard: document.getElementById('totalCard'),
+      totalId: document.getElementById('totalId'),
+      totalNewId: document.getElementById('totalNewId'),
+      cardTarget: document.getElementById('cardTarget'),
+      idTarget: document.getElementById('idTarget'),
+      newIdTarget: document.getElementById('newIdTarget'),
+      holidays: document.getElementById('holidays'),
+      saveBtn: document.getElementById('saveBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      exportImageBtn: document.getElementById('exportImageBtn'),
+      displayBranchName: document.getElementById('displayBranchName'),
+      statusPill: document.getElementById('statusPill'),
+      exportBranchName: document.getElementById('exportBranchName'),
+      exportDateText: document.getElementById('exportDateText'),
+      captureArea: document.getElementById('captureArea'),
+
+      cardTargetValue: document.getElementById('cardTargetValue'),
+      cardPercent: document.getElementById('cardPercent'),
+      cardRunrateMeta: document.getElementById('cardRunrateMeta'),
+      cardProgressBar: document.getElementById('cardProgressBar'),
+      cardPerformanceSub: document.getElementById('cardPerformanceSub'),
+      cardPerformanceCard: document.getElementById('cardPerformanceCard'),
+      cardStatusBadge: document.getElementById('cardStatusBadge'),
+
+      idTargetValue: document.getElementById('idTargetValue'),
+      idPercent: document.getElementById('idPercent'),
+      idRunrateMeta: document.getElementById('idRunrateMeta'),
+      idProgressBar: document.getElementById('idProgressBar'),
+      idPerformanceSub: document.getElementById('idPerformanceSub'),
+      idPerformanceCard: document.getElementById('idPerformanceCard'),
+      idStatusBadge: document.getElementById('idStatusBadge'),
+
+      newIdTargetValue: document.getElementById('newIdTargetValue'),
+      newIdPercent: document.getElementById('newIdPercent'),
+      newIdRunrateMeta: document.getElementById('newIdRunrateMeta'),
+      newIdProgressBar: document.getElementById('newIdProgressBar'),
+      newIdPerformanceSub: document.getElementById('newIdPerformanceSub'),
+      newIdGapValue: document.getElementById('newIdGapValue'),
+      newIdGapPercent: document.getElementById('newIdGapPercent'),
+      newIdGapSub: document.getElementById('newIdGapSub'),
+      newIdDailyNeedValue: document.getElementById('newIdDailyNeedValue'),
+      newIdDailyNeedSub: document.getElementById('newIdDailyNeedSub'),
+      newIdPerformanceCard: document.getElementById('newIdPerformanceCard'),
+      newIdGapCard: document.getElementById('newIdGapCard'),
+      newIdStatusBadge: document.getElementById('newIdStatusBadge')
+    };
+
+    function clone(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    function loadData() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+        return saved ? { ...clone(defaults), ...saved } : clone(defaults);
+      } catch {
+        return clone(defaults);
+      }
+    }
+
+    let branchData = loadData();
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(branchData));
+    }
+
+    function getSelectedBranchKey() {
+      return els.branchSelector.value;
+    }
+
+    function toNum(v) {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function percent(value, target) {
+      if (!target) return 0;
+      return (value / target) * 100;
+    }
+
+    function parseHolidaySet(str) {
+      return new Set((str || '').split(',').map(s => s.trim()).filter(Boolean));
+    }
+
+    function fmtDate(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function getBusinessDaysInfo(year, monthIndex, holidayStr) {
+      const holidays = parseHolidaySet(holidayStr);
+      const today = new Date();
+      const first = new Date(year, monthIndex, 1);
+      const last = new Date(year, monthIndex + 1, 0);
+      let total = 0;
+      let elapsed = 0;
+      let remaining = 0;
+
+      for (let d = new Date(first); d <= last; d.setDate(d.getDate() + 1)) {
+        const day = d.getDay();
+        const key = fmtDate(d);
+        const isBusiness = day !== 0 && day !== 6 && !holidays.has(key);
+        if (!isBusiness) continue;
+        total += 1;
+
+        const compare = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        if (compare <= todayOnly) elapsed += 1;
+        if (compare >= todayOnly) remaining += 1;
+      }
+
+      return { total, elapsed, remaining };
+    }
+
+    function fillForm(branchKey) {
+      const data = branchData[branchKey];
+      els.branchSelector.value = branchKey;
+      els.branchFormSelect.value = branchKey;
+      els.totalCard.value = data.totalCard ?? '';
+      els.totalId.value = data.totalId ?? '';
+      els.totalNewId.value = data.totalNewId ?? '';
+      els.cardTarget.value = data.cardTarget ?? '';
+      els.idTarget.value = data.idTarget ?? '';
+      els.newIdTarget.value = data.newIdTarget ?? '';
+      els.holidays.value = data.holidays ?? '';
+    }
+
+    function readForm() {
+      const branchKey = els.branchFormSelect.value;
+      branchData[branchKey] = {
+        ...branchData[branchKey],
+        totalCard: toNum(els.totalCard.value),
+        totalId: toNum(els.totalId.value),
+        totalNewId: toNum(els.totalNewId.value),
+        cardTarget: toNum(els.cardTarget.value),
+        idTarget: toNum(els.idTarget.value),
+        newIdTarget: toNum(els.newIdTarget.value),
+        holidays: els.holidays.value.trim()
+      };
+      saveData();
+      els.branchSelector.value = branchKey;
+      render(branchKey);
+    }
+
+    function formatThaiDateTime(date = new Date()) {
+      const dateText = new Intl.DateTimeFormat('th-TH', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }).format(date);
+      const timeText = new Intl.DateTimeFormat('th-TH', {
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(date);
+      return `วันที่ ${dateText} • ${timeText} น.`;
+    }
+
+    function applyMetric({ actual, target, runrate, remaining, label, prefix, important = false, minimal = false }) {
+      const currentPct = percent(actual, target);
+      const diffPct = currentPct - runrate;
+      const gapToTarget = Math.max(0, target - actual);
+      const runrateNeedAmount = Math.max(0, ((runrate / 100) * target) - actual);
+      const dailyNeed = Math.ceil(remaining ? gapToTarget / remaining : gapToTarget);
+
+      els[`${prefix}TargetValue`].textContent = target.toLocaleString();
+      els[`${prefix}Percent`].textContent = `${currentPct.toFixed(1)}%`;
+      els[`${prefix}RunrateMeta`].innerHTML = diffPct >= 0
+        ? `<span class="trend-up">↗</span> Runrate ${runrate.toFixed(1)}%`
+        : `<span class="trend-down">↘</span> Runrate ${runrate.toFixed(1)}%`;
+      els[`${prefix}ProgressBar`].style.width = `${Math.min(currentPct, 100)}%`;
+      els[`${prefix}PerformanceSub`].textContent = `ผลงาน ${actual.toLocaleString()} จากเป้า ${target.toLocaleString()} ${label}`;
+      els[`${prefix}PerformanceCard`].className = 'result-card ' + (diffPct >= 0 ? 'ok' : 'warn') + (prefix === 'newId' ? ' priority-highlight' : '');
+
+      if (!minimal) {
+        els[`${prefix}GapValue`].textContent = Math.ceil(gapToTarget).toLocaleString();
+        els[`${prefix}GapPercent`].textContent = diffPct >= 0
+          ? `เหนือกว่า Runrate +${diffPct.toFixed(1)}%`
+          : `ต่ำกว่า Runrate ${diffPct.toFixed(1)}%`;
+        els[`${prefix}GapSub`].innerHTML = diffPct >= 0
+          ? `มากกว่า Runrate ประมาณ <span class="inline-emphasis">${Math.ceil(Math.abs(diffPct / 100 * target)).toLocaleString()}</span> ${label} และยังขาดจากเป้าเดือน <span class="inline-emphasis">${Math.ceil(gapToTarget).toLocaleString()}</span> ${label}`
+          : `ติดลบจาก Runrate ประมาณ <span class="inline-emphasis">${Math.ceil(runrateNeedAmount).toLocaleString()}</span> ${label} และยังขาดจากเป้าเดือน <span class="inline-emphasis">${Math.ceil(gapToTarget).toLocaleString()}</span> ${label}`;
+        els[`${prefix}DailyNeedValue`].textContent = dailyNeed.toLocaleString();
+        els[`${prefix}DailyNeedSub`].textContent = `เหลือ ${remaining} วันทำงาน • ต้องทำขั้นต่ำ ${dailyNeed.toLocaleString()} ${label} ต่อวัน`;
+        els[`${prefix}GapCard`].className = 'result-card ' + (diffPct >= 0 ? 'ok' : 'warn') + (prefix === 'newId' ? ' priority-highlight' : '');
+      }
+
+      if (important) {
+        els[`${prefix}StatusBadge`].textContent = diffPct >= 0 ? 'อยู่เหนือ Runrate' : 'ต่ำกว่า Runrate';
+      } else {
+        els[`${prefix}StatusBadge`].textContent = diffPct >= 0 ? 'อยู่เหนือ Runrate' : 'ต้องเร่งเพิ่ม';
+      }
+    }
+
+    function render(branchKey) {
+      const data = branchData[branchKey];
+      els.displayBranchName.textContent = data.name;
+      els.exportBranchName.textContent = data.name;
+      els.exportDateText.textContent = formatThaiDateTime(new Date());
+
+      const now = new Date();
+      const { total, elapsed, remaining } = getBusinessDaysInfo(now.getFullYear(), now.getMonth(), data.holidays);
+      const runrate = total ? (100 / total) * elapsed : 0;
+
+      applyMetric({ actual: data.totalCard, target: data.cardTarget, runrate, remaining, label: 'Card', prefix: 'card', minimal: true });
+      applyMetric({ actual: data.totalId, target: data.idTarget, runrate, remaining, label: 'ID', prefix: 'id', minimal: true });
+      applyMetric({ actual: data.totalNewId, target: data.newIdTarget, runrate, remaining, label: 'New ID', prefix: 'newId', important: true });
+
+      const newIdPct = percent(data.totalNewId, data.newIdTarget);
+      const newIdDiff = newIdPct - runrate;
+      if (newIdPct >= 100) {
+        els.statusPill.className = 'status-pill good';
+        els.statusPill.textContent = 'สถานะ: New ID ปิด 100% แล้ว';
+      } else if (newIdDiff >= 0) {
+        els.statusPill.className = 'status-pill warn';
+        els.statusPill.textContent = 'สถานะ: New ID ยังอยู่เหนือ Runrate';
+      } else {
+        els.statusPill.className = 'status-pill bad';
+        els.statusPill.textContent = 'สถานะ: New ID ต้องเร่งปิดให้ถึง 100%';
+      }
+    }
+
+    async function exportAsImage() {
+      const originalText = els.exportImageBtn.textContent;
+      try {
+        els.exportImageBtn.disabled = true;
+        els.exportImageBtn.textContent = 'กำลังสร้างภาพ...';
+        if (document.fonts?.ready) {
+          await document.fonts.ready;
+        }
+        const canvas = await html2canvas(els.captureArea, {
+          backgroundColor: '#fffdfa',
+          scale: 2,
+          useCORS: true,
+          logging: false
+        });
+        const link = document.createElement('a');
+        const branchKey = getSelectedBranchKey();
+        link.download = `${branchData[branchKey].name.replace(/\s+/g, '_').toLowerCase()}_summary.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } catch (error) {
+        console.error(error);
+        alert('ส่งออกภาพไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+      } finally {
+        els.exportImageBtn.disabled = false;
+        els.exportImageBtn.textContent = originalText;
+      }
+    }
+
+    function runSelfTests() {
+      console.assert(formatThaiDateTime(new Date('2026-03-14T08:05:00')).includes('วันที่'), 'formatThaiDateTime should include date prefix');
+      console.assert(formatThaiDateTime(new Date('2026-03-14T08:05:00')).includes('น.'), 'formatThaiDateTime should include Thai time suffix');
+      console.assert(percent(50, 100) === 50, 'percent should calculate correctly');
+      console.assert(percent(0, 0) === 0, 'percent should safely handle zero target');
+      console.assert(Math.ceil(5.1) === 6, 'daily need should round up');
+    }
+
+    els.branchSelector.addEventListener('change', (e) => {
+      const branchKey = e.target.value;
+      fillForm(branchKey);
+      render(branchKey);
+    });
+
+    els.branchFormSelect.addEventListener('change', (e) => {
+      const branchKey = e.target.value;
+      els.branchSelector.value = branchKey;
+      fillForm(branchKey);
+      render(branchKey);
+    });
+
+    els.saveBtn.addEventListener('click', readForm);
+    els.resetBtn.addEventListener('click', () => {
+      const branchKey = els.branchFormSelect.value;
+      branchData[branchKey] = clone(defaults[branchKey]);
+      saveData();
+      fillForm(branchKey);
+      render(branchKey);
+    });
+    els.exportImageBtn.addEventListener('click', exportAsImage);
+
+    runSelfTests();
+    fillForm('rbs');
+    render('rbs');
+  </script>
+</body>
+</html>
