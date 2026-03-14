@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Branch End of Day Summary</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: #151b23;
+      --panel-2: #1b232d;
+      --panel-3: #10161d;
+      --line: #283241;
+      --line-soft: #1f2732;
+      --text: #edf2f7;
+      --muted: #96a3b5;
+      --accent: #f0a25a;
+      --green: #63c29f;
+      --red: #f08b7c;
+      --purple: #aa8cff;
+      --shadow: 0 14px 36px rgba(0, 0, 0, 0.34);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --export-width: 1080px;
+      --export-ratio: 10 / 16;
+      --export-padding: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Thai", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(170, 140, 255, 0.14), transparent 26%),
+        radial-gradient(circle at top right, rgba(240, 162, 90, 0.10), transparent 22%),
+        linear-gradient(180deg, var(--bg) 0%, #0f141b 100%);
+      padding: 18px;
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero {
+      background: linear-gradient(180deg, rgba(28, 34, 44, 0.96), rgba(18, 24, 32, 0.96));
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(240, 162, 90, 0.18), transparent 68%);
+      right: -70px;
+      top: -80px;
+      pointer-events: none;
+    }
+
+    .hero-row {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #d9e2ee;
+      font-size: 0.96rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    h1 {
+      margin: 14px 0 8px;
+      font-size: clamp(2.1rem, 4vw, 3.2rem);
+      line-height: 1.06;
+      font-weight: 950;
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.65;
+      font-weight: 600;
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .select-branch,
+    .btn,
+    .file-picker {
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      min-height: 58px;
+      padding: 14px 16px;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .select-branch,
+    .file-picker {
+      background: #121821;
+      color: var(--text);
+      outline: none;
+    }
+
+    .btn {
+      cursor: pointer;
+      background: linear-gradient(180deg, #1c2631, #151c24);
+      color: var(--text);
+      transition: transform 0.18s ease, opacity 0.18s ease;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+    .btn:disabled { opacity: 0.72; cursor: wait; transform: none; }
+
+    .btn.export {
+      background: linear-gradient(180deg, #f0a25a, #d98b49);
+      color: #10151b;
+      border-color: #d98b49;
+      font-weight: 900;
+      box-shadow: 0 10px 22px rgba(240, 162, 90, 0.24);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .input-panel {
+      background: linear-gradient(180deg, var(--panel), var(--panel-3));
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .input-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    }
+
+    .input-head h2 {
+      margin: 0 0 8px;
+      font-size: 1.34rem;
+      font-weight: 950;
+      letter-spacing: -0.02em;
+    }
+
+    .input-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.96rem;
+      line-height: 1.6;
+      font-weight: 600;
+    }
+
+    .input-body {
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .form-block {
+      background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01));
+      border: 1px solid var(--line-soft);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .form-block h3 {
+      margin: 0;
+      font-size: 1.02rem;
+      font-weight: 900;
+      color: #dce6f2;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 800;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      background: #0f151c;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 13px 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      outline: none;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: rgba(240, 162, 90, 0.84);
+      box-shadow: 0 0 0 4px rgba(240, 162, 90, 0.12);
+    }
+
+    .helper {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.58;
+      font-weight: 600;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .action-row .btn {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .display-wrap {
+      display: grid;
+      gap: 14px;
+    }
+
+    .status-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: linear-gradient(180deg, rgba(26, 34, 44, 0.96), rgba(17, 23, 31, 0.96));
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .branch-title {
+      font-size: 1.28rem;
+      font-weight: 950;
+      letter-spacing: -0.02em;
+    }
+
+    .status-pill {
+      padding: 10px 15px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 900;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.04);
+      color: #d8e2ee;
+    }
+
+    .status-pill.good {
+      color: #8de0bf;
+      background: rgba(99, 194, 159, 0.08);
+      border-color: rgba(99, 194, 159, 0.26);
+    }
+
+    .status-pill.warn {
+      color: #ffc78f;
+      background: rgba(240, 162, 90, 0.08);
+      border-color: rgba(240, 162, 90, 0.26);
+    }
+
+    .status-pill.bad {
+      color: #ffb0a4;
+      background: rgba(240, 139, 124, 0.08);
+      border-color: rgba(240, 139, 124, 0.26);
+    }
+
+    .export-frame {
+      width: min(100%, var(--export-width));
+      min-height: calc(min(100%, var(--export-width)) / (var(--export-ratio)));
+      margin: 0 auto;
+      overflow: visible;
+      background: linear-gradient(180deg, #11161d, #0d1218);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: var(--export-padding);
+      box-shadow: var(--shadow);
+    }
+
+    .export-frame.is-exporting {
+      aspect-ratio: var(--export-ratio);
+      min-height: unset;
+      overflow: hidden;
+    }
+
+    .export-frame-inner {
+      width: 100%;
+      min-height: 100%;
+      display: grid;
+      align-content: start;
+      gap: 14px;
+    }
+
+    .export-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding: 20px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.015));
+    }
+
+    .export-branch {
+      font-size: clamp(2rem, 3.8vw, 2.9rem);
+      font-weight: 950;
+      letter-spacing: -0.04em;
+      line-height: 1.02;
+    }
+
+    .export-date {
+      font-size: clamp(1rem, 2vw, 1.28rem);
+      font-weight: 900;
+      color: #fed7b0;
+      background: rgba(240, 162, 90, 0.08);
+      border: 1px solid rgba(240, 162, 90, 0.24);
+      padding: 12px 16px;
+      border-radius: 999px;
+    }
+
+    .metric-section {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.012));
+    }
+
+    .metric-section.primary {
+      background: linear-gradient(180deg, rgba(170, 140, 255, 0.10), rgba(170, 140, 255, 0.04));
+      border-color: rgba(170, 140, 255, 0.24);
+    }
+
+    .metric-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .metric-name {
+      font-size: 1.28rem;
+      font-weight: 950;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .metric-badge {
+      padding: 9px 13px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 900;
+      color: #d3deea;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+    }
+
+    .metric-badge.good {
+      color: #8de0bf;
+      border-color: rgba(99, 194, 159, 0.26);
+      background: rgba(99, 194, 159, 0.08);
+    }
+
+    .metric-badge.warn {
+      color: #ffc78f;
+      border-color: rgba(240, 162, 90, 0.26);
+      background: rgba(240, 162, 90, 0.08);
+    }
+
+    .metric-badge.bad {
+      color: #ffb0a4;
+      border-color: rgba(240, 139, 124, 0.26);
+      background: rgba(240, 139, 124, 0.08);
+    }
+
+    .metric-cards {
+      display: grid;
+      gap: 14px;
+    }
+
+    .metric-cards.targets { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .metric-cards.results { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .result-card {
+      min-height: 148px;
+      display: grid;
+      gap: 10px;
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.014));
+    }
+
+    .target-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(240, 162, 90, 0.04));
+    }
+
+    .highlight-days {
+      border: 1px solid rgba(240, 162, 90, 0.24);
+      background: linear-gradient(180deg, rgba(240, 162, 90, 0.14), rgba(170, 140, 255, 0.08));
+      box-shadow: 0 14px 28px rgba(240, 162, 90, 0.10);
+    }
+
+    .highlight-days .card-label {
+      color: #ffe0bf;
+      font-size: 1.02rem;
+    }
+
+    .highlight-days .card-value {
+      color: #fff4e6;
+      font-size: clamp(2.8rem, 5.2vw, 4.1rem);
+    }
+
+    .highlight-days .card-meta,
+    .highlight-days .card-sub {
+      color: #f5dcc0;
+    }
+
+    .result-card-main {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(170, 140, 255, 0.04));
+    }
+
+    .kpi-main {
+      min-height: 176px;
+      border: 1px solid rgba(240, 162, 90, 0.24);
+      background: linear-gradient(180deg, rgba(240, 162, 90, 0.12), rgba(170, 140, 255, 0.10));
+      box-shadow: 0 16px 34px rgba(240, 162, 90, 0.10);
+    }
+
+    .kpi-main .card-value {
+      font-size: clamp(3.3rem, 7vw, 5.2rem);
+    }
+
+    .kpi-main .card-label {
+      color: #ffe0bf;
+      font-size: 1.04rem;
+    }
+
+    .kpi-main .card-sub {
+      font-size: 1.08rem;
+    }
+
+    .runrate-card {
+      min-height: 176px;
+      align-content: start;
+      border: 1px solid rgba(99, 194, 159, 0.22);
+      background: linear-gradient(180deg, rgba(99, 194, 159, 0.10), rgba(170, 140, 255, 0.08));
+      box-shadow: 0 14px 28px rgba(99, 194, 159, 0.08);
+    }
+
+    .runrate-card.bad {
+      border-color: rgba(240, 139, 124, 0.24);
+      background: linear-gradient(180deg, rgba(240, 139, 124, 0.10), rgba(170, 140, 255, 0.06));
+      box-shadow: 0 14px 28px rgba(240, 139, 124, 0.08);
+    }
+
+    .runrate-card.neutral {
+      border-color: rgba(240, 162, 90, 0.22);
+      background: linear-gradient(180deg, rgba(240, 162, 90, 0.10), rgba(170, 140, 255, 0.06));
+      box-shadow: 0 14px 28px rgba(240, 162, 90, 0.08);
+    }
+
+    .runrate-card .card-label {
+      color: #dff6ec;
+      font-size: 1.02rem;
+    }
+
+    .runrate-card.bad .card-label {
+      color: #ffd3cb;
+    }
+
+    .runrate-card.neutral .card-label {
+      color: #ffe0bf;
+    }
+
+    .card-label {
+      font-size: 0.98rem;
+      color: var(--muted);
+      font-weight: 900;
+      line-height: 1.45;
+    }
+
+    .card-main {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .card-value {
+      font-size: clamp(2.7rem, 5.8vw, 4.25rem);
+      line-height: 0.88;
+      font-weight: 950;
+      color: var(--text);
+      letter-spacing: -0.06em;
+    }
+
+    .card-value.compact {
+      font-size: clamp(2.3rem, 4.4vw, 3.5rem);
+    }
+
+    .card-meta {
+      font-size: 1.02rem;
+      color: var(--accent);
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .runrate-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 900;
+      line-height: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--line);
+      color: #dce6f2;
+    }
+
+    .runrate-inline.up {
+      color: #8de0bf;
+      background: rgba(99, 194, 159, 0.08);
+      border-color: rgba(99, 194, 159, 0.24);
+    }
+
+    .runrate-inline.down {
+      color: #ffb0a4;
+      background: rgba(240, 139, 124, 0.08);
+      border-color: rgba(240, 139, 124, 0.24);
+    }
+
+    .runrate-inline .arrow {
+      font-size: 0.92rem;
+      line-height: 1;
+    }
+
+    .card-percent {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 900;
+      line-height: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--line);
+      color: #d9e4ef;
+    }
+
+    .card-percent.good {
+      color: #8de0bf;
+      background: rgba(99, 194, 159, 0.08);
+      border-color: rgba(99, 194, 159, 0.26);
+    }
+
+    .card-percent.warn {
+      color: #ffc78f;
+      background: rgba(240, 162, 90, 0.08);
+      border-color: rgba(240, 162, 90, 0.26);
+    }
+
+    .card-percent.bad {
+      color: #ffb0a4;
+      background: rgba(240, 139, 124, 0.08);
+      border-color: rgba(240, 139, 124, 0.26);
+    }
+
+    .card-sub {
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: #d2dbe6;
+      font-weight: 700;
+    }
+
+    .card-sub-strong {
+      display: inline-block;
+      font-size: 1.45em;
+      line-height: 0.95;
+      font-weight: 950;
+      color: #ffffff;
+      letter-spacing: -0.03em;
+      margin: 0 0.08em;
+    }
+
+    .runrate-main {
+      display: grid;
+      gap: 6px;
+      align-items: start;
+    }
+
+    .summary-emoji {
+      font-size: clamp(2.8rem, 5vw, 4.2rem);
+      line-height: 1;
+    }
+
+    .summary-tone {
+      font-size: clamp(1.25rem, 2.6vw, 1.9rem);
+      line-height: 1.12;
+      font-weight: 950;
+      letter-spacing: -0.03em;
+      color: #ffffff;
+    }
+
+    .summary-small {
+      font-size: 1rem;
+      line-height: 1.55;
+      font-weight: 800;
+      color: #d8e3ee;
+    }
+
+    .summary-small strong {
+      font-size: 1.2em;
+      font-weight: 950;
+      color: #ffffff;
+    }
+
+    .subtle-note {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.55;
+      font-weight: 600;
+    }
+
+    .chart-card {
+      display: grid;
+      gap: 12px;
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    }
+
+    .chart-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .chart-title {
+      font-size: 1rem;
+      font-weight: 900;
+      color: #dce6f2;
+    }
+
+    .chart-note {
+      font-size: 0.86rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .chart-svg {
+      width: 100%;
+      height: 220px;
+      display: block;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.005));
+      border: 1px solid var(--line-soft);
+    }
+
+    .chart-summary {
+      color: #d2dbe6;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      font-weight: 700;
+    }
+
+    .progress-shell {
+      height: 11px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #0b1117;
+      border: 1px solid var(--line);
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #f0a25a, #aa8cff);
+    }
+
+    .delta-positive { color: var(--green); }
+    .delta-negative { color: var(--red); }
+    .delta-neutral { color: #c6d1dd; }
+
+    .export-note {
+      color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1.58;
+      font-weight: 700;
+      padding: 0 6px;
+    }
+
+    @media (max-width: 980px) {
+      :root { --export-padding: 14px; }
+      body { padding: 12px; }
+      .container { gap: 14px; }
+      .layout { grid-template-columns: 1fr; }
+      .metric-cards.targets,
+      .metric-cards.results { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero,
+      .input-panel,
+      .export-frame,
+      .metric-section,
+      .status-banner,
+      .export-header { border-radius: 20px; }
+    }
+
+    @media (max-width: 640px) {
+      :root { --export-padding: 12px; }
+      body { padding: 10px; }
+      .container { gap: 12px; }
+      h1 { font-size: clamp(1.9rem, 8vw, 2.7rem); }
+      .subtitle,
+      .helper,
+      .export-note,
+      .card-sub,
+      .subtle-note { font-size: 0.9rem; line-height: 1.55; }
+      .metric-cards.targets,
+      .metric-cards.results { grid-template-columns: 1fr; }
+      .card-value { font-size: clamp(2.2rem, 11vw, 3.8rem); }
+      .card-value.compact { font-size: clamp(2rem, 9vw, 3.2rem); }
+      .select-branch,
+      .btn,
+      .file-picker,
+      .field input,
+      .field select { min-height: 56px; }
+      .hero,
+      .input-head,
+      .input-body,
+      .export-frame,
+      .metric-section { padding-left: 14px; padding-right: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <div class="hero-row">
+        <div>
+          <div class="eyebrow">🌙 End of Day Branch Summary</div>
+          <h1>สรุปผลงานสาขา ณ สิ้นวัน</h1>
+          <p class="subtitle">Minimal dark tone สำหรับส่งตอนกลางคืน • สรุปเป้า ผลงาน ยอดเพิ่มจากวันก่อน และยอดที่ยังขาด</p>
+        </div>
+        <div class="top-actions">
+          <select id="branchSelector" class="select-branch">
+            <option value="RBS Saraburi">RBS Saraburi</option>
+            <option value="LT Nakhonnayok">LT Nakhonnayok</option>
+          </select>
+          <button class="btn export" id="exportImageBtn">ส่งออกเป็นภาพ</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <aside class="input-panel">
+        <div class="input-head">
+          <h2>แหล่งข้อมูลและค่าเป้า</h2>
+          <p>หน้านี้ฝังข้อมูลจาก CSV ล่าสุดไว้แล้ว และสามารถอัปโหลด CSV ใหม่เพื่ออัปเดตผลได้ทันที</p>
+        </div>
+        <div class="input-body">
+          <div class="form-block">
+            <h3>อัปโหลดไฟล์ CSV</h3>
+            <div class="field-grid">
+              <div class="field">
+                <label>เลือกไฟล์ Branch Summary Performance.csv</label>
+                <input class="file-picker" type="file" id="csvFileInput" accept=".csv,text/csv" />
+              </div>
+            </div>
+            <div class="helper">คอลัมน์ที่ใช้: Date, Branch, Result Card, Result Total ID, Result New ID</div>
+          </div>
+
+          <div class="form-block">
+            <h3>Target ประจำเดือน</h3>
+            <div class="field-grid">
+              <div class="field">
+                <label>Total Card Target</label>
+                <input type="number" id="cardTargetInput" placeholder="เช่น 330" />
+              </div>
+              <div class="field">
+                <label>Total ID Target</label>
+                <input type="number" id="idTargetInput" placeholder="เช่น 320" />
+              </div>
+              <div class="field">
+                <label>Total New ID Target</label>
+                <input type="number" id="newIdTargetInput" placeholder="เช่น 190" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-block">
+            <h3>วันหยุดเพิ่มเติม</h3>
+            <div class="field-grid">
+              <div class="field">
+                <label>ใส่วันหยุดนักขัต / หยุดพิเศษ (คั่นด้วย ,)</label>
+                <input type="text" id="holidaysInput" placeholder="เช่น 2026-03-23,2026-03-30" />
+              </div>
+            </div>
+            <div class="helper">ระบบจะไม่นับ เสาร์ อาทิตย์ และวันที่ที่ใส่เพิ่ม จากนั้นจะลบอีก 1 วัน เพราะเป็นการสรุปยอดสิ้นวัน</div>
+          </div>
+
+          <div class="form-block">
+            <h3>หมายเหตุข้อมูล</h3>
+            <div class="helper" id="dataInfoText">ยังไม่ได้ประมวลผลข้อมูล</div>
+          </div>
+
+          <div class="action-row">
+            <button class="btn export" id="saveBtn">คำนวณ / อัปเดต</button>
+            <button class="btn" id="resetBtn">รีเซ็ตค่า</button>
+          </div>
+        </div>
+      </aside>
+
+      <section class="display-wrap">
+        <div class="status-banner">
+          <div class="branch-title" id="displayBranchName">RBS Saraburi</div>
+          <div class="status-pill warn" id="statusPill">สถานะ: รอคำนวณ</div>
+        </div>
+
+        <div id="captureArea" class="export-frame">
+          <div class="export-frame-inner">
+            <div class="export-header">
+              <div>
+                <div class="export-branch" id="exportBranchName">RBS Saraburi</div>
+                <div class="subtle-note" id="exportDateSourceText">ข้อมูลจากวันที่ 2026-03-13 • สรุปสิ้นวัน</div>
+              </div>
+              <div class="export-date" id="exportDateText">วันที่ 14/03/2569 • 22:00 น.</div>
+            </div>
+
+            <section class="metric-section">
+              <div class="metric-head">
+                <div class="metric-name">🎯 เป้าหมายประจำเดือน</div>
+                <div class="metric-badge" id="targetBadge">Monthly Target</div>
+              </div>
+              <div class="metric-cards targets">
+                <article class="result-card target-card">
+                  <div class="card-label">Total Card Target</div>
+                  <div class="card-main">
+                    <div class="card-value compact" id="displayCardTarget">330</div>
+                    <div class="card-meta">Cards</div>
+                  </div>
+                  <div class="card-sub">เป้ารวมของ Card ภายในเดือนนี้</div>
+                </article>
+
+                <article class="result-card target-card">
+                  <div class="card-label">Total ID Target</div>
+                  <div class="card-main">
+                    <div class="card-value compact" id="displayIdTarget">320</div>
+                    <div class="card-meta">IDs</div>
+                  </div>
+                  <div class="card-sub">เป้ารวมของ Total ID ภายในเดือนนี้</div>
+                </article>
+
+                <article class="result-card target-card">
+                  <div class="card-label">Total New ID Target</div>
+                  <div class="card-main">
+                    <div class="card-value compact" id="displayNewIdTarget">190</div>
+                    <div class="card-meta">New IDs</div>
+                  </div>
+                  <div class="card-sub">เป้ารวมของ Total New ID ภายในเดือนนี้</div>
+                </article>
+
+                <article class="result-card target-card highlight-days">
+                  <div class="card-label">วันทำการที่เหลืออยู่</div>
+                  <div class="card-main">
+                    <div class="card-value compact" id="remainingDaysValue">0</div>
+                    <div class="card-meta">วัน</div>
+                  </div>
+                  <div class="card-sub" id="remainingDaysSub">ไม่รวมเสาร์ อาทิตย์ วันหยุด และลบเพิ่มอีก 1 วันสำหรับการสรุปยอดสิ้นวัน</div>
+                </article>
+              </div>
+            </section>
+
+            <section class="metric-section primary">
+              <div class="metric-head">
+                <div class="metric-name">📈 Result ณ สิ้นวัน</div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                  <div class="metric-badge" id="resultLatestDateBadge">ข้อมูลวันที่ -</div>
+                  <div class="metric-badge" id="resultStatusBadge">เทียบวันก่อนหน้า</div>
+                </div>
+              </div>
+
+              <div class="metric-cards results">
+                <article class="result-card result-card-main">
+                  <div class="card-label">Result Card</div>
+                  <div class="card-main">
+                    <div class="card-value" id="resultCardValue">0</div>
+                    <div class="card-meta" id="resultCardDelta">+0 จากวันก่อน</div>
+                    <div class="card-percent warn" id="resultCardPercent">0.0%</div>
+                    <div class="runrate-inline up" id="resultCardRunrate"><span class="arrow">↗</span> Runrate 0</div>
+                  </div>
+                  <div class="progress-shell"><div class="progress-bar" id="resultCardProgress"></div></div>
+                  <div class="card-sub" id="resultCardSub">ปัจจุบัน 0 จากเป้า 0</div>
+                </article>
+
+                <article class="result-card result-card-main">
+                  <div class="card-label">Result Total ID</div>
+                  <div class="card-main">
+                    <div class="card-value" id="resultIdValue">0</div>
+                    <div class="card-meta" id="resultIdDelta">+0 จากวันก่อน</div>
+                    <div class="card-percent warn" id="resultIdPercent">0.0%</div>
+                    <div class="runrate-inline up" id="resultIdRunrate"><span class="arrow">↗</span> Runrate 0</div>
+                  </div>
+                  <div class="progress-shell"><div class="progress-bar" id="resultIdProgress"></div></div>
+                  <div class="card-sub" id="resultIdSub">ปัจจุบัน 0 จากเป้า 0</div>
+                </article>
+
+                <article class="result-card result-card-main kpi-main">
+                  <div class="card-label">⭐ KPI หลัก • Result New ID</div>
+                  <div class="card-main">
+                    <div class="card-value" id="resultNewIdValue">0</div>
+                    <div class="card-meta" id="resultNewIdDelta">+0 จากวันก่อน</div>
+                    <div class="card-percent warn" id="resultNewIdPercent">0.0%</div>
+                    <div class="runrate-inline up" id="resultNewIdRunrate"><span class="arrow">↗</span> Runrate 0</div>
+                  </div>
+                  <div class="progress-shell"><div class="progress-bar" id="resultNewIdProgress"></div></div>
+                  <div class="card-sub" id="resultNewIdSub">ปัจจุบัน 0 จากเป้า 0</div>
+                </article>
+
+                <article class="result-card runrate-card neutral" id="runrateCard">
+                  <div class="card-label">สรุปภาพรวมผลงานสาขา</div>
+                  <div class="runrate-main">
+                    <div class="summary-emoji" id="runrateEmoji">😐</div>
+                    <div class="summary-tone" id="runrateStatusText">สถานการณ์ทรงตัว</div>
+                  </div>
+                  <div class="summary-small" id="runrateSubText">New ID ตอนนี้ <strong>เท่ากับ</strong> Runrate • ต่าง <strong>0</strong> เคส</div>
+                </article>
+              </div>
+
+              <div class="chart-card">
+                <div class="chart-head">
+                  <div class="chart-title">กราฟยอดอนุมัติเพิ่มรายวัน</div>
+                  <div class="chart-note">ยึดจาก Result New ID เพิ่มขึ้นของแต่ละวันในไฟล์ CSV</div>
+                </div>
+                <svg id="approvalTrendChart" class="chart-svg" viewBox="0 0 760 220" preserveAspectRatio="none" aria-label="Daily approval trend chart"></svg>
+                <div class="chart-summary" id="approvalTrendSummary">ยังไม่มีข้อมูลเพียงพอสำหรับแสดงกราฟ</div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div class="export-note">ถ้าใน CSV ยังไม่มีข้อมูลของวันก่อนหน้า ระบบจะแสดงผลต่างเป็น 0 และขึ้นข้อความว่า “ยังไม่มีข้อมูลวันก่อนหน้า”</div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'branch_end_of_day_summary_v1';
+    const EMBEDDED_CSV = `ประทับเวลา,Date,Branch,Result Card,Result Total ID,Result New ID
+2569/03/14 4:33:44 PM GMT+7,2026-03-13,RBS Saraburi,213,133,76
+2569/03/14 4:34:14 PM GMT+7,2026-03-13,LT Nakhonnayok,56,35,27`;
+
+    const defaults = {
+      selectedBranch: 'RBS Saraburi',
+      holidays: '',
+      targets: {
+        'RBS Saraburi': { cardTarget: 330, idTarget: 320, newIdTarget: 190 },
+        'LT Nakhonnayok': { cardTarget: 150, idTarget: 118, newIdTarget: 80 }
+      }
+    };
+
+    function mustGet(id) {
+      const el = document.getElementById(id);
+      if (!el) throw new Error(`Missing required element: #${id}`);
+      return el;
+    }
+
+    const els = {
+      branchSelector: mustGet('branchSelector'),
+      csvFileInput: mustGet('csvFileInput'),
+      cardTargetInput: mustGet('cardTargetInput'),
+      idTargetInput: mustGet('idTargetInput'),
+      newIdTargetInput: mustGet('newIdTargetInput'),
+      holidaysInput: mustGet('holidaysInput'),
+      dataInfoText: mustGet('dataInfoText'),
+      saveBtn: mustGet('saveBtn'),
+      resetBtn: mustGet('resetBtn'),
+      exportImageBtn: mustGet('exportImageBtn'),
+      displayBranchName: mustGet('displayBranchName'),
+      statusPill: mustGet('statusPill'),
+      captureArea: mustGet('captureArea'),
+      exportBranchName: mustGet('exportBranchName'),
+      exportDateText: mustGet('exportDateText'),
+      exportDateSourceText: mustGet('exportDateSourceText'),
+      targetBadge: mustGet('targetBadge'),
+      resultLatestDateBadge: mustGet('resultLatestDateBadge'),
+      resultStatusBadge: mustGet('resultStatusBadge'),
+      displayCardTarget: mustGet('displayCardTarget'),
+      displayIdTarget: mustGet('displayIdTarget'),
+      displayNewIdTarget: mustGet('displayNewIdTarget'),
+      resultCardValue: mustGet('resultCardValue'),
+      resultCardDelta: mustGet('resultCardDelta'),
+      resultCardPercent: mustGet('resultCardPercent'),
+      resultCardProgress: mustGet('resultCardProgress'),
+      resultCardRunrate: mustGet('resultCardRunrate'),
+      resultCardSub: mustGet('resultCardSub'),
+      resultIdValue: mustGet('resultIdValue'),
+      resultIdDelta: mustGet('resultIdDelta'),
+      resultIdPercent: mustGet('resultIdPercent'),
+      resultIdProgress: mustGet('resultIdProgress'),
+      resultIdRunrate: mustGet('resultIdRunrate'),
+      resultIdSub: mustGet('resultIdSub'),
+      resultNewIdValue: mustGet('resultNewIdValue'),
+      resultNewIdDelta: mustGet('resultNewIdDelta'),
+      resultNewIdPercent: mustGet('resultNewIdPercent'),
+      resultNewIdProgress: mustGet('resultNewIdProgress'),
+      resultNewIdRunrate: mustGet('resultNewIdRunrate'),
+      resultNewIdSub: mustGet('resultNewIdSub'),
+      remainingDaysValue: mustGet('remainingDaysValue'),
+      remainingDaysSub: mustGet('remainingDaysSub'),
+      approvalTrendChart: mustGet('approvalTrendChart'),
+      approvalTrendSummary: mustGet('approvalTrendSummary'),
+      runrateCard: mustGet('runrateCard'),
+      runrateEmoji: mustGet('runrateEmoji'),
+      runrateStatusText: mustGet('runrateStatusText'),
+      runrateSubText: mustGet('runrateSubText')
+    };
+
+    let appState = loadState();
+    let csvRows = parseCSV(EMBEDDED_CSV);
+
+    function clone(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+        return saved ? mergeDefaults(saved) : clone(defaults);
+      } catch {
+        return clone(defaults);
+      }
+    }
+
+    function mergeDefaults(saved) {
+      const base = clone(defaults);
+      return {
+        ...base,
+        ...saved,
+        targets: {
+          ...base.targets,
+          ...(saved.targets || {})
+        }
+      };
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    }
+
+    function parseCSV(text) {
+      const clean = text.trim();
+      if (!clean) return [];
+      const lines = clean.split(/\r?\n/).filter(Boolean);
+      const headers = splitCsvLine(lines[0]);
+      return lines.slice(1).map((line) => {
+        const values = splitCsvLine(line);
+        const row = {};
+        headers.forEach((header, index) => {
+          row[header] = (values[index] || '').trim();
+        });
+        return row;
+      });
+    }
+
+    function splitCsvLine(line) {
+      const out = [];
+      let cur = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i += 1) {
+        const char = line[i];
+        const next = line[i + 1];
+        if (char === '"') {
+          if (inQuotes && next === '"') {
+            cur += '"';
+            i += 1;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === ',' && !inQuotes) {
+          out.push(cur);
+          cur = '';
+        } else {
+          cur += char;
+        }
+      }
+      out.push(cur);
+      return out;
+    }
+
+    function toNum(value) {
+      const num = Number(String(value || '').replace(/,/g, '').trim());
+      return Number.isFinite(num) ? num : 0;
+    }
+
+    function parseHolidaySet(str) {
+      return new Set((str || '').split(',').map((s) => s.trim()).filter(Boolean));
+    }
+
+    function fmtDate(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatThaiDateTime(date = new Date()) {
+      const dateText = new Intl.DateTimeFormat('th-TH', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }).format(date);
+      const timeText = new Intl.DateTimeFormat('th-TH', {
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(date);
+      return `วันที่ ${dateText} • ${timeText} น.`;
+    }
+
+    function getBusinessDaysRemainingFromSummary(summaryDateStr, holidayStr) {
+      const summaryDate = new Date(`${summaryDateStr}T00:00:00`);
+      const holidays = parseHolidaySet(holidayStr);
+      const monthEnd = new Date(summaryDate.getFullYear(), summaryDate.getMonth() + 1, 0);
+      let remaining = 0;
+      for (let d = new Date(summaryDate); d <= monthEnd; d.setDate(d.getDate() + 1)) {
+        const day = d.getDay();
+        const key = fmtDate(d);
+        const isBusiness = day !== 0 && day !== 6 && !holidays.has(key);
+        if (isBusiness) remaining += 1;
+      }
+      return Math.max(0, remaining - 1);
+    }
+
+    function getBusinessDaysElapsedInMonth(summaryDateStr, holidayStr) {
+      const summaryDate = new Date(`${summaryDateStr}T00:00:00`);
+      const holidays = parseHolidaySet(holidayStr);
+      const monthStart = new Date(summaryDate.getFullYear(), summaryDate.getMonth(), 1);
+      let elapsed = 0;
+      for (let d = new Date(monthStart); d <= summaryDate; d.setDate(d.getDate() + 1)) {
+        const day = d.getDay();
+        const key = fmtDate(d);
+        const isBusiness = day !== 0 && day !== 6 && !holidays.has(key);
+        if (isBusiness) elapsed += 1;
+      }
+      return elapsed;
+    }
+
+    function getBusinessDaysTotalInMonth(summaryDateStr, holidayStr) {
+      const summaryDate = new Date(`${summaryDateStr}T00:00:00`);
+      const holidays = parseHolidaySet(holidayStr);
+      const monthStart = new Date(summaryDate.getFullYear(), summaryDate.getMonth(), 1);
+      const monthEnd = new Date(summaryDate.getFullYear(), summaryDate.getMonth() + 1, 0);
+      let total = 0;
+      for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
+        const day = d.getDay();
+        const key = fmtDate(d);
+        const isBusiness = day !== 0 && day !== 6 && !holidays.has(key);
+        if (isBusiness) total += 1;
+      }
+      return total;
+    }
+
+    function percent(actual, target) {
+      return target > 0 ? (actual / target) * 100 : 0;
+    }
+
+    function setDeltaText(el, diff, missingPrev) {
+      if (missingPrev) {
+        el.textContent = 'ยังไม่มีข้อมูลวันก่อนหน้า';
+        el.className = 'card-meta delta-neutral';
+        return;
+      }
+      const sign = diff > 0 ? '+' : diff < 0 ? '' : '±';
+      el.textContent = `${sign}${diff.toLocaleString()} จากวันก่อน`;
+      el.className = `card-meta ${diff > 0 ? 'delta-positive' : diff < 0 ? 'delta-negative' : 'delta-neutral'}`;
+    }
+
+    function setPercentBadge(el, actual, target) {
+      const pct = percent(actual, target);
+      el.textContent = `${pct.toFixed(1)}%`;
+      if (pct >= 100) {
+        el.className = 'card-percent good';
+      } else if (pct >= 60) {
+        el.className = 'card-percent warn';
+      } else {
+        el.className = 'card-percent bad';
+      }
+    }
+
+    function setProgress(barEl, actual, target) {
+      barEl.style.width = `${Math.min(100, percent(actual, target))}%`;
+    }
+
+    function getRunrateExpectedCount(target, summaryDateStr, holidayStr) {
+      const elapsedDays = getBusinessDaysElapsedInMonth(summaryDateStr, holidayStr);
+      const totalBusinessDays = getBusinessDaysTotalInMonth(summaryDateStr, holidayStr);
+      const expectedPct = totalBusinessDays > 0 ? (elapsedDays / totalBusinessDays) * 100 : 0;
+      return {
+        expectedPct,
+        expectedCount: Math.round((expectedPct / 100) * target)
+      };
+    }
+
+    function setRunrateInline(el, actual, target, summaryDateStr, holidayStr) {
+      const { expectedCount } = getRunrateExpectedCount(target, summaryDateStr, holidayStr);
+      const diffCount = actual - expectedCount;
+      if (diffCount >= 0) {
+        el.className = 'runrate-inline up';
+        el.innerHTML = `<span class="arrow">↗</span> Runrate ${expectedCount.toLocaleString()}`;
+      } else {
+        el.className = 'runrate-inline down';
+        el.innerHTML = `<span class="arrow">↘</span> Runrate ${expectedCount.toLocaleString()}`;
+      }
+    }
+
+    function renderRunrateCard(resultNewId, newIdTarget, summaryDateStr, holidayStr) {
+      const { expectedCount } = getRunrateExpectedCount(newIdTarget, summaryDateStr, holidayStr);
+      const diffCount = resultNewId - expectedCount;
+      if (diffCount > 0) {
+        els.runrateCard.className = 'result-card runrate-card';
+        els.runrateEmoji.textContent = '😊';
+        els.runrateStatusText.textContent = 'ภาพรวมเป็นบวก';
+        els.runrateSubText.innerHTML = `New ID ตอนนี้ <strong>มากกว่า</strong> Runrate • ต่าง <strong>${Math.abs(diffCount).toLocaleString()}</strong> เคส`;
+      } else if (diffCount < 0) {
+        els.runrateCard.className = 'result-card runrate-card bad';
+        els.runrateEmoji.textContent = '☹️';
+        els.runrateStatusText.textContent = 'ภาพรวมติดลบ';
+        els.runrateSubText.innerHTML = `New ID ตอนนี้ <strong>ติดลบ</strong> จาก Runrate • ต่าง <strong>${Math.abs(diffCount).toLocaleString()}</strong> เคส`;
+      } else {
+        els.runrateCard.className = 'result-card runrate-card neutral';
+        els.runrateEmoji.textContent = '😐';
+        els.runrateStatusText.textContent = 'สถานการณ์ทรงตัว';
+        els.runrateSubText.innerHTML = 'New ID ตอนนี้ <strong>เท่ากับ</strong> Runrate • ต่าง <strong>0</strong> เคส';
+      }
+    }
+
+    function getBranchRows(branchName) {
+      return csvRows
+        .filter((row) => String(row.Branch || '').trim() === branchName)
+        .map((row) => ({
+          date: String(row.Date || '').trim(),
+          branch: String(row.Branch || '').trim(),
+          resultCard: toNum(row['Result Card']),
+          resultTotalId: toNum(row['Result Total ID']),
+          resultNewId: toNum(row['Result New ID'])
+        }))
+        .filter((row) => /^\d{4}-\d{2}-\d{2}$/.test(row.date))
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+    }
+
+    function getLatestAndPrevious(rows) {
+      if (!rows.length) return { latest: null, previous: null };
+      return {
+        latest: rows[rows.length - 1],
+        previous: rows.length > 1 ? rows[rows.length - 2] : null
+      };
+    }
+
+    function buildDailyNewIdIncrements(rows) {
+      return rows.map((row, index) => ({
+        date: row.date,
+        value: index === 0 ? 0 : Math.max(0, row.resultNewId - rows[index - 1].resultNewId)
+      }));
+    }
+
+    function renderApprovalTrendChart(points) {
+      const svg = els.approvalTrendChart;
+      const width = 760;
+      const height = 220;
+      const pad = { top: 18, right: 20, bottom: 34, left: 20 };
+      const innerWidth = width - pad.left - pad.right;
+      const innerHeight = height - pad.top - pad.bottom;
+
+      if (!points.length) {
+        svg.innerHTML = '';
+        els.approvalTrendSummary.textContent = 'ยังไม่มีข้อมูลเพียงพอสำหรับแสดงกราฟ';
+        return;
+      }
+
+      const maxValue = Math.max(1, ...points.map((p) => p.value));
+      const stepX = points.length > 1 ? innerWidth / (points.length - 1) : innerWidth / 2;
+      const coords = points.map((point, index) => {
+        const x = points.length > 1 ? pad.left + index * stepX : pad.left + innerWidth / 2;
+        const y = pad.top + innerHeight - (point.value / maxValue) * (innerHeight - 14);
+        return { ...point, x, y };
+      });
+
+      const grid = [0.25, 0.5, 0.75, 1].map((ratio) => {
+        const y = pad.top + innerHeight - innerHeight * ratio;
+        return `<line x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}" stroke="rgba(255,255,255,0.08)" stroke-width="1"></line>`;
+      }).join('');
+
+      const axis = `<line x1="${pad.left}" y1="${pad.top + innerHeight}" x2="${width - pad.right}" y2="${pad.top + innerHeight}" stroke="rgba(255,255,255,0.12)" stroke-width="1.2"></line>`;
+      const polylinePoints = coords.map((point) => `${point.x},${point.y}`).join(' ');
+      const areaPoints = `${pad.left},${pad.top + innerHeight} ${polylinePoints} ${coords[coords.length - 1].x},${pad.top + innerHeight}`;
+      const area = `<polygon points="${areaPoints}" fill="rgba(240,162,90,0.12)"></polygon>`;
+      const path = `<polyline points="${polylinePoints}" fill="none" stroke="rgba(240,162,90,0.95)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>`;
+      const dots = coords.map((point) => `
+        <circle cx="${point.x}" cy="${point.y}" r="5.5" fill="#f0a25a" stroke="#fff1df" stroke-width="2"></circle>
+        <text x="${point.x}" y="${Math.max(14, point.y - 10)}" text-anchor="middle" fill="#dce6f2" font-size="11" font-weight="700">${point.value}</text>
+        <text x="${point.x}" y="${height - 12}" text-anchor="middle" fill="#96a3b5" font-size="11" font-weight="700">${point.date.slice(5)}</text>
+      `).join('');
+
+      svg.innerHTML = `${grid}${axis}${area}${path}${dots}`;
+      const latestPoint = points[points.length - 1];
+      const peakPoint = points.reduce((best, cur) => cur.value > best.value ? cur : best, points[0]);
+      els.approvalTrendSummary.textContent = `วันที่ล่าสุดในกราฟ ${latestPoint.date} เพิ่ม ${latestPoint.value.toLocaleString()} รายการ • วันที่เพิ่มสูงสุด ${peakPoint.date} จำนวน ${peakPoint.value.toLocaleString()} รายการ`;
+    }
+
+    function fillInputs(branchName) {
+      const targets = appState.targets[branchName] || { cardTarget: 0, idTarget: 0, newIdTarget: 0 };
+      els.branchSelector.value = branchName;
+      els.cardTargetInput.value = targets.cardTarget || '';
+      els.idTargetInput.value = targets.idTarget || '';
+      els.newIdTargetInput.value = targets.newIdTarget || '';
+      els.holidaysInput.value = appState.holidays || '';
+    }
+
+    function saveInputs() {
+      const branchName = els.branchSelector.value;
+      appState.selectedBranch = branchName;
+      appState.holidays = els.holidaysInput.value.trim();
+      appState.targets[branchName] = {
+        cardTarget: toNum(els.cardTargetInput.value),
+        idTarget: toNum(els.idTargetInput.value),
+        newIdTarget: toNum(els.newIdTargetInput.value)
+      };
+      saveState();
+      render(branchName);
+    }
+
+    function render(branchName) {
+      const branchRows = getBranchRows(branchName);
+      const { latest, previous } = getLatestAndPrevious(branchRows);
+      const targets = appState.targets[branchName] || { cardTarget: 0, idTarget: 0, newIdTarget: 0 };
+
+      els.displayBranchName.textContent = branchName;
+      els.exportBranchName.textContent = branchName;
+      els.exportDateText.textContent = formatThaiDateTime(new Date());
+      els.displayCardTarget.textContent = targets.cardTarget.toLocaleString();
+      els.displayIdTarget.textContent = targets.idTarget.toLocaleString();
+      els.displayNewIdTarget.textContent = targets.newIdTarget.toLocaleString();
+      els.targetBadge.textContent = 'Monthly Target';
+      els.resultLatestDateBadge.textContent = 'ข้อมูลวันที่ -';
+
+      if (!latest) {
+        els.exportDateSourceText.textContent = 'ยังไม่พบข้อมูลของสาขานี้ใน CSV';
+        els.dataInfoText.textContent = `CSV ปัจจุบันมี ${csvRows.length.toLocaleString()} แถว แต่ยังไม่มีข้อมูลของ ${branchName}`;
+        els.resultCardValue.textContent = '0';
+        els.resultIdValue.textContent = '0';
+        els.resultNewIdValue.textContent = '0';
+        setDeltaText(els.resultCardDelta, 0, true);
+        setDeltaText(els.resultIdDelta, 0, true);
+        setDeltaText(els.resultNewIdDelta, 0, true);
+        setPercentBadge(els.resultCardPercent, 0, targets.cardTarget);
+        setPercentBadge(els.resultIdPercent, 0, targets.idTarget);
+        setPercentBadge(els.resultNewIdPercent, 0, targets.newIdTarget);
+        els.resultCardSub.innerHTML = `ปัจจุบัน <span class="card-sub-strong">0</span> จากเป้า <span class="card-sub-strong">${targets.cardTarget.toLocaleString()}</span> • ขาดอีก <span class="card-sub-strong">${targets.cardTarget.toLocaleString()}</span>`;
+        els.resultIdSub.innerHTML = `ปัจจุบัน <span class="card-sub-strong">0</span> จากเป้า <span class="card-sub-strong">${targets.idTarget.toLocaleString()}</span> • ขาดอีก <span class="card-sub-strong">${targets.idTarget.toLocaleString()}</span>`;
+        els.resultNewIdSub.innerHTML = `ปัจจุบัน <span class="card-sub-strong">0</span> จากเป้า <span class="card-sub-strong">${targets.newIdTarget.toLocaleString()}</span> • ขาดอีก <span class="card-sub-strong">${targets.newIdTarget.toLocaleString()}</span>`;
+        setProgress(els.resultCardProgress, 0, targets.cardTarget);
+        setProgress(els.resultIdProgress, 0, targets.idTarget);
+        setProgress(els.resultNewIdProgress, 0, targets.newIdTarget);
+        setRunrateInline(els.resultCardRunrate, 0, targets.cardTarget, '2026-03-01', appState.holidays);
+        setRunrateInline(els.resultIdRunrate, 0, targets.idTarget, '2026-03-01', appState.holidays);
+        setRunrateInline(els.resultNewIdRunrate, 0, targets.newIdTarget, '2026-03-01', appState.holidays);
+        els.remainingDaysValue.textContent = '0';
+        els.remainingDaysSub.textContent = 'ยังคำนวณวันทำการไม่ได้ เพราะยังไม่มีวันที่จาก CSV';
+        els.runrateCard.className = 'result-card runrate-card neutral';
+        els.runrateEmoji.textContent = '😐';
+        els.runrateStatusText.textContent = 'สถานการณ์ทรงตัว';
+        els.runrateSubText.innerHTML = 'New ID ตอนนี้ <strong>เท่ากับ</strong> Runrate • ต่าง <strong>0</strong> เคส';
+        els.statusPill.className = 'status-pill bad';
+        els.statusPill.textContent = 'สถานะ: ยังไม่มีข้อมูล CSV';
+        els.resultStatusBadge.className = 'metric-badge bad';
+        els.resultStatusBadge.textContent = 'ยังไม่มีข้อมูล';
+        renderApprovalTrendChart([]);
+        return;
+      }
+
+      const missingPrev = !previous;
+      const cardDiff = latest.resultCard - (previous ? previous.resultCard : latest.resultCard);
+      const idDiff = latest.resultTotalId - (previous ? previous.resultTotalId : latest.resultTotalId);
+      const newIdDiff = latest.resultNewId - (previous ? previous.resultNewId : latest.resultNewId);
+      const remainingDays = getBusinessDaysRemainingFromSummary(latest.date, appState.holidays);
+      const cardGap = Math.max(0, targets.cardTarget - latest.resultCard);
+      const idGap = Math.max(0, targets.idTarget - latest.resultTotalId);
+      const newIdGap = Math.max(0, targets.newIdTarget - latest.resultNewId);
+      const allClosed = cardGap === 0 && idGap === 0 && newIdGap === 0;
+      const improving = cardDiff >= 0 && idDiff >= 0 && newIdDiff >= 0;
+      const dailyNewIdPoints = buildDailyNewIdIncrements(branchRows);
+
+      els.exportDateSourceText.textContent = `ข้อมูลจากวันที่ ${latest.date} • สรุปสิ้นวัน`;
+      els.resultLatestDateBadge.textContent = `ข้อมูลวันที่ ${latest.date}`;
+      els.dataInfoText.textContent = `อ่านข้อมูลแล้ว ${csvRows.length.toLocaleString()} แถว • ใช้ข้อมูลล่าสุดของ ${branchName} วันที่ ${latest.date}${missingPrev ? ' • ยังไม่มีข้อมูลวันก่อนหน้า' : ` • เทียบกับวันที่ ${previous.date}`}`;
+
+      els.resultCardValue.textContent = latest.resultCard.toLocaleString();
+      els.resultIdValue.textContent = latest.resultTotalId.toLocaleString();
+      els.resultNewIdValue.textContent = latest.resultNewId.toLocaleString();
+      setDeltaText(els.resultCardDelta, cardDiff, missingPrev);
+      setDeltaText(els.resultIdDelta, idDiff, missingPrev);
+      setDeltaText(els.resultNewIdDelta, newIdDiff, missingPrev);
+      setPercentBadge(els.resultCardPercent, latest.resultCard, targets.cardTarget);
+      setPercentBadge(els.resultIdPercent, latest.resultTotalId, targets.idTarget);
+      setPercentBadge(els.resultNewIdPercent, latest.resultNewId, targets.newIdTarget);
+      els.resultCardSub.innerHTML = `ปัจจุบัน <span class="card-sub-strong">${latest.resultCard.toLocaleString()}</span> จากเป้า <span class="card-sub-strong">${targets.cardTarget.toLocaleString()}</span> • ขาดอีก <span class="card-sub-strong">${cardGap.toLocaleString()}</span>`;
+      els.resultIdSub.innerHTML = `ปัจจุบัน <span class="card-sub-strong">${latest.resultTotalId.toLocaleString()}</span> จากเป้า <span class="card-sub-strong">${targets.idTarget.toLocaleString()}</span> • ขาดอีก <span class="card-sub-strong">${idGap.toLocaleString()}</span>`;
+      els.resultNewIdSub.innerHTML = `ปัจจุบัน <span class="card-sub-strong">${latest.resultNewId.toLocaleString()}</span> จากเป้า <span class="card-sub-strong">${targets.newIdTarget.toLocaleString()}</span> • ขาดอีก <span class="card-sub-strong">${newIdGap.toLocaleString()}</span>`;
+      setProgress(els.resultCardProgress, latest.resultCard, targets.cardTarget);
+      setProgress(els.resultIdProgress, latest.resultTotalId, targets.idTarget);
+      setProgress(els.resultNewIdProgress, latest.resultNewId, targets.newIdTarget);
+      setRunrateInline(els.resultCardRunrate, latest.resultCard, targets.cardTarget, latest.date, appState.holidays);
+      setRunrateInline(els.resultIdRunrate, latest.resultTotalId, targets.idTarget, latest.date, appState.holidays);
+      setRunrateInline(els.resultNewIdRunrate, latest.resultNewId, targets.newIdTarget, latest.date, appState.holidays);
+      els.remainingDaysValue.textContent = remainingDays.toLocaleString();
+      els.remainingDaysSub.textContent = `หลังวันสรุป ${latest.date} ยังเหลือ ${remainingDays.toLocaleString()} วันทำการ (ไม่รวมเสาร์ อาทิตย์ วันหยุด และลบเพิ่มอีก 1 วัน)`;
+      renderRunrateCard(latest.resultNewId, targets.newIdTarget, latest.date, appState.holidays);
+      renderApprovalTrendChart(dailyNewIdPoints);
+
+      if (allClosed) {
+        els.statusPill.className = 'status-pill good';
+        els.statusPill.textContent = 'สถานะ: ปิดเป้าแล้วทั้ง 3 รายการ';
+        els.resultStatusBadge.className = 'metric-badge good';
+        els.resultStatusBadge.textContent = 'ปิดเป้าแล้ว';
+      } else if (improving || missingPrev) {
+        els.statusPill.className = 'status-pill warn';
+        els.statusPill.textContent = 'สถานะ: ผลงานยังเดินหน้า';
+        els.resultStatusBadge.className = 'metric-badge warn';
+        els.resultStatusBadge.textContent = missingPrev ? 'ยังไม่มีฐานเทียบก่อนหน้า' : 'เพิ่มจากวันก่อน';
+      } else {
+        els.statusPill.className = 'status-pill bad';
+        els.statusPill.textContent = 'สถานะ: ต้องเร่งปิดยอดเพิ่ม';
+        els.resultStatusBadge.className = 'metric-badge bad';
+        els.resultStatusBadge.textContent = 'บางรายการลดลง';
+      }
+
+      els.targetBadge.textContent = `เหลือวันทำการ ${remainingDays.toLocaleString()} วัน`;
+    }
+
+    async function exportAsImage() {
+      const originalText = els.exportImageBtn.textContent;
+      try {
+        els.exportImageBtn.disabled = true;
+        els.exportImageBtn.textContent = 'กำลังสร้างภาพ...';
+        els.captureArea.classList.add('is-exporting');
+        if (document.fonts?.ready) await document.fonts.ready;
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        const canvas = await html2canvas(els.captureArea, {
+          backgroundColor: '#11161d',
+          scale: 2,
+          useCORS: true,
+          logging: false
+        });
+        const link = document.createElement('a');
+        link.download = `${els.branchSelector.value.replace(/\s+/g, '_').toLowerCase()}_end_of_day.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } catch (error) {
+        console.error(error);
+        alert('ส่งออกภาพไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+      } finally {
+        els.captureArea.classList.remove('is-exporting');
+        els.exportImageBtn.disabled = false;
+        els.exportImageBtn.textContent = originalText;
+      }
+    }
+
+    async function handleCsvUpload(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const text = await file.text();
+      csvRows = parseCSV(text);
+      render(els.branchSelector.value);
+    }
+
+    function resetState() {
+      appState = clone(defaults);
+      saveState();
+      csvRows = parseCSV(EMBEDDED_CSV);
+      fillInputs(appState.selectedBranch);
+      render(appState.selectedBranch);
+      els.csvFileInput.value = '';
+    }
+
+    function runSelfTests() {
+      console.assert(parseCSV(EMBEDDED_CSV).length === 2, 'parseCSV should read embedded csv rows');
+      console.assert(splitCsvLine('a,b,c').length === 3, 'splitCsvLine should split simple CSV');
+      console.assert(toNum('1,234') === 1234, 'toNum should parse comma numbers');
+      console.assert(toNum('abc') === 0, 'toNum should fallback to 0');
+      console.assert(parseHolidaySet('2026-03-23, 2026-03-30').size === 2, 'parseHolidaySet should build set');
+      console.assert(fmtDate(new Date('2026-03-05T00:00:00')).length === 10, 'fmtDate should return yyyy-mm-dd');
+      console.assert(percent(50, 100) === 50, 'percent should calculate correctly');
+      console.assert(percent(10, 0) === 0, 'percent should safely handle zero target');
+      console.assert(getBusinessDaysRemainingFromSummary('2026-03-13', '') >= 0, 'remaining business days should not be negative');
+      console.assert(getBusinessDaysElapsedInMonth('2026-03-13', '') > 0, 'elapsed business days should be positive for mid-month');
+      console.assert(getBusinessDaysTotalInMonth('2026-03-13', '') >= getBusinessDaysElapsedInMonth('2026-03-13', ''), 'total business days should be at least elapsed days');
+      console.assert(document.getElementById('resultCardRunrate'), 'result card runrate element must exist');
+      console.assert(document.getElementById('resultIdRunrate'), 'result id runrate element must exist');
+      console.assert(document.getElementById('resultNewIdRunrate'), 'result new id runrate element must exist');
+      console.assert(document.getElementById('runrateCard'), 'runrate card should exist');
+      console.assert(!document.getElementById('runratePercentValue'), 'obsolete runratePercentValue should not exist');
+      const trendPoints = buildDailyNewIdIncrements([
+        { date: '2026-03-10', resultNewId: 10 },
+        { date: '2026-03-11', resultNewId: 15 },
+        { date: '2026-03-12', resultNewId: 22 }
+      ]);
+      console.assert(trendPoints.length === 3, 'trend points should keep same length as rows');
+      console.assert(trendPoints[0].value === 0, 'first trend point should be zero when no previous day exists');
+      console.assert(trendPoints[2].value === 7, 'trend points should use day-over-day delta');
+      renderApprovalTrendChart(trendPoints);
+      console.assert(els.approvalTrendChart.innerHTML.includes('polyline'), 'chart should render as line chart');
+      const tempPercent = document.createElement('div');
+      setPercentBadge(tempPercent, 100, 100);
+      console.assert(tempPercent.className === 'card-percent good', 'percent badge good');
+      setPercentBadge(tempPercent, 20, 100);
+      console.assert(tempPercent.className === 'card-percent bad', 'percent badge bad');
+      const tempRunrate = document.createElement('div');
+      setRunrateInline(tempRunrate, 80, 100, '2026-03-13', '');
+      console.assert(tempRunrate.innerHTML.includes('Runrate'), 'runrate inline should show runrate text');
+      console.assert(!tempRunrate.innerHTML.includes('%'), 'runrate inline should show KPI count, not %');
+      renderRunrateCard(76, 190, '2026-03-13', '');
+      console.assert(els.runrateEmoji.textContent.length > 0, 'summary card should show emoji');
+      console.assert(els.runrateSubText.innerHTML.includes('Runrate'), 'summary card should mention runrate');
+      const exportStyles = getComputedStyle(els.captureArea);
+      console.assert(exportStyles.overflow === 'visible', 'export frame should allow page scrolling before export');
+      els.captureArea.classList.add('is-exporting');
+      const exportingStyles = getComputedStyle(els.captureArea);
+      console.assert(exportingStyles.overflow === 'hidden', 'export frame should clip only during export');
+      els.captureArea.classList.remove('is-exporting');
+    }
+
+    els.branchSelector.addEventListener('change', (e) => {
+      appState.selectedBranch = e.target.value;
+      saveState();
+      fillInputs(e.target.value);
+      render(e.target.value);
+    });
+    els.saveBtn.addEventListener('click', saveInputs);
+    els.resetBtn.addEventListener('click', resetState);
+    els.exportImageBtn.addEventListener('click', exportAsImage);
+    els.csvFileInput.addEventListener('change', handleCsvUpload);
+
+    runSelfTests();
+    fillInputs(appState.selectedBranch);
+    render(appState.selectedBranch);
+  </script>
+</body>
+</html>

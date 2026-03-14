@@ -20,7 +20,6 @@
     }
 
     * { box-sizing: border-box; }
-
     html { scroll-behavior: smooth; }
 
     body {
@@ -52,15 +51,6 @@
       backdrop-filter: blur(14px);
       box-shadow: var(--shadow);
       padding: 28px;
-    }
-
-    .hero::before,
-    .hero::after {
-      content: "";
-      position: absolute;
-      border-radius: 999px;
-      filter: blur(40px);
-      z-index: 0;
     }
 
     .hero::before,
@@ -122,10 +112,19 @@
     }
 
     .grid {
-      margin-top: 28px;
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 20px;
+    }
+
+    .employee-grid {
+      margin-top: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .manager-grid {
+      margin-top: 12px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
     }
 
     .app-card {
@@ -184,6 +183,10 @@
     }
 
     .icon.green {
+      background: linear-gradient(135deg, rgba(14,165,233,0.95), rgba(59,130,246,0.92));
+    }
+
+    .icon.gold {
       background: linear-gradient(135deg, rgba(245,158,11,0.95), rgba(251,191,36,0.92));
     }
 
@@ -234,46 +237,49 @@
     }
 
     .employee-zone {
-      background: linear-gradient(135deg, rgba(37, 99, 235, 0.22), rgba(96, 165, 250, 0.16));
-      border: 1px solid rgba(96, 165, 250, 0.30);
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.26), rgba(96, 165, 250, 0.22));
+      border: 1px solid rgba(96, 165, 250, 0.34);
       color: #f3f8ff;
       box-shadow: 0 10px 24px rgba(37, 99, 235, 0.16);
     }
 
     .manager-zone {
-      background: linear-gradient(135deg, rgba(255, 214, 102, 0.34), rgba(255, 241, 194, 0.24));
-      border: 1px solid rgba(255, 224, 130, 0.42);
+      background: linear-gradient(135deg, rgba(255, 214, 102, 0.24), rgba(255, 241, 194, 0.18));
+      border: 1px solid rgba(255, 224, 130, 0.32);
       color: #fff9eb;
-      box-shadow: 0 10px 28px rgba(255, 193, 7, 0.22);
+      box-shadow: 0 10px 28px rgba(255, 193, 7, 0.14);
     }
 
-    .employee-grid {
-      margin-top: 12px;
+    .employee-highlight {
+      margin-top: 18px;
+      padding: 22px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(37,99,235,0.26), rgba(56,189,248,0.14));
+      border: 1px solid rgba(125,211,252,0.22);
+      box-shadow: 0 18px 40px rgba(37,99,235,0.18);
     }
 
-    .manager-grid {
-      margin-top: 14px;
+    .employee-highlight h2 {
+      margin: 0 0 8px;
+      font-size: clamp(1.35rem, 2.5vw, 2rem);
+    }
+
+    .employee-highlight p {
+      margin: 0;
+      color: #dfeaff;
+      line-height: 1.7;
+      font-size: 1rem;
     }
 
     .employee-card {
       border: 2px solid rgba(96,165,250,0.26);
-      background: linear-gradient(180deg, rgba(37,99,235,0.20), rgba(255,255,255,0.08));
+      background: linear-gradient(180deg, rgba(37,99,235,0.24), rgba(255,255,255,0.08));
+      min-height: 260px;
     }
 
     .employee-card:hover {
       border-color: rgba(125,211,252,0.52);
       box-shadow: 0 24px 50px rgba(37, 99, 235, 0.22);
-    }
-
-    .manager-grid .app-card {
-      border: 2px solid rgba(255, 224, 130, 0.34);
-      background: linear-gradient(180deg, rgba(255, 220, 120, 0.18), rgba(255,255,255,0.12));
-      box-shadow: 0 18px 40px rgba(255, 193, 7, 0.12);
-    }
-
-    .manager-grid .app-card:hover {
-      border-color: rgba(255, 235, 170, 0.58);
-      box-shadow: 0 26px 54px rgba(255, 193, 7, 0.22);
     }
 
     .menu-badge {
@@ -295,9 +301,62 @@
     }
 
     .menu-badge.manager {
-      background: rgba(255, 236, 179, 0.24);
-      border: 1px solid rgba(255, 236, 179, 0.36);
+      background: rgba(255, 236, 179, 0.18);
+      border: 1px solid rgba(255, 236, 179, 0.28);
       color: #fffaf0;
+    }
+
+    .admin-section {
+      margin-top: 34px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .admin-caption {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 0.96rem;
+      line-height: 1.6;
+    }
+
+    .manager-mini-card {
+      min-height: auto;
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 224, 130, 0.22);
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.08));
+      box-shadow: 0 12px 24px rgba(0,0,0,0.14);
+    }
+
+    .manager-mini-card .menu-badge {
+      margin-bottom: 10px;
+      font-size: 0.74rem;
+      padding: 6px 10px;
+    }
+
+    .manager-mini-card .icon {
+      width: 44px;
+      height: 44px;
+      font-size: 1.2rem;
+      border-radius: 14px;
+      margin-bottom: 12px;
+    }
+
+    .manager-mini-card .card-title {
+      margin: 0;
+      font-size: 0.98rem;
+      line-height: 1.35;
+    }
+
+    .manager-mini-card .card-desc {
+      display: none;
+    }
+
+    .manager-mini-card .card-footer {
+      margin-top: 12px;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      gap: 8px;
     }
 
     .tips {
@@ -315,6 +374,12 @@
       color: #ffffff;
     }
 
+    @media (max-width: 900px) {
+      .manager-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
     @media (max-width: 768px) {
       body {
         align-items: flex-start;
@@ -325,11 +390,16 @@
         border-radius: 24px;
       }
 
-      .grid {
+      .employee-grid,
+      .manager-grid {
         grid-template-columns: 1fr;
       }
 
       .app-card {
+        min-height: auto;
+      }
+
+      .employee-card {
         min-height: auto;
       }
     }
@@ -341,28 +411,29 @@
       <div class="hero-inner">
         <div class="eyebrow">🏢 Branch Operations Portal</div>
         <h1>ศูนย์รวมระบบงานสาขา สำหรับใช้งานประจำวัน</h1>
+
+        <div class="employee-highlight">
+          <h2>เมนูสำหรับพนักงาน</h2>
+          <p>ส่วนนี้เป็นเมนูหลักสำหรับการลงข้อมูลประจำวัน ให้เห็นเด่นชัดและกดใช้งานได้ง่ายบนมือถือ</p>
+        </div>
+
         <div class="section-label employee-zone">สำหรับพนักงาน</div>
         <div class="grid employee-grid">
           <a class="app-card employee-card" href="https://docs.google.com/forms/d/e/1FAIpQLSfYgIiqvvCshveqGOWkAw2p4G5z2pablYq2e6sTjUSqXcd8OA/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">
             <div class="menu-badge employee">พนักงาน</div>
             <div class="icon blue">📝</div>
             <h2 class="card-title">ลงบันทึกผลงานประจำวัน</h2>
-            <p class="card-desc">
-              ปุ่มนี้สำหรับพนักงาน ใช้บันทึกผลงานประจำวัน เพื่อส่งข้อมูลเข้าระบบในแต่ละวัน
-            </p>
+            <p class="card-desc">ปุ่มนี้สำหรับพนักงาน ใช้บันทึกผลงานประจำวัน เพื่อส่งข้อมูลเข้าระบบในแต่ละวัน</p>
             <div class="card-footer">
               <span>เปิดฟอร์มบันทึกผลงาน</span>
               <span>↗</span>
             </div>
           </a>
-
-          <a class="app-card employee-card" href="https://docs.google.com/forms/d/e/1FAIpQLSf0fFYbP8tvWNaNiXssNGi9CQzclyCWjZ8BRSwJFJe8_1Gw-g/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">
+<a class="app-card employee-card" href="https://docs.google.com/forms/d/e/1FAIpQLSf0fFYbP8tvWNaNiXssNGi9CQzclyCWjZ8BRSwJFJe8_1Gw-g/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">
             <div class="menu-badge employee">พนักงาน</div>
-            <div class="icon green">🚙</div>
+            <div class="icon gold">🚙</div>
             <h2 class="card-title">ลงบันทึกการเดินทาง</h2>
-            <p class="card-desc">
-              ปุ่มนี้สำหรับพนักงานที่ใช้รถในการทำกิจกรรม Direct Sale ให้ลงข้อมูลการเดินทางหลังจบกิจกรรมในทุกวัน
-            </p>
+            <p class="card-desc">ปุ่มนี้สำหรับพนักงานที่ใช้รถในการทำกิจกรรม Direct Sale ให้ลงข้อมูลการเดินทางหลังจบกิจกรรมในทุกวัน</p>
             <div class="card-footer">
               <span>เปิดฟอร์มบันทึกการเดินทาง</span>
               <span>↗</span>
@@ -370,48 +441,43 @@
           </a>
         </div>
 
-        <div class="section-label manager-zone">สำหรับผู้ดูแลระบบ</div>
-        
+        <div class="admin-section">
+          <div class="section-label manager-zone">สำหรับผู้ดูแลระบบ</div>
+          <div class="grid manager-grid">
+<a class="app-card manager-mini-card" href="https://docs.google.com/forms/d/e/1FAIpQLScyEhOwu2a0pTJKixX58KqyirnMMjvf-UytFWLAMA-EHi73Fg/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">
+              <div class="menu-badge manager">ผู้ดูแลระบบ</div>
+              <div class="icon green">🗂️</div>
+              <h2 class="card-title">Input Summary Data</h2>
+              <div class="card-footer"><span>เปิด</span><span>↗</span></div>
+            </a>
+            <a class="app-card manager-mini-card" href="employee_dashboard.html" target="_blank" rel="noopener noreferrer">
+              <div class="menu-badge manager">ผู้ดูแลระบบ</div>
+              <div class="icon blue">👥</div>
+              <h2 class="card-title">Employee Performance Dashboard</h2>
+              <div class="card-footer"><span>เปิด</span><span>↗</span></div>
+            </a>
 
-        <div class="grid manager-grid">
-          <a class="app-card" href="employee_dashboard.html" target="_blank" rel="noopener noreferrer">
-            <div class="menu-badge manager">ผู้ดูแลระบบ</div>
-            <div class="icon blue">👥</div>
-            <h2 class="card-title">Employee Performance Dashboard</h2>
-            <p class="card-desc">
-              ปุ่มนี้สำหรับผู้ดูแลระบบ ใช้ดูสรุปผลงานพนักงานและตัวเลขหลังบ้าน
-            </p>
-            <div class="card-footer">
-              <span>เข้าสู่ระบบผลงานพนักงาน</span>
-              <span>↗</span>
-            </div>
-          </a>
+            <a class="app-card manager-mini-card" href="mileage_report.html" target="_blank" rel="noopener noreferrer">
+              <div class="menu-badge manager">ผู้ดูแลระบบ</div>
+              <div class="icon gold">🚗</div>
+              <h2 class="card-title">Vehicle Mileage & Fuel Check</h2>
+              <div class="card-footer"><span>เปิด</span><span>↗</span></div>
+            </a>
 
-          <a class="app-card" href="mileage_report.html" target="_blank" rel="noopener noreferrer">
-            <div class="menu-badge manager">ผู้ดูแลระบบ</div>
-            <div class="icon green">🚗</div>
-            <h2 class="card-title">Vehicle Mileage & Fuel Check</h2>
-            <p class="card-desc">
-              ปุ่มนี้สำหรับผู้ดูแลระบบ ใช้ดูสรุปการเดินทาง เลขไมล์ และข้อมูลการใช้น้ำมันรถ
-            </p>
-            <div class="card-footer">
-              <span>เข้าสู่ระบบตรวจสอบรถ</span>
-              <span>↗</span>
-            </div>
-          </a>
+            <a class="app-card manager-mini-card" href="branch_daily_target.html" target="_blank" rel="noopener noreferrer">
+              <div class="menu-badge manager">ผู้ดูแลระบบ</div>
+              <div class="icon blue">🎯</div>
+              <h2 class="card-title">Branch Daily Target</h2>
+              <div class="card-footer"><span>เปิด</span><span>↗</span></div>
+            </a>
 
-          <a class="app-card" href="branch_daily_target.html" target="_blank" rel="noopener noreferrer">
-            <div class="menu-badge manager">ผู้ดูแลระบบ</div>
-            <div class="icon blue">🎯</div>
-            <h2 class="card-title">Branch Daily Target</h2>
-            <p class="card-desc">
-              ปุ่มนี้สำหรับผู้ดูแลระบบ ใช้ดูสรุปเป้ารายวันของแต่ละสาขา เทียบ Runrate และส่งออกภาพเพื่อสื่อสารในกลุ่ม
-            </p>
-            <div class="card-footer">
-              <span>เข้าสู่ระบบเป้ารายวันสาขา</span>
-              <span>↗</span>
-            </div>
-          </a>
+            <a class="app-card manager-mini-card" href="branch_end_of_day.html" target="_blank" rel="noopener noreferrer">
+              <div class="menu-badge manager">ผู้ดูแลระบบ</div>
+              <div class="icon green">📈</div>
+              <h2 class="card-title">Summary Branch Performance</h2>
+              <div class="card-footer"><span>เปิด</span><span>↗</span></div>
+            </a>
+          </div>
         </div>
 
         <div class="tips">
