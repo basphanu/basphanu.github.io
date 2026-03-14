@@ -655,7 +655,7 @@
       gap: 6px;
       padding: 6px 10px;
       border-radius: 999px;
-      font-size: 0.8rem;
+      font-size: 0.76rem;
       font-weight: 900;
       line-height: 1;
       background: rgba(255,255,255,0.05);
@@ -685,7 +685,7 @@
       align-items: center;
       padding: 7px 10px;
       border-radius: 999px;
-      font-size: 0.88rem;
+      font-size: 0.8rem;
       font-weight: 900;
       line-height: 1;
       background: rgba(255,255,255,0.05);
@@ -1358,7 +1358,11 @@
 
     function setPercentBadge(el, actual, target) {
       const pct = percent(actual, target);
-      el.textContent = `${pct.toFixed(1)}%`;
+      const gap = actual - target;
+      const gapLabel = gap >= 0
+        ? `เกิน ${Math.abs(gap).toLocaleString()}`
+        : `ขาด ${Math.abs(gap).toLocaleString()}`;
+      el.textContent = `${pct.toFixed(1)}% • ${gapLabel}`;
       if (pct >= 100) {
         el.className = 'card-percent good';
       } else if (pct >= 60) {
@@ -1387,10 +1391,10 @@
       const diffCount = actual - expectedCount;
       if (diffCount >= 0) {
         el.className = 'runrate-inline up';
-        el.innerHTML = `<span class="arrow">↗</span> Runrate ${expectedCount.toLocaleString()}`;
+        el.innerHTML = `<span class="arrow">↗</span> Runrate ${expectedCount.toLocaleString()} • เกิน ${Math.abs(diffCount).toLocaleString()}`;
       } else {
         el.className = 'runrate-inline down';
-        el.innerHTML = `<span class="arrow">↘</span> Runrate ${expectedCount.toLocaleString()}`;
+        el.innerHTML = `<span class="arrow">↘</span> Runrate ${expectedCount.toLocaleString()} • ขาด ${Math.abs(diffCount).toLocaleString()}`;
       }
     }
 
@@ -1399,12 +1403,12 @@
       const diffCount = resultNewId - expectedCount;
       if (diffCount > 0) {
         els.runrateCard.className = 'result-card runrate-card';
-        els.runrateEmoji.textContent = '😊';
+        els.runrateEmoji.textContent = '😄';
         els.runrateStatusText.textContent = 'ภาพรวมเป็นบวก';
         els.runrateSubText.innerHTML = `New ID ตอนนี้ <strong>มากกว่า</strong> Runrate • ต่าง <strong>${Math.abs(diffCount).toLocaleString()}</strong> เคส`;
       } else if (diffCount < 0) {
         els.runrateCard.className = 'result-card runrate-card bad';
-        els.runrateEmoji.textContent = '☹️';
+        els.runrateEmoji.textContent = '😓';
         els.runrateStatusText.textContent = 'ภาพรวมติดลบ';
         els.runrateSubText.innerHTML = `New ID ตอนนี้ <strong>ติดลบ</strong> จาก Runrate • ต่าง <strong>${Math.abs(diffCount).toLocaleString()}</strong> เคส`;
       } else {
