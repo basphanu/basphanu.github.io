@@ -663,6 +663,35 @@
       color: #ffffff;
     }
 
+    .summary-today {
+      display: grid;
+      gap: 4px;
+      margin-top: 2px;
+      margin-bottom: 2px;
+    }
+
+    .summary-today-label {
+      font-size: 0.92rem;
+      line-height: 1.35;
+      font-weight: 800;
+      color: #d8e3ee;
+    }
+
+    .summary-today-date {
+      font-size: 0.84rem;
+      line-height: 1.35;
+      font-weight: 800;
+      color: var(--muted);
+    }
+
+    .summary-today-value {
+      font-size: clamp(2.8rem, 5.2vw, 4.4rem);
+      line-height: 0.9;
+      font-weight: 950;
+      color: #ffffff;
+      letter-spacing: -0.05em;
+    }
+
     .summary-small {
       font-size: 1rem;
       line-height: 1.55;
@@ -987,14 +1016,19 @@
                     <div class="summary-emoji" id="runrateEmoji">😐</div>
                     <div class="summary-tone" id="runrateStatusText">สถานการณ์ทรงตัว</div>
                   </div>
+                  <div class="summary-today">
+                    <div class="summary-today-label">NEW ID ที่อนุมัติวันนี้</div>
+                    <div class="summary-today-date" id="todayApprovedDateText">ข้อมูลวันที่ -</div>
+                    <div class="summary-today-value" id="todayApprovedValue">0</div>
+                  </div>
                   <div class="summary-small" id="runrateSubText">New ID ตอนนี้ <strong>เท่ากับ</strong> Runrate • ต่าง <strong>0</strong> เคส</div>
                 </article>
               </div>
 
               <div class="chart-card">
                 <div class="chart-head">
-                  <div class="chart-title">กราฟยอดอนุมัติเพิ่มรายวัน</div>
-                  <div class="chart-note">ยึดจาก Result New ID เพิ่มขึ้นของแต่ละวันในไฟล์ CSV</div>
+                  <div class="chart-title">กราฟยอดอนุมัติรายวัน</div>
+                  <div class="chart-note">คำนวณจากยอดสรุปสิ้นวันล่าสุด เทียบกับยอดสรุปของวันก่อนหน้าในแต่ละวัน</div>
                 </div>
                 <svg id="approvalTrendChart" class="chart-svg" viewBox="0 0 760 220" preserveAspectRatio="none" aria-label="Daily approval trend chart"></svg>
                 <div class="chart-summary" id="approvalTrendSummary">ยังไม่มีข้อมูลเพียงพอสำหรับแสดงกราฟ</div>
@@ -1077,7 +1111,9 @@
       runrateCard: mustGet('runrateCard'),
       runrateEmoji: mustGet('runrateEmoji'),
       runrateStatusText: mustGet('runrateStatusText'),
-      runrateSubText: mustGet('runrateSubText')
+      runrateSubText: mustGet('runrateSubText'),
+      todayApprovedValue: mustGet('todayApprovedValue'),
+      todayApprovedDateText: mustGet('todayApprovedDateText')
     };
 
     let appState = loadState();
@@ -1294,6 +1330,8 @@
         els.runrateCard.className = 'result-card runrate-card neutral';
         els.runrateEmoji.textContent = '😐';
         els.runrateStatusText.textContent = 'สถานการณ์ทรงตัว';
+        els.todayApprovedDateText.textContent = 'ข้อมูลวันที่ -';
+        els.todayApprovedValue.textContent = '0';
         els.runrateSubText.innerHTML = 'New ID ตอนนี้ <strong>เท่ากับ</strong> Runrate • ต่าง <strong>0</strong> เคส';
       }
     }
@@ -1323,15 +1361,21 @@
     function buildDailyNewIdIncrements(rows) {
       return rows.map((row, index) => ({
         date: row.date,
-        value: index === 0 ? 0 : Math.max(0, row.resultNewId - rows[index - 1].resultNewId)
+        value: index === 0 ? row.resultNewId : Math.max(0, row.resultNewId - rows[index - 1].resultNewId)
       }));
+    }
+
+    function getTodayApprovedNewId(rows) {
+      if (!rows.length) return 0;
+      if (rows.length === 1) return rows[0].resultNewId;
+      return Math.max(0, rows[rows.length - 1].resultNewId - rows[rows.length - 2].resultNewId);
     }
 
     function renderApprovalTrendChart(points) {
       const svg = els.approvalTrendChart;
       const width = 760;
       const height = 220;
-      const pad = { top: 18, right: 20, bottom: 34, left: 20 };
+      const pad = { top: 18, right: 20, bottom: 38, left: 26 };
       const innerWidth = width - pad.left - pad.right;
       const innerHeight = height - pad.top - pad.bottom;
 
@@ -1342,33 +1386,36 @@
       }
 
       const maxValue = Math.max(1, ...points.map((p) => p.value));
-      const stepX = points.length > 1 ? innerWidth / (points.length - 1) : innerWidth / 2;
-      const coords = points.map((point, index) => {
-        const x = points.length > 1 ? pad.left + index * stepX : pad.left + innerWidth / 2;
-        const y = pad.top + innerHeight - (point.value / maxValue) * (innerHeight - 14);
-        return { ...point, x, y };
-      });
+      const gap = Math.max(10, Math.floor(innerWidth / Math.max(points.length, 8) * 0.22));
+      const barWidth = Math.max(26, (innerWidth - gap * (points.length - 1)) / points.length);
 
       const grid = [0.25, 0.5, 0.75, 1].map((ratio) => {
         const y = pad.top + innerHeight - innerHeight * ratio;
-        return `<line x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}" stroke="rgba(255,255,255,0.08)" stroke-width="1"></line>`;
+        const label = Math.round(maxValue * ratio);
+        return `
+          <line x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}" stroke="rgba(255,255,255,0.08)" stroke-width="1"></line>
+          <text x="${pad.left - 6}" y="${y + 4}" text-anchor="end" fill="#96a3b5" font-size="11" font-weight="700">${label}</text>
+        `;
       }).join('');
 
-      const axis = `<line x1="${pad.left}" y1="${pad.top + innerHeight}" x2="${width - pad.right}" y2="${pad.top + innerHeight}" stroke="rgba(255,255,255,0.12)" stroke-width="1.2"></line>`;
-      const polylinePoints = coords.map((point) => `${point.x},${point.y}`).join(' ');
-      const areaPoints = `${pad.left},${pad.top + innerHeight} ${polylinePoints} ${coords[coords.length - 1].x},${pad.top + innerHeight}`;
-      const area = `<polygon points="${areaPoints}" fill="rgba(240,162,90,0.12)"></polygon>`;
-      const path = `<polyline points="${polylinePoints}" fill="none" stroke="rgba(240,162,90,0.95)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>`;
-      const dots = coords.map((point) => `
-        <circle cx="${point.x}" cy="${point.y}" r="5.5" fill="#f0a25a" stroke="#fff1df" stroke-width="2"></circle>
-        <text x="${point.x}" y="${Math.max(14, point.y - 10)}" text-anchor="middle" fill="#dce6f2" font-size="11" font-weight="700">${point.value}</text>
-        <text x="${point.x}" y="${height - 12}" text-anchor="middle" fill="#96a3b5" font-size="11" font-weight="700">${point.date.slice(5)}</text>
-      `).join('');
+      const axis = `<line x1="${pad.left}" y1="${pad.top + innerHeight}" x2="${width - pad.right}" y2="${pad.top + innerHeight}" stroke="rgba(255,255,255,0.14)" stroke-width="1.2"></line>`;
 
-      svg.innerHTML = `${grid}${axis}${area}${path}${dots}`;
+      const bars = points.map((point, index) => {
+        const x = pad.left + index * (barWidth + gap);
+        const barHeight = (point.value / maxValue) * (innerHeight - 12);
+        const y = pad.top + innerHeight - barHeight;
+        const shortDate = point.date.slice(5);
+        return `
+          <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" rx="12" fill="rgba(240,162,90,0.82)"></rect>
+          <text x="${x + barWidth / 2}" y="${Math.max(14, y - 6)}" text-anchor="middle" fill="#f8fbff" font-size="12" font-weight="800">${point.value}</text>
+          <text x="${x + barWidth / 2}" y="${height - 12}" text-anchor="middle" fill="#96a3b5" font-size="11" font-weight="700">${shortDate}</text>
+        `;
+      }).join('');
+
+      svg.innerHTML = `${grid}${axis}${bars}`;
       const latestPoint = points[points.length - 1];
       const peakPoint = points.reduce((best, cur) => cur.value > best.value ? cur : best, points[0]);
-      els.approvalTrendSummary.textContent = `วันที่ล่าสุดในกราฟ ${latestPoint.date} เพิ่ม ${latestPoint.value.toLocaleString()} รายการ • วันที่เพิ่มสูงสุด ${peakPoint.date} จำนวน ${peakPoint.value.toLocaleString()} รายการ`;
+      els.approvalTrendSummary.textContent = `ข้อมูลล่าสุดวันที่ ${latestPoint.date} วันนี้อนุมัติ ${latestPoint.value.toLocaleString()} ID • วันที่อนุมัติสูงสุด ${peakPoint.date} จำนวน ${peakPoint.value.toLocaleString()} ID`;
     }
 
     function fillInputs(branchName) {
@@ -1453,6 +1500,7 @@
       const allClosed = cardGap === 0 && idGap === 0 && newIdGap === 0;
       const improving = cardDiff >= 0 && idDiff >= 0 && newIdDiff >= 0;
       const dailyNewIdPoints = buildDailyNewIdIncrements(branchRows);
+      const todayApprovedNewId = getTodayApprovedNewId(branchRows);
 
       els.exportDateSourceText.textContent = `ข้อมูลจากวันที่ ${latest.date} • สรุปสิ้นวัน`;
       els.resultLatestDateBadge.textContent = `ข้อมูลวันที่ ${latest.date}`;
@@ -1479,6 +1527,8 @@
       els.remainingDaysValue.textContent = remainingDays.toLocaleString();
       els.remainingDaysSub.textContent = `หลังวันสรุป ${latest.date} ยังเหลือ ${remainingDays.toLocaleString()} วันทำการ (ไม่รวมเสาร์ อาทิตย์ วันหยุด และลบเพิ่มอีก 1 วัน)`;
       renderRunrateCard(latest.resultNewId, targets.newIdTarget, latest.date, appState.holidays);
+      els.todayApprovedDateText.textContent = `ข้อมูลวันที่ ${latest.date}`;
+      els.todayApprovedValue.textContent = todayApprovedNewId.toLocaleString();
       renderApprovalTrendChart(dailyNewIdPoints);
 
       if (allClosed) {
@@ -1569,10 +1619,14 @@
         { date: '2026-03-12', resultNewId: 22 }
       ]);
       console.assert(trendPoints.length === 3, 'trend points should keep same length as rows');
-      console.assert(trendPoints[0].value === 0, 'first trend point should be zero when no previous day exists');
+      console.assert(trendPoints[0].value === 10, 'first trend point should equal first available end-of-day new id');
       console.assert(trendPoints[2].value === 7, 'trend points should use day-over-day delta');
       renderApprovalTrendChart(trendPoints);
-      console.assert(els.approvalTrendChart.innerHTML.includes('polyline'), 'chart should render as line chart');
+      console.assert(els.approvalTrendChart.innerHTML.includes('rect'), 'chart should render daily approval bars clearly');
+      console.assert(getTodayApprovedNewId([
+        { date: '2026-03-10', resultNewId: 10 },
+        { date: '2026-03-11', resultNewId: 15 }
+      ]) === 5, 'today approved new id should be latest minus previous end-of-day total');
       const tempPercent = document.createElement('div');
       setPercentBadge(tempPercent, 100, 100);
       console.assert(tempPercent.className === 'card-percent good', 'percent badge good');
@@ -1584,6 +1638,8 @@
       console.assert(!tempRunrate.innerHTML.includes('%'), 'runrate inline should show KPI count, not %');
       renderRunrateCard(76, 190, '2026-03-13', '');
       console.assert(els.runrateEmoji.textContent.length > 0, 'summary card should show emoji');
+      console.assert(document.getElementById('todayApprovedValue'), 'summary card should show today approved value');
+      console.assert(document.getElementById('todayApprovedDateText'), 'summary card should show today approved date text');
       console.assert(els.runrateSubText.innerHTML.includes('Runrate'), 'summary card should mention runrate');
       const exportStyles = getComputedStyle(els.captureArea);
       console.assert(exportStyles.overflow === 'visible', 'export frame should allow page scrolling before export');
