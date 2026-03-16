@@ -6,79 +6,68 @@
   <title>Insurance License Dashboard</title>
   <style>
     :root {
-      --bg: #f3f7fb;
-      --panel: rgba(255, 255, 255, 0.94);
-      --panel-strong: #ffffff;
-      --line: #d9e3ee;
-      --text: #17212f;
-      --muted: #6b7a90;
-      --blue: #2563eb;
-      --blue-soft: #e8f0ff;
-      --green: #0f766e;
-      --green-soft: #dff8f1;
-      --amber: #b45309;
-      --amber-soft: #fff2cf;
-      --red: #b91c1c;
-      --red-soft: #ffe2e2;
-      --slate-soft: #eef3f8;
+      --bg: #f4f7fb;
+      --surface: rgba(255,255,255,0.94);
+      --border: #dbe3ee;
+      --text: #18212f;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --primary-soft: #dbeafe;
+      --success: #0f766e;
+      --success-soft: #ccfbf1;
+      --warn: #b45309;
+      --warn-soft: #fef3c7;
+      --danger: #b91c1c;
+      --danger-soft: #fee2e2;
       --shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
-      --radius-xl: 28px;
-      --radius-lg: 22px;
-      --radius-md: 16px;
+      --radius: 22px;
     }
 
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--text);
       background:
-        radial-gradient(circle at top left, rgba(37,99,235,.12), transparent 26%),
-        radial-gradient(circle at top right, rgba(14,165,233,.10), transparent 22%),
-        linear-gradient(180deg, #eef4fb 0%, #f8fbfd 100%);
+        radial-gradient(circle at top left, rgba(59,130,246,0.12), transparent 30%),
+        radial-gradient(circle at top right, rgba(14,165,233,0.10), transparent 24%),
+        linear-gradient(180deg, #eef4fb 0%, #f7f9fc 100%);
+      color: var(--text);
     }
 
-    .container {
-      max-width: 1480px;
+    .shell {
+      max-width: 1500px;
       margin: 0 auto;
       padding: 28px;
     }
 
-    .panel {
-      background: var(--panel);
-      border: 1px solid rgba(217, 227, 238, 0.95);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-    }
-
     .hero {
-      display: grid;
-      grid-template-columns: 1.25fr .95fr;
-      gap: 18px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(244,248,255,0.92));
+      border: 1px solid rgba(219,227,238,0.9);
+      border-radius: 30px;
       padding: 28px;
-      border-radius: var(--radius-xl);
-      margin-bottom: 20px;
-      background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(242,247,255,.92));
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 20px;
+      align-items: stretch;
     }
 
-    .hero h1 {
+    .hero-title {
       margin: 0;
-      font-size: clamp(30px, 4vw, 44px);
-      line-height: 1.05;
-      letter-spacing: -0.04em;
+      font-size: clamp(30px, 4vw, 42px);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
     }
 
-    .hero p {
-      margin: 14px 0 0;
+    .hero-sub {
+      margin: 12px 0 0;
+      color: var(--muted);
       font-size: 16px;
       line-height: 1.75;
-      color: var(--muted);
-      max-width: 860px;
+      max-width: 900px;
     }
 
-    .chips, .toolbar, .filters, .branch-list, .header-actions {
+    .chip-row, .toolbar, .meta-row {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
@@ -86,115 +75,135 @@
     }
 
     .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       padding: 10px 14px;
       border-radius: 999px;
-      border: 1px solid var(--line);
       background: #fff;
+      border: 1px solid var(--border);
       color: var(--muted);
       font-size: 13px;
-      font-weight: 800;
+      font-weight: 700;
     }
 
-    .upload-card {
+    .panel {
+      background: var(--surface);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(219,227,238,0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .upload-box {
       padding: 22px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
       justify-content: space-between;
     }
 
-    .dropzone {
-      border: 1.5px dashed #bfd2e6;
+    .upload-drop {
+      border: 1.5px dashed #bfd0e6;
       border-radius: 20px;
-      background: linear-gradient(180deg, #ffffff, #f7fbff);
       padding: 18px;
+      background: linear-gradient(180deg, #ffffff, #f7fbff);
     }
 
-    .dropzone-title {
-      font-size: 15px;
-      font-weight: 900;
+    .upload-title {
+      font-size: 16px;
+      font-weight: 800;
       margin-bottom: 6px;
     }
 
-    .subtle {
-      color: var(--muted);
-      line-height: 1.65;
-      font-size: 14px;
-    }
+    .muted { color: var(--muted); }
+    .hidden { display: none !important; }
 
     .btn {
-      appearance: none;
       border: none;
       border-radius: 14px;
       padding: 12px 16px;
       font-size: 14px;
-      font-weight: 900;
+      font-weight: 800;
       cursor: pointer;
       transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+      text-decoration: none;
     }
+
     .btn:hover { transform: translateY(-1px); }
-    .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
-    .btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; box-shadow: 0 16px 28px rgba(37,99,235,.22); }
-    .btn-secondary { background: #fff; border: 1px solid var(--line); color: var(--text); }
-    .btn-soft { background: var(--blue-soft); color: var(--blue); }
-    .btn-danger { background: #fff1f2; color: var(--red); }
+    .btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; box-shadow: 0 16px 28px rgba(37, 99, 235, 0.22); }
+    .btn-secondary { background: #fff; color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost { background: #eff6ff; color: #1d4ed8; }
 
-    input[type="file"] { display: none; }
+    .file-input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
 
-    .stats {
+    .file-picker-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    .grid-cards {
       display: grid;
       grid-template-columns: repeat(6, minmax(0, 1fr));
       gap: 16px;
-      margin-bottom: 18px;
+      margin-top: 22px;
     }
 
-    .stat-card {
+    .card {
       padding: 18px;
-      min-height: 130px;
+      min-height: 132px;
       position: relative;
       overflow: hidden;
     }
-    .stat-card::after {
+
+    .card::after {
       content: "";
       position: absolute;
-      right: -30px;
-      bottom: -42px;
-      width: 118px;
-      height: 118px;
-      border-radius: 999px;
+      inset: auto -32px -40px auto;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
       background: rgba(37,99,235,.06);
     }
-    .tone-blue { background: linear-gradient(160deg, #ffffff, #eef5ff); }
-    .tone-green { background: linear-gradient(160deg, #ffffff, #eefdf7); }
-    .tone-amber { background: linear-gradient(160deg, #ffffff, #fff9eb); }
-    .tone-red { background: linear-gradient(160deg, #ffffff, #fff5f5); }
 
-    .stat-label {
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: .05em;
-      text-transform: uppercase;
+    .label {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .02em;
       color: var(--muted);
+      text-transform: uppercase;
     }
-    .stat-value {
-      margin-top: 12px;
+
+    .value {
+      margin-top: 10px;
       font-size: clamp(28px, 3vw, 40px);
-      line-height: 1;
       font-weight: 900;
       letter-spacing: -0.04em;
+      line-height: 1;
     }
-    .stat-hint {
+
+    .hint {
       margin-top: 10px;
-      color: var(--muted);
       font-size: 13px;
+      color: var(--muted);
       line-height: 1.55;
     }
 
-    .grid-2 {
+    .tone-primary { background: linear-gradient(160deg, #ffffff, #eff6ff); }
+    .tone-success { background: linear-gradient(160deg, #ffffff, #ecfdf5); }
+    .tone-warn { background: linear-gradient(160deg, #ffffff, #fffbeb); }
+    .tone-danger { background: linear-gradient(160deg, #ffffff, #fff5f5); }
+
+    .content-grid {
       display: grid;
       grid-template-columns: 1.1fr .9fr;
       gap: 18px;
-      margin-bottom: 18px;
+      margin-top: 18px;
     }
 
     .section {
@@ -204,8 +213,8 @@
     .section-head {
       display: flex;
       justify-content: space-between;
-      gap: 14px;
       align-items: flex-start;
+      gap: 12px;
       margin-bottom: 14px;
     }
 
@@ -218,21 +227,22 @@
     .section-sub {
       margin: 6px 0 0;
       color: var(--muted);
-      line-height: 1.65;
       font-size: 14px;
+      line-height: 1.6;
     }
 
-    .stack-list {
+    .alert-list, .missing-list, .summary-list {
       display: flex;
       flex-direction: column;
       gap: 12px;
+      min-height: 120px;
     }
 
-    .item {
-      background: #fff;
-      border: 1px solid var(--line);
+    .alert-item, .missing-item, .summary-item {
+      border: 1px solid var(--border);
       border-radius: 18px;
       padding: 14px 16px;
+      background: #fff;
       display: grid;
       grid-template-columns: auto 1fr auto;
       gap: 14px;
@@ -242,21 +252,23 @@
     .dot {
       width: 12px;
       height: 12px;
-      border-radius: 999px;
+      border-radius: 50%;
       background: #94a3b8;
     }
-    .dot.green { background: #10b981; }
-    .dot.amber { background: #f59e0b; }
-    .dot.red { background: #ef4444; }
-    .dot.blue { background: #3b82f6; }
+
+    .dot.warn { background: #f59e0b; }
+    .dot.danger { background: #ef4444; }
+    .dot.success { background: #10b981; }
+    .dot.primary { background: #2563eb; }
 
     .name {
       font-size: 15px;
-      font-weight: 900;
+      font-weight: 800;
       margin-bottom: 3px;
+      color: #1f2937;
     }
 
-    .meta {
+    .subline {
       font-size: 13px;
       color: var(--muted);
       line-height: 1.6;
@@ -266,64 +278,69 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      padding: 7px 11px;
       border-radius: 999px;
-      padding: 8px 12px;
       font-size: 12px;
-      font-weight: 900;
+      font-weight: 800;
       white-space: nowrap;
     }
-    .tag.blue { background: var(--blue-soft); color: var(--blue); }
-    .tag.green { background: var(--green-soft); color: var(--green); }
-    .tag.amber { background: var(--amber-soft); color: var(--amber); }
-    .tag.red { background: var(--red-soft); color: var(--red); }
-    .tag.gray { background: #eef3f8; color: #516073; }
 
-    .branch-pill {
-      border: 1px solid var(--line);
-      background: #fff;
-      color: var(--text);
-      border-radius: 999px;
-      padding: 10px 14px;
-      font-size: 13px;
-      font-weight: 900;
-      cursor: pointer;
-    }
-    .branch-pill.active {
-      background: var(--blue-soft);
-      color: var(--blue);
-      border-color: #bfd4ff;
-    }
+    .tag.warn { background: var(--warn-soft); color: var(--warn); }
+    .tag.danger { background: var(--danger-soft); color: var(--danger); }
+    .tag.success { background: var(--success-soft); color: var(--success); }
+    .tag.primary { background: var(--primary-soft); color: var(--primary); }
+    .tag.gray { background: #f1f5f9; color: #475569; }
 
-    .filter-bar {
+    .controls-grid {
       display: grid;
-      grid-template-columns: 1.15fr .7fr .7fr .7fr .7fr;
+      grid-template-columns: 1.1fr .9fr .9fr .8fr;
       gap: 12px;
       margin-top: 16px;
-      margin-bottom: 14px;
     }
 
-    .input, .select {
+    .control {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .control label {
+      font-size: 13px;
+      font-weight: 800;
+      color: #475569;
+    }
+
+    .control input,
+    .control select {
       width: 100%;
-      border: 1px solid var(--line);
+      border: 1px solid var(--border);
       border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 15px;
+      font-weight: 700;
       background: #fff;
-      padding: 12px 14px;
-      font-size: 14px;
       color: var(--text);
       outline: none;
     }
 
+    .control input:focus,
+    .control select:focus {
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+    }
+
     .table-wrap {
+      margin-top: 18px;
       overflow: auto;
-      border: 1px solid var(--line);
+      border: 1px solid var(--border);
       border-radius: 22px;
       background: #fff;
     }
 
     table {
       width: 100%;
-      min-width: 1450px;
       border-collapse: collapse;
+      min-width: 1380px;
     }
 
     thead th {
@@ -332,18 +349,17 @@
       z-index: 2;
       background: #f8fbff;
       color: #334155;
-      text-align: left;
-      font-size: 12px;
+      font-size: 15px;
       font-weight: 900;
-      letter-spacing: .05em;
-      text-transform: uppercase;
-      padding: 14px;
-      border-bottom: 1px solid var(--line);
+      letter-spacing: .02em;
+      padding: 18px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
       white-space: nowrap;
     }
 
     tbody td {
-      padding: 15px 14px;
+      padding: 18px 14px;
       border-bottom: 1px solid #edf2f7;
       vertical-align: top;
       font-size: 14px;
@@ -351,514 +367,613 @@
 
     tbody tr:hover { background: #fbfdff; }
 
-    .person-cell, .branch-cell {
+    .employee-cell {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
+      min-width: 170px;
     }
 
-    .small { font-size: 12px; color: var(--muted); }
+    .emp-id { font-size: 13px; color: var(--muted); }
+    .stack { display: flex; flex-direction: column; gap: 8px; }
+    .tiny { font-size: 13px; color: var(--muted); }
 
     .license-box {
-      min-width: 196px;
-      padding: 11px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
       background: #fcfdff;
+      min-width: 220px;
+    }
+
+    .license-title {
+      font-size: 15px;
+      font-weight: 900;
+      margin-bottom: 8px;
+      color: #1f2937;
+    }
+
+    .license-line {
+      font-size: 14px;
+      color: #475569;
+      line-height: 1.65;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #f8fbff, #ffffff);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .evidence-actions {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      align-items: flex-start;
+      gap: 8px;
+      min-width: 160px;
+    }
+
+    .evidence-actions .btn {
+      width: 100%;
+      justify-content: center;
+      display: inline-flex;
+      align-items: center;
     }
 
     .empty-state {
-      padding: 42px 24px;
+      border: 1px dashed #c6d3e3;
+      border-radius: 18px;
+      padding: 20px;
       text-align: center;
       color: var(--muted);
-      border: 1px dashed #bfd2e6;
-      border-radius: 22px;
-      background: linear-gradient(180deg, #ffffff, #f8fbff);
-    }
-
-    .empty-state h3 {
-      margin: 0 0 8px;
-      color: var(--text);
-      font-size: 22px;
-      letter-spacing: -0.03em;
-    }
-
-    .status-note {
-      margin-top: 14px;
-      padding: 14px 16px;
-      border-radius: 16px;
-      background: #f8fbff;
-      border: 1px solid var(--line);
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.65;
+      background: linear-gradient(180deg, #fbfdff, #f8fbff);
+      min-height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.7;
+      font-weight: 700;
     }
 
     .modal {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, .58);
+      background: rgba(15, 23, 42, 0.56);
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 100;
       padding: 24px;
+      z-index: 50;
     }
+
     .modal.open { display: flex; }
+
     .modal-card {
-      width: min(980px, 100%);
+      width: min(1100px, 100%);
       background: #fff;
       border-radius: 26px;
-      border: 1px solid var(--line);
-      box-shadow: 0 30px 80px rgba(15, 23, 42, .26);
+      box-shadow: 0 30px 80px rgba(15, 23, 42, 0.25);
       overflow: hidden;
+      border: 1px solid var(--border);
     }
-    .modal-head, .modal-body { padding: 20px 22px; }
+
+    .modal-head, .modal-body {
+      padding: 20px 22px;
+    }
+
     .modal-head {
+      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      border-bottom: 1px solid var(--line);
     }
-    .preview-frame {
+
+    .image-preview {
       width: 100%;
-      height: min(70vh, 680px);
-      border: 1px solid var(--line);
+      min-height: 68vh;
       border-radius: 18px;
-      background: linear-gradient(145deg, #eef5ff, #f8fafc);
+      border: 1px dashed #bfd0e6;
+      background: linear-gradient(145deg, #eff6ff, #f8fafc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 700;
+      text-align: left;
+      padding: 18px;
+      line-height: 1.7;
       overflow: hidden;
     }
-    .preview-frame iframe, .preview-frame img {
+
+    .image-preview iframe {
       width: 100%;
-      height: 100%;
-      border: none;
-      object-fit: contain;
+      height: 68vh;
+      border: 0;
+      border-radius: 14px;
       background: #fff;
     }
 
-    @media (max-width: 1200px) {
-      .hero, .grid-2 { grid-template-columns: 1fr; }
-      .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .filter-bar { grid-template-columns: 1fr 1fr 1fr; }
+    .mapping-box {
+      background: #f8fbff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      margin-top: 14px;
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 1180px) {
+      .hero, .content-grid { grid-template-columns: 1fr; }
+      .grid-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .controls-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
     @media (max-width: 760px) {
-      .container { padding: 16px; }
+      .shell { padding: 16px; }
       .hero, .section { padding: 18px; }
-      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .filter-bar { grid-template-columns: 1fr; }
-      .item { grid-template-columns: auto 1fr; }
-      .item > :last-child { grid-column: 2 / -1; justify-self: start; }
-      .stat-value { font-size: 28px; }
+      .grid-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .controls-grid { grid-template-columns: 1fr; }
+      .value { font-size: 28px; }
+      .alert-item, .missing-item, .summary-item { grid-template-columns: auto 1fr; }
+      .alert-item > :last-child, .missing-item > :last-child, .summary-item > :last-child { grid-column: 2 / -1; justify-self: start; }
+      .section-head { flex-direction: column; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <section class="panel hero">
+  <div class="shell">
+    <section class="hero">
       <div>
-        <div class="chips">
-          <span class="chip">รองรับ CSV จาก Google Form</span>
-          <span class="chip">เตรียมต่อ Google Sheet</span>
-          <span class="chip">Merge ข้อมูลล่าสุดอัตโนมัติ</span>
+        <div class="chip-row">
+          <div class="chip">รองรับ CSV จาก Google Form</div>
+          <div class="chip">Merge ข้อมูลซ้ำด้วย Timestamp ล่าสุด</div>
+          <div class="chip">พร้อมต่อ Google Sheet ภายหลัง</div>
         </div>
-        <h1>ระบบแสดงฐานข้อมูล<br>ใบอนุญาตนายหน้าประกัน</h1>
-        <p>
-          สำหรับติดตามพนักงานสาขา <strong>สระบุรี / นครนายก</strong> โดยเริ่มต้นเป็นเว็บเปล่า
-          เมื่ออัปโหลดไฟล์ CSV แล้วระบบจึงเริ่มประมวลผล, รวมข้อมูลซ้ำด้วยรายการล่าสุด,
-          สรุปผู้ที่ยังไม่มีใบอนุญาต, แจ้งเตือนวันหมดอายุล่วงหน้า 60 วัน และเปิดดูภาพหลักฐานที่พนักงานแนบมาได้ทันที
+        <h1 class="hero-title">ระบบแสดงฐานข้อมูล<br/>ใบอนุญาตนายหน้าประกัน</h1>
+        <p class="hero-sub">
+          สำหรับติดตามพนักงานสาขา <strong>สระบุรี / นครนายก</strong> พร้อมสรุปผู้ที่ยังไม่มีใบอนุญาต,
+          แจ้งเตือนวันหมดอายุล่วงหน้า 60 วัน, เปิดดูหลักฐานที่พนักงานอัปโหลดได้ทั้ง <strong>นช.</strong> และ <strong>นว.</strong>
+          และคงโครงสร้างการใช้งานแบบไฟล์ HTML หน้าเดียวสำหรับอัปขึ้น GitHub Pages ได้ทันที
         </p>
       </div>
-      <div class="panel upload-card">
+      <div class="panel upload-box">
         <div>
-          <div class="dropzone-title">นำเข้าข้อมูลจาก CSV</div>
-          <div class="subtle">เวอร์ชันนี้ยังไม่ดึง Google Sheet ตรง แต่โครงสร้างเตรียมไว้สำหรับเชื่อมต่อในอนาคตแล้ว</div>
+          <div class="upload-title">นำเข้าข้อมูลจาก CSV</div>
+          <div class="muted">เริ่มต้นจากหน้าเว็บเปล่า เมื่ออัปโหลด CSV จาก Google Form แล้วระบบจะประมวลผลทันที</div>
         </div>
-
-        <div class="dropzone">
-          <div class="toolbar" style="justify-content:space-between; align-items:flex-start;">
+        <div class="upload-drop">
+          <div class="toolbar" style="justify-content:space-between; gap:12px;">
             <div>
-              <div class="dropzone-title" style="font-size:14px; margin-bottom:4px;">สถานะข้อมูล</div>
-              <div class="subtle" id="sourceFileName">ยังไม่มีไฟล์ข้อมูล</div>
+              <div style="font-weight:800; margin-bottom:4px;">สถานะไฟล์</div>
+              <div class="muted" id="fileStatus">ยังไม่ได้อัปโหลดไฟล์</div>
             </div>
-            <span class="tag blue" id="sourceCountBadge">0 รายการ</span>
+            <div class="tag primary" id="rowCountTag">0 รายการ</div>
           </div>
-          <div class="status-note" id="mergeRuleText">
-            กติกา Merge: ใช้ <strong>รหัสพนักงาน</strong> เป็นคีย์หลัก และเก็บเฉพาะรายการที่มี <strong>Timestamp ใหม่ล่าสุด</strong>
+          <div class="meta-row" style="margin-top:14px; justify-content:space-between;">
+            <div class="tiny">กติกา Merge: ใช้ <strong>รหัสพนักงาน</strong> เป็นคีย์หลัก และเก็บรายการที่ <strong>Timestamp ล่าสุด</strong></div>
           </div>
         </div>
-
         <div class="toolbar">
-          <label class="btn btn-primary" for="csvFileInput">อัปโหลด CSV</label>
-          <button class="btn btn-secondary" id="resetBtn">ล้างข้อมูล</button>
-          <button class="btn btn-soft" id="mappingBtn">ดู Mapping คอลัมน์</button>
+          <div class="file-picker-wrap">
+            <button class="btn btn-primary">อัปโหลด CSV</button>
+            <input class="file-input" id="csvInput" type="file" accept=".csv,text/csv" />
+          </div>
+          <button class="btn btn-secondary" id="resetBtn" type="button">ล้างข้อมูล</button>
+          <button class="btn btn-ghost" id="toggleMappingBtn" type="button">ดู Mapping คอลัมน์</button>
         </div>
-        <input type="file" id="csvFileInput" accept=".csv,text/csv">
+        <div class="mapping-box hidden" id="mappingBox">
+          <strong>คอลัมน์ที่ระบบอ่านตรงจากไฟล์จริง</strong><br>
+          Timestamp, รหัสพนักงาน, สาขาปฏิบัติงาน, คำนำหน้า (ภาษาไทย), ชื่อ (ภาษาไทย), นามสกุล (ภาษาไทย), คำนำหน้า (ภาษาอังกฤษ), First Name (ภาษาอังกฤษ), Last Name (ภาษาอังกฤษ), User Domain (เช่น phanumarsr), ข้อมูลใบอนุญาตนายหน้าประกันชีวิต (นช.), หมายเลขใบอนุญาตนายหน้าประกันชีวิต (ถ้ามี), วันที่ออกบัตร (นช.), วันที่หมดอายุ (นช.), แนบรูปภาพ/ไฟล์ ใบอนุญาตนายหน้าประกันชีวิต (นช.), ข้อมูลใบอนุญาตนายหน้าประกันวินาศภัย (นว.), หมายเลขใบอนุญาตนายหน้าประกันวินาศภัย (ถ้ามี), วันที่ออกบัตร (นว.), วันที่หมดอายุ (นว.), แนบรูปภาพ/ไฟล์ ใบอนุญาตนายหน้าประกันวินาศภัย (นว.)
+        </div>
       </div>
     </section>
 
-    <section class="stats">
-      <div class="panel stat-card tone-blue">
-        <div class="stat-label">พนักงานทั้งหมด</div>
-        <div class="stat-value" id="totalEmployees">0</div>
-        <div class="stat-hint">หลัง Merge ข้อมูลซ้ำเรียบร้อยแล้ว</div>
+    <section class="grid-cards">
+      <div class="panel card tone-primary">
+        <div class="label">พนักงานทั้งหมด</div>
+        <div class="value" id="totalEmployees">0</div>
+        <div class="hint">หลัง Merge ข้อมูลซ้ำเรียบร้อยแล้ว</div>
       </div>
-      <div class="panel stat-card tone-green">
-        <div class="stat-label">มีใบอนุญาตครบ 2 ประเภท</div>
-        <div class="stat-value" id="fullLicense">0</div>
-        <div class="stat-hint">มีทั้ง นช. และ นว.</div>
+      <div class="panel card tone-success">
+        <div class="label">มีใบอนุญาตครบ 2 ประเภท</div>
+        <div class="value" id="fullLicense">0</div>
+        <div class="hint">ติดตามสถานะ นช. + นว. แบบครบถ้วน</div>
       </div>
-      <div class="panel stat-card tone-amber">
-        <div class="stat-label">ยังขาดอย่างน้อย 1 ประเภท</div>
-        <div class="stat-value" id="missingSome">0</div>
-        <div class="stat-hint">ใช้ติดตามสอบหรืออบรมต่อ</div>
+      <div class="panel card tone-warn">
+        <div class="label">ยังขาดอย่างน้อย 1 ประเภท</div>
+        <div class="value" id="missingSome">0</div>
+        <div class="hint">ใช้สำหรับติดตามอบรม / สอบเพิ่มเติม</div>
       </div>
-      <div class="panel stat-card tone-red">
-        <div class="stat-label">ยังไม่มีทั้งสองประเภท</div>
-        <div class="stat-value" id="missingBoth">0</div>
-        <div class="stat-hint">กลุ่มที่ต้องเร่งติดตาม</div>
+      <div class="panel card tone-danger">
+        <div class="label">ยังไม่มีใบอนุญาตทั้งสองประเภท</div>
+        <div class="value" id="missingBoth">0</div>
+        <div class="hint">เป็นกลุ่มเร่งติดตามมากที่สุด</div>
       </div>
-      <div class="panel stat-card tone-amber">
-        <div class="stat-label">ใกล้หมดอายุภายใน 60 วัน</div>
-        <div class="stat-value" id="expiringSoon">0</div>
-        <div class="stat-hint">เตือนเฉพาะคนที่มีใบอนุญาตจริง</div>
+      <div class="panel card tone-warn">
+        <div class="label">ใกล้หมดอายุภายใน 60 วัน</div>
+        <div class="value" id="expiringSoon">0</div>
+        <div class="hint">แจ้งเตือนทุกครั้งเมื่อเข้าหน้าระบบ</div>
       </div>
-      <div class="panel stat-card tone-blue">
-        <div class="stat-label">จำนวนสาขา</div>
-        <div class="stat-value" id="branchCount">0</div>
-        <div class="stat-hint">ดูได้ทั้งแบบรวมและรายสาขา</div>
+      <div class="panel card tone-primary">
+        <div class="label">สาขาที่มีข้อมูล</div>
+        <div class="value" id="branchCount">0</div>
+        <div class="hint">สรุปภาพรวมได้ทั้งแบบรวมและรายสาขา</div>
       </div>
     </section>
 
-    <section class="grid-2">
-      <div class="panel section">
+    <div class="content-grid">
+      <section class="panel section">
         <div class="section-head">
           <div>
             <h2 class="section-title">แจ้งเตือนวันหมดอายุใบอนุญาต</h2>
-            <p class="section-sub">เตือนล่วงหน้า 60 วัน และไม่นำคนที่เลือกสถานะว่าไม่มีใบอนุญาตมาคิดผิดพลาด</p>
+            <p class="section-sub">ระบบเตือนล่วงหน้า 60 วัน แยกตามประเภทใบอนุญาต เพื่อให้ติดตามต่ออายุได้ทันเวลา</p>
           </div>
         </div>
-        <div class="stack-list" id="alertList"></div>
-      </div>
+        <div class="alert-list" id="alertList">
+          <div class="empty-state">อัปโหลดไฟล์ CSV เพื่อเริ่มประมวลผลรายการแจ้งเตือน</div>
+        </div>
+      </section>
 
-      <div class="panel section">
+      <section class="panel section">
         <div class="section-head">
           <div>
             <h2 class="section-title">สรุปพนักงานที่ยังไม่มีใบอนุญาต</h2>
-            <p class="section-sub">พร้อม Export เป็น CSV เฉพาะรายชื่อที่ยังขาดใบอนุญาตจริง</p>
+            <p class="section-sub">พร้อมส่งออก CSV เพื่อใช้ติดตามการสอบ และการอบรมในแต่ละสาขา</p>
           </div>
-          <button class="btn btn-primary" id="exportMissingBtn" disabled>Export CSV</button>
+          <button class="btn btn-primary" id="exportMissingBtn" type="button">Export CSV รายชื่อที่ยังไม่มีใบอนุญาต</button>
         </div>
-        <div class="stack-list" id="missingList"></div>
-      </div>
-    </section>
+        <div class="missing-list" id="missingList">
+          <div class="empty-state">อัปโหลดไฟล์ CSV เพื่อให้ระบบสรุปรายชื่อผู้ที่ยังไม่มีใบอนุญาต</div>
+        </div>
+      </section>
+    </div>
 
-    <section class="panel section" style="margin-bottom:18px;">
+    <section class="panel section" style="margin-top:18px;">
       <div class="section-head">
         <div>
           <h2 class="section-title">ภาพรวมตามสาขา</h2>
-          <p class="section-sub">เลือกดูรวมทั้งหมด หรือแยกสรุปเฉพาะสาขาได้</p>
+          <p class="section-sub">เลือกดูข้อมูลรวมทั้งหมด หรือสรุปเฉพาะสาขา เพื่อใช้ติดตามหน่วยงานย่อยได้ง่ายขึ้น</p>
         </div>
       </div>
-      <div class="branch-list" id="branchPills"></div>
-      <div class="stack-list" id="branchSummary" style="margin-top:16px;"></div>
+      <div class="summary-list" id="branchSummary">
+        <div class="empty-state">เมื่ออัปโหลด CSV แล้ว ระบบจะแสดงสรุปภาพรวมแยกตามสาขาให้อัตโนมัติ</div>
+      </div>
     </section>
 
-    <section class="panel section">
+    <section class="panel section" style="margin-top:18px;">
       <div class="section-head">
         <div>
           <h2 class="section-title">ฐานข้อมูลพนักงานใบอนุญาตนายหน้าประกัน</h2>
-          <p class="section-sub">ข้อมูลจะปรากฏหลังจากอัปโหลด CSV แล้วเท่านั้น โดยระบบใช้ค่าจากคอลัมน์สถานะของฟอร์มตรงๆ</p>
-        </div>
-        <div class="header-actions">
-          <button class="btn btn-secondary" id="downloadSampleBtn">ดาวน์โหลดหัวตารางตัวอย่าง</button>
+          <p class="section-sub">แสดงข้อมูลหลัง Merge โดยเก็บรายการล่าสุดของพนักงานแต่ละคน พร้อมรายละเอียดใบอนุญาตครบทั้งสถานะ เลขที่ วันออกบัตร วันหมดอายุ และหลักฐานแยกตามประเภท</p>
         </div>
       </div>
 
-      <div class="filter-bar">
-        <input class="input" id="searchInput" type="text" placeholder="ค้นหาชื่อ, รหัสพนักงาน, User Domain">
-        <select class="select" id="branchSelect">
-          <option value="ทั้งหมด">ทุกสาขา</option>
-        </select>
-        <select class="select" id="statusFilter">
-          <option value="ทั้งหมด">ทุกสถานะ</option>
-          <option value="ครบ">มีครบ 2 ประเภท</option>
-          <option value="ขาดบางประเภท">ยังขาดบางประเภท</option>
-          <option value="ไม่มีทั้งสอง">ยังไม่มีทั้งสองประเภท</option>
-          <option value="ใกล้หมดอายุ">ใกล้หมดอายุภายใน 60 วัน</option>
-        </select>
-        <select class="select" id="licenseTypeFilter">
-          <option value="ทั้งหมด">ทุกประเภทใบอนุญาต</option>
-          <option value="นช">เฉพาะผู้มีใบ นช.</option>
-          <option value="นว">เฉพาะผู้มีใบ นว.</option>
-          <option value="ทั้งสอง">เฉพาะผู้มีครบทั้งสองประเภท</option>
-        </select>
-        <select class="select" id="sortBy">
-          <option value="branch_name">เรียงตามสาขา / ชื่อ</option>
-          <option value="name">เรียงตามชื่อ</option>
-          <option value="employeeId">เรียงตามรหัสพนักงาน</option>
-          <option value="expiry">เรียงตามวันหมดอายุใกล้สุด</option>
-        </select>
+      <div class="controls-grid">
+        <div class="control">
+          <label for="searchInput">ค้นหาพนักงาน</label>
+          <input id="searchInput" type="text" placeholder="ค้นหาชื่อ รหัสพนักงาน หรือ User Domain" />
+        </div>
+        <div class="control">
+          <label for="branchFilter">สาขา</label>
+          <select id="branchFilter">
+            <option value="ทั้งหมด">ทั้งหมด</option>
+          </select>
+        </div>
+        <div class="control">
+          <label for="statusFilter">สถานะรวม</label>
+          <select id="statusFilter">
+            <option value="all">ทั้งหมด</option>
+            <option value="full">มีครบ</option>
+            <option value="partial">ขาดบางประเภท</option>
+            <option value="none">ไม่มีทั้งสอง</option>
+            <option value="expiring">ใกล้หมดอายุ</option>
+          </select>
+        </div>
+        <div class="control">
+          <label for="licenseFilter">ประเภทใบอนุญาต</label>
+          <select id="licenseFilter">
+            <option value="all">ทุกประเภทใบอนุญาต</option>
+            <option value="life">เฉพาะผู้มีใบ นช.</option>
+            <option value="nonlife">เฉพาะผู้มีใบ นว.</option>
+            <option value="both">เฉพาะผู้มีครบทั้งสอง</option>
+            <option value="missing">เฉพาะผู้ยังขาดใบ</option>
+          </select>
+        </div>
       </div>
 
-      <div id="tableArea">
-        <div class="empty-state">
-          <h3>ยังไม่มีข้อมูลสำหรับแสดงผล</h3>
-          <div>กรุณาอัปโหลดไฟล์ CSV จาก Google Form Responses ก่อน ระบบจึงจะเริ่มประมวลผลและแสดงตารางสรุปทั้งหมด</div>
-        </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>รหัส / พนักงาน</th>
+              <th>สาขา</th>
+              <th>นช. ชีวิต</th>
+              <th>นว. วินาศภัย</th>
+              <th>สถานะรวม</th>
+              <th>แจ้งเตือน</th>
+              <th>หลักฐาน</th>
+            </tr>
+          </thead>
+          <tbody id="employeeTable">
+            <tr>
+              <td colspan="7">
+                <div class="empty-state">อัปโหลดไฟล์ CSV เพื่อเริ่มแสดงข้อมูลพนักงาน</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="footer-note">
+        <strong>แนวทางระบบจริง:</strong> รองรับการอัปโหลด CSV จาก Google Form Responses ในระยะเริ่มต้น,
+        ทำ Data Cleaning อัตโนมัติ, Merge ด้วยข้อมูลที่ใหม่ที่สุด, Export CSV สำหรับผู้ที่ยังไม่มีใบอนุญาต,
+        และเตรียม adapter สำหรับเชื่อม Google Sheet API ในเฟสถัดไปโดยไม่ต้องรื้อหน้าเว็บใหม่
       </div>
     </section>
   </div>
 
-  <div class="modal" id="previewModal">
+  <div class="modal" id="modal">
     <div class="modal-card">
       <div class="modal-head">
         <div>
-          <div style="font-size:20px; font-weight:900; letter-spacing:-0.03em;" id="modalTitle">ภาพหลักฐาน</div>
-          <div class="subtle" id="modalSub">ดูไฟล์แนบจากข้อมูลที่พนักงานอัปโหลด</div>
+          <div style="font-size:20px; font-weight:900; letter-spacing:-0.03em;" id="modalTitle">หลักฐานใบอนุญาต</div>
+          <div class="muted" id="modalSub">แสดงลิงก์หลักฐานที่พนักงานอัปโหลด แยกตามประเภทใบอนุญาต</div>
         </div>
-        <button class="btn btn-secondary" id="closeModalBtn">ปิด</button>
+        <button class="btn btn-secondary" onclick="closeModal()" type="button">ปิด</button>
       </div>
       <div class="modal-body">
-        <div class="preview-frame" id="previewFrame"></div>
+        <div class="image-preview" id="imagePreview">ยังไม่มีข้อมูล</div>
       </div>
     </div>
   </div>
 
   <script>
-    const appState = {
-      rawRows: [],
-      mergedRows: [],
-      selectedBranch: 'ทั้งหมด',
-      search: '',
-      statusFilter: 'ทั้งหมด',
-      licenseTypeFilter: 'ทั้งหมด',
-      sortBy: 'branch_name',
-      sourceFileName: ''
+    const EXACT_COLUMNS = {
+      timestamp: 'Timestamp',
+      employeeId: 'รหัสพนักงาน',
+      branch: 'สาขาปฏิบัติงาน',
+      thTitle: 'คำนำหน้า (ภาษาไทย)',
+      thFirst: 'ชื่อ (ภาษาไทย)',
+      thLast: 'นามสกุล (ภาษาไทย)',
+      enTitle: 'คำนำหน้า (ภาษาอังกฤษ)',
+      enFirst: 'First Name (ภาษาอังกฤษ)',
+      enLast: 'Last Name (ภาษาอังกฤษ)',
+      domain: 'User Domain (เช่น phanumarsr)',
+      lifeStatus: 'ข้อมูลใบอนุญาตนายหน้าประกันชีวิต (นช.)',
+      lifeNo: 'หมายเลขใบอนุญาตนายหน้าประกันชีวิต (ถ้ามี)',
+      lifeIssue: 'วันที่ออกบัตร (นช.)',
+      lifeExpiry: 'วันที่หมดอายุ (นช.)',
+      lifeImage: 'แนบรูปภาพ/ไฟล์ ใบอนุญาตนายหน้าประกันชีวิต (นช.)',
+      nonLifeStatus: 'ข้อมูลใบอนุญาตนายหน้าประกันวินาศภัย (นว.)',
+      nonLifeNo: 'หมายเลขใบอนุญาตนายหน้าประกันวินาศภัย (ถ้ามี)',
+      nonLifeIssue: 'วันที่ออกบัตร (นว.)',
+      nonLifeExpiry: 'วันที่หมดอายุ (นว.)',
+      nonLifeImage: 'แนบรูปภาพ/ไฟล์ ใบอนุญาตนายหน้าประกันวินาศภัย (นว.)'
     };
 
-    const COLUMN_ALIASES = {
-      timestamp: ['Timestamp'],
-      employeeId: ['รหัสพนักงาน'],
-      branch: ['สาขาปฏิบัติงาน', 'สาขา'],
-      thaiTitle: ['คำนำหน้า (ภาษาไทย)'],
-      thaiFirstName: ['ชื่อ (ภาษาไทย)'],
-      thaiLastName: ['นามสกุล (ภาษาไทย)'],
-      engTitle: ['คำนำหน้า (ภาษาอังกฤษ)'],
-      engFirstName: ['First Name (ภาษาอังกฤษ)'],
-      engLastName: ['Last Name (ภาษาอังกฤษ)'],
-      domain: ['User Domain (เช่น phanumarsr)', 'User Domain'],
-      lifeStatus: ['ข้อมูลใบอนุญาตนายหน้าประกันชีวิต (นช.)'],
-      lifeNo: ['หมายเลขใบอนุญาตนายหน้าประกันชีวิต (ถ้ามี)'],
-      lifeIssue: ['วันที่ออกบัตร (นช.)'],
-      lifeExpiry: ['วันที่หมดอายุ (นช.)'],
-      lifeImage: ['แนบรูปภาพ/ไฟล์ ใบอนุญาตนายหน้าประกันชีวิต (นช.)'],
-      nonLifeStatus: ['ข้อมูลใบอนุญาตนายหน้าประกันวินาศภัย (นว.)'],
-      nonLifeNo: ['หมายเลขใบอนุญาตนายหน้าประกันวินาศภัย (ถ้ามี)'],
-      nonLifeIssue: ['วันที่ออกบัตร (นว.)'],
-      nonLifeExpiry: ['วันที่หมดอายุ (นว.)'],
-      nonLifeImage: ['แนบรูปภาพ/ไฟล์ ใบอนุญาตนายหน้าประกันวินาศภัย (นว.)']
-    };
-
-    function normalizeCell(value) {
-      if (value === null || value === undefined) return '';
-      return String(value).trim();
-    }
+    let rawRows = [];
+    let mergedData = [];
 
     function parseCSV(text) {
       const rows = [];
-      let current = '';
       let row = [];
+      let value = '';
       let inQuotes = false;
 
-      for (let i = 0; i < text.length; i += 1) {
-        const ch = text[i];
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
         const next = text[i + 1];
 
-        if (ch === '"') {
+        if (char === '"') {
           if (inQuotes && next === '"') {
-            current += '"';
-            i += 1;
+            value += '"';
+            i++;
           } else {
             inQuotes = !inQuotes;
           }
-          continue;
-        }
-
-        if (ch === ',' && !inQuotes) {
-          row.push(current);
-          current = '';
-          continue;
-        }
-
-        if ((ch === '\n' || ch === '\r') && !inQuotes) {
-          if (ch === '\r' && next === '\n') i += 1;
-          row.push(current);
-          if (row.some(cell => cell !== '')) rows.push(row);
+        } else if (char === ',' && !inQuotes) {
+          row.push(value);
+          value = '';
+        } else if ((char === '\n' || char === '\r') && !inQuotes) {
+          if (char === '\r' && next === '\n') i++;
+          row.push(value);
+          if (row.some(cell => String(cell).trim() !== '')) rows.push(row);
           row = [];
-          current = '';
-          continue;
+          value = '';
+        } else {
+          value += char;
         }
-
-        current += ch;
       }
 
-      if (current.length || row.length) {
-        row.push(current);
-        if (row.some(cell => cell !== '')) rows.push(row);
+      if (value.length || row.length) {
+        row.push(value);
+        if (row.some(cell => String(cell).trim() !== '')) rows.push(row);
       }
 
-      if (!rows.length) return [];
-
-      const headers = rows[0].map(h => normalizeCell(h).replace(/^\uFEFF/, ''));
-      return rows.slice(1).map(cols => {
+      const header = (rows.shift() || []).map(h => String(h || '').trim());
+      return rows.map(cells => {
         const obj = {};
-        headers.forEach((header, index) => {
-          obj[header] = normalizeCell(cols[index] || '');
+        header.forEach((key, idx) => {
+          obj[key] = typeof cells[idx] === 'undefined' ? '' : String(cells[idx]).trim();
         });
         return obj;
       });
     }
 
-    function getField(row, aliases) {
-      for (const key of aliases) {
-        if (row[key] !== undefined) return normalizeCell(row[key]);
+    function safe(value) {
+      const v = String(value ?? '').trim();
+      return v === 'nan' || v === 'NaN' ? '' : v;
+    }
+
+    function compactSpaces(value) {
+      return safe(value).replace(/\s+/g, ' ').trim();
+    }
+
+    function normalizeNumberText(value) {
+      const text = safe(value);
+      if (!text) return '';
+      return text.replace(/\.0$/, '').trim();
+    }
+
+    function buildThaiName(row) {
+      return [safe(row[EXACT_COLUMNS.thTitle]), safe(row[EXACT_COLUMNS.thFirst]), safe(row[EXACT_COLUMNS.thLast])]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+    }
+
+    function buildEnglishName(row) {
+      return [safe(row[EXACT_COLUMNS.enTitle]), safe(row[EXACT_COLUMNS.enFirst]), safe(row[EXACT_COLUMNS.enLast])]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+    }
+
+    function normalizeStatus(status) {
+      const value = compactSpaces(status);
+      if (value === 'มีใบอนุญาต (นช.)' || value === 'มีใบอนุญาต (นว.)') return true;
+      if (value === 'ไม่มีใบอนุญาต (นช.)' || value === 'ไม่มีใบอนุญาต (นว.)') return false;
+      return false;
+    }
+
+    function parseDate(value) {
+      const text = safe(value);
+      if (!text) return null;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+        const date = new Date(text + 'T00:00:00');
+        return Number.isNaN(date.getTime()) ? null : date;
       }
-      return '';
-    }
-
-    function mapRow(row) {
-      return {
-        timestamp: getField(row, COLUMN_ALIASES.timestamp),
-        employeeId: getField(row, COLUMN_ALIASES.employeeId),
-        branch: getField(row, COLUMN_ALIASES.branch),
-        thaiTitle: getField(row, COLUMN_ALIASES.thaiTitle),
-        thaiFirstName: getField(row, COLUMN_ALIASES.thaiFirstName),
-        thaiLastName: getField(row, COLUMN_ALIASES.thaiLastName),
-        engTitle: getField(row, COLUMN_ALIASES.engTitle),
-        engFirstName: getField(row, COLUMN_ALIASES.engFirstName),
-        engLastName: getField(row, COLUMN_ALIASES.engLastName),
-        domain: getField(row, COLUMN_ALIASES.domain),
-        lifeStatus: getField(row, COLUMN_ALIASES.lifeStatus),
-        lifeNo: getField(row, COLUMN_ALIASES.lifeNo),
-        lifeIssue: getField(row, COLUMN_ALIASES.lifeIssue),
-        lifeExpiry: getField(row, COLUMN_ALIASES.lifeExpiry),
-        lifeImage: getField(row, COLUMN_ALIASES.lifeImage),
-        nonLifeStatus: getField(row, COLUMN_ALIASES.nonLifeStatus),
-        nonLifeNo: getField(row, COLUMN_ALIASES.nonLifeNo),
-        nonLifeIssue: getField(row, COLUMN_ALIASES.nonLifeIssue),
-        nonLifeExpiry: getField(row, COLUMN_ALIASES.nonLifeExpiry),
-        nonLifeImage: getField(row, COLUMN_ALIASES.nonLifeImage)
-      };
-    }
-
-    function parseFlexibleDate(value) {
-      const v = normalizeCell(value);
-      if (!v) return null;
-
-      if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
-        const d = new Date(v + 'T00:00:00');
-        return Number.isNaN(d.getTime()) ? null : d;
+      if (/^\d{4}\/\d{2}\/\d{2}/.test(text)) {
+        const date = new Date(text.replace(' GMT+7', ' +07:00'));
+        return Number.isNaN(date.getTime()) ? null : date;
       }
-
-      if (/^\d{4}\/\d{2}\/\d{2}/.test(v)) {
-        const safe = v.replace(' GMT+7', '+07:00').replace(' GMT+07:00', '+07:00');
-        const d = new Date(safe);
-        return Number.isNaN(d.getTime()) ? null : d;
-      }
-
-      const direct = new Date(v);
-      return Number.isNaN(direct.getTime()) ? null : direct;
+      const date = new Date(text);
+      return Number.isNaN(date.getTime()) ? null : date;
     }
 
-    function normalizeLicenseStatus(status) {
-      const raw = normalizeCell(status);
-      const compact = raw.replace(/\s+/g, '');
-
-      if (!compact) return { hasLicense: false, label: 'ไม่ระบุ' };
-      if (compact.startsWith('ไม่มีใบอนุญาต')) return { hasLicense: false, label: raw };
-      if (compact.startsWith('มีใบอนุญาต')) return { hasLicense: true, label: raw };
-      return { hasLicense: false, label: raw || 'ไม่ระบุ' };
-    }
-
-    function fullThaiName(row) {
-      return [row.thaiTitle, row.thaiFirstName, row.thaiLastName].filter(Boolean).join(' ').trim();
-    }
-
-    function fullEngName(row) {
-      return [row.engTitle, row.engFirstName, row.engLastName].filter(Boolean).join(' ').trim();
+    function getTodayStart() {
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate());
     }
 
     function daysUntil(date) {
       if (!date) return null;
-      const today = new Date();
-      today.setHours(0,0,0,0);
-      const target = new Date(date);
-      target.setHours(0,0,0,0);
-      return Math.ceil((target.getTime() - today.getTime()) / 86400000);
+      const today = getTodayStart();
+      const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const diff = target.getTime() - today.getTime();
+      return Math.ceil(diff / (1000 * 60 * 60 * 24));
     }
 
-    function earliestExpiry(row) {
-      const candidates = [];
-      if (row.hasLife && row.lifeExpiryDate) candidates.push(row.lifeExpiryDate.getTime());
-      if (row.hasNonLife && row.nonLifeExpiryDate) candidates.push(row.nonLifeExpiryDate.getTime());
-      return candidates.length ? Math.min(...candidates) : Number.POSITIVE_INFINITY;
+    function formatDate(value) {
+      const date = value instanceof Date ? value : parseDate(value);
+      if (!date) return '—';
+      return new Intl.DateTimeFormat('th-TH', { dateStyle: 'medium' }).format(date);
+    }
+
+    function timestampValue(value) {
+      const date = parseDate(value);
+      return date ? date.getTime() : 0;
+    }
+
+    function toDrivePreviewUrl(url) {
+      const text = safe(url);
+      if (!text) return '';
+      const directIdMatch = text.match(/[?&]id=([^&]+)/);
+      const fileMatch = text.match(/\/d\/([^/]+)/);
+      const fileId = directIdMatch?.[1] || fileMatch?.[1] || '';
+      return fileId ? `https://drive.google.com/file/d/${fileId}/preview` : text;
+    }
+
+    function toDriveOpenUrl(url) {
+      const text = safe(url);
+      if (!text) return '';
+      const directIdMatch = text.match(/[?&]id=([^&]+)/);
+      const fileMatch = text.match(/\/d\/([^/]+)/);
+      const fileId = directIdMatch?.[1] || fileMatch?.[1] || '';
+      return fileId ? `https://drive.google.com/file/d/${fileId}/view` : text;
+    }
+
+    function mapRow(row) {
+      return {
+        timestamp: safe(row[EXACT_COLUMNS.timestamp]),
+        employeeId: normalizeNumberText(row[EXACT_COLUMNS.employeeId]),
+        branch: compactSpaces(row[EXACT_COLUMNS.branch]),
+        thName: buildThaiName(row),
+        enName: buildEnglishName(row),
+        domain: compactSpaces(row[EXACT_COLUMNS.domain]),
+        lifeStatusRaw: compactSpaces(row[EXACT_COLUMNS.lifeStatus]),
+        lifeStatus: normalizeStatus(row[EXACT_COLUMNS.lifeStatus]),
+        lifeNo: normalizeNumberText(row[EXACT_COLUMNS.lifeNo]),
+        lifeIssue: safe(row[EXACT_COLUMNS.lifeIssue]),
+        lifeExpiry: safe(row[EXACT_COLUMNS.lifeExpiry]),
+        lifeImage: safe(row[EXACT_COLUMNS.lifeImage]),
+        nonLifeStatusRaw: compactSpaces(row[EXACT_COLUMNS.nonLifeStatus]),
+        nonLifeStatus: normalizeStatus(row[EXACT_COLUMNS.nonLifeStatus]),
+        nonLifeNo: normalizeNumberText(row[EXACT_COLUMNS.nonLifeNo]),
+        nonLifeIssue: safe(row[EXACT_COLUMNS.nonLifeIssue]),
+        nonLifeExpiry: safe(row[EXACT_COLUMNS.nonLifeExpiry]),
+        nonLifeImage: safe(row[EXACT_COLUMNS.nonLifeImage])
+      };
     }
 
     function mergeLatest(rows) {
       const map = new Map();
-      rows.forEach((row) => {
-        const key = normalizeCell(row.employeeId) || `${normalizeCell(row.branch)}|${normalizeCell(row.thaiFirstName)}|${normalizeCell(row.thaiLastName)}`;
-        const existing = map.get(key);
-        if (!existing) {
+      rows.forEach(row => {
+        const key = row.employeeId || `${row.thName}-${row.domain}`;
+        if (!map.has(key)) {
           map.set(key, row);
           return;
         }
-        const existingDate = parseFlexibleDate(existing.timestamp)?.getTime() || 0;
-        const currentDate = parseFlexibleDate(row.timestamp)?.getTime() || 0;
-        if (currentDate >= existingDate) map.set(key, row);
+        const current = map.get(key);
+        if (timestampValue(row.timestamp) >= timestampValue(current.timestamp)) {
+          map.set(key, row);
+        }
       });
-      return Array.from(map.values());
+      return Array.from(map.values()).sort((a, b) => {
+        const byBranch = a.branch.localeCompare(b.branch, 'th');
+        if (byBranch !== 0) return byBranch;
+        return a.employeeId.localeCompare(b.employeeId, 'th');
+      });
     }
 
-    function enrichRow(row) {
-      const lifeStatus = normalizeLicenseStatus(row.lifeStatus);
-      const nonLifeStatus = normalizeLicenseStatus(row.nonLifeStatus);
-      const lifeExpiryDate = lifeStatus.hasLicense ? parseFlexibleDate(row.lifeExpiry) : null;
-      const nonLifeExpiryDate = nonLifeStatus.hasLicense ? parseFlexibleDate(row.nonLifeExpiry) : null;
-      const lifeDays = lifeStatus.hasLicense ? daysUntil(lifeExpiryDate) : null;
-      const nonLifeDays = nonLifeStatus.hasLicense ? daysUntil(nonLifeExpiryDate) : null;
-
+    function enrich(row) {
+      const hasLife = row.lifeStatus;
+      const hasNonLife = row.nonLifeStatus;
+      const lifeExpiryDate = parseDate(row.lifeExpiry);
+      const nonLifeExpiryDate = parseDate(row.nonLifeExpiry);
+      const lifeDays = hasLife ? daysUntil(lifeExpiryDate) : null;
+      const nonLifeDays = hasNonLife ? daysUntil(nonLifeExpiryDate) : null;
       const alerts = [];
-      if (lifeStatus.hasLicense && lifeDays !== null && lifeDays <= 60) {
-        alerts.push({ tone: lifeDays < 0 ? 'red' : 'amber', label: `นช. ${lifeDays < 0 ? 'หมดอายุแล้ว' : `เหลือ ${lifeDays} วัน`}` });
+
+      if (hasLife && lifeDays !== null && lifeDays <= 60) {
+        alerts.push({ type: lifeDays < 0 ? 'danger' : 'warn', label: `นช. ${lifeDays < 0 ? 'หมดอายุแล้ว' : `เหลือ ${lifeDays} วัน`}` });
       }
-      if (nonLifeStatus.hasLicense && nonLifeDays !== null && nonLifeDays <= 60) {
-        alerts.push({ tone: nonLifeDays < 0 ? 'red' : 'amber', label: `นว. ${nonLifeDays < 0 ? 'หมดอายุแล้ว' : `เหลือ ${nonLifeDays} วัน`}` });
+      if (hasNonLife && nonLifeDays !== null && nonLifeDays <= 60) {
+        alerts.push({ type: nonLifeDays < 0 ? 'danger' : 'warn', label: `นว. ${nonLifeDays < 0 ? 'หมดอายุแล้ว' : `เหลือ ${nonLifeDays} วัน`}` });
       }
 
       let summaryStatus = 'มีครบ 2 ประเภท';
-      let summaryTone = 'green';
-      if (!lifeStatus.hasLicense && !nonLifeStatus.hasLicense) {
-        summaryStatus = 'ยังไม่มีทั้งสองประเภท';
-        summaryTone = 'red';
-      } else if (!lifeStatus.hasLicense || !nonLifeStatus.hasLicense) {
+      let summaryTone = 'success';
+      if (!hasLife && !hasNonLife) {
+        summaryStatus = 'ยังไม่มีทั้ง 2 ประเภท';
+        summaryTone = 'danger';
+      } else if (!hasLife || !hasNonLife) {
         summaryStatus = 'ยังขาดบางประเภท';
-        summaryTone = 'amber';
+        summaryTone = 'warn';
       }
 
       return {
         ...row,
-        nameTh: fullThaiName(row),
-        nameEn: fullEngName(row),
-        hasLife: lifeStatus.hasLicense,
-        hasNonLife: nonLifeStatus.hasLicense,
-        lifeStatusLabel: lifeStatus.label,
-        nonLifeStatusLabel: nonLifeStatus.label,
+        hasLife,
+        hasNonLife,
         lifeExpiryDate,
         nonLifeExpiryDate,
         lifeDays,
@@ -869,437 +984,309 @@
       };
     }
 
-    function formatDate(date) {
-      if (!date) return '—';
-      return new Intl.DateTimeFormat('th-TH', { dateStyle: 'medium' }).format(date);
+    function licenseHTML(title, rawStatus, no, issue, expiry) {
+      return `
+        <div class="license-box">
+          <div class="license-title">${title}</div>
+          <div class="license-line">สถานะ: ${rawStatus || '—'}</div>
+          <div class="license-line">เลขที่: ${no || '—'}</div>
+          <div class="license-line">วันออกบัตร: ${issue ? formatDate(issue) : '—'}</div>
+          <div class="license-line">วันหมดอายุ: ${expiry ? formatDate(expiry) : '—'}</div>
+        </div>
+      `;
     }
 
-    function setSummaryStats(data) {
+    function updateFileInfo(name, count) {
+      document.getElementById('fileStatus').textContent = name || 'ยังไม่ได้อัปโหลดไฟล์';
+      document.getElementById('rowCountTag').textContent = `${count} รายการ`;
+    }
+
+    function renderStats(data) {
       document.getElementById('totalEmployees').textContent = data.length;
-      document.getElementById('fullLicense').textContent = data.filter(r => r.hasLife && r.hasNonLife).length;
-      document.getElementById('missingSome').textContent = data.filter(r => (r.hasLife && !r.hasNonLife) || (!r.hasLife && r.hasNonLife)).length;
-      document.getElementById('missingBoth').textContent = data.filter(r => !r.hasLife && !r.hasNonLife).length;
-      document.getElementById('expiringSoon').textContent = data.filter(r => r.alerts.length > 0).length;
-      document.getElementById('branchCount').textContent = new Set(data.map(r => r.branch).filter(Boolean)).size;
-      document.getElementById('sourceCountBadge').textContent = `${appState.rawRows.length} รายการ`;
-      document.getElementById('sourceFileName').textContent = appState.sourceFileName || 'ยังไม่มีไฟล์ข้อมูล';
-      document.getElementById('exportMissingBtn').disabled = data.filter(r => !r.hasLife || !r.hasNonLife).length === 0;
+      document.getElementById('fullLicense').textContent = data.filter(d => d.hasLife && d.hasNonLife).length;
+      document.getElementById('missingSome').textContent = data.filter(d => (d.hasLife && !d.hasNonLife) || (!d.hasLife && d.hasNonLife)).length;
+      document.getElementById('missingBoth').textContent = data.filter(d => !d.hasLife && !d.hasNonLife).length;
+      document.getElementById('expiringSoon').textContent = data.filter(d => d.alerts.length > 0).length;
+      document.getElementById('branchCount').textContent = new Set(data.map(d => d.branch).filter(Boolean)).size;
     }
 
-    function renderAlertList(data) {
-      const container = document.getElementById('alertList');
-      const items = data
-        .flatMap(row => row.alerts.map(alert => ({ row, alert })))
-        .sort((a, b) => earliestExpiry(a.row) - earliestExpiry(b.row));
-
-      if (!items.length) {
-        container.innerHTML = `
-          <div class="item">
-            <div class="dot green"></div>
-            <div>
-              <div class="name">ยังไม่มีรายการเตือน</div>
-              <div class="meta">หลังอัปโหลดข้อมูลแล้ว ระบบจะแจ้งเฉพาะคนที่มีใบอนุญาตจริงและใกล้หมดอายุภายใน 60 วัน</div>
-            </div>
-            <div class="tag green">พร้อมใช้งาน</div>
-          </div>`;
+    function renderAlerts(data) {
+      const rows = data.flatMap(row => row.alerts.map(alert => ({ row, alert })));
+      const el = document.getElementById('alertList');
+      if (!data.length) {
+        el.innerHTML = '<div class="empty-state">อัปโหลดไฟล์ CSV เพื่อเริ่มประมวลผลรายการแจ้งเตือน</div>';
         return;
       }
-
-      container.innerHTML = items.slice(0, 8).map(({ row, alert }) => `
-        <div class="item">
-          <div class="dot ${alert.tone}"></div>
+      if (!rows.length) {
+        el.innerHTML = `<div class="alert-item"><div class="dot success"></div><div><div class="name">ยังไม่มีรายการเตือนในมุมมองนี้</div><div class="subline">เมื่อมีใบอนุญาตใกล้หมดอายุภายใน 60 วัน ระบบจะแสดงแจ้งเตือนอัตโนมัติ</div></div><div class="tag success">พร้อมใช้งาน</div></div>`;
+        return;
+      }
+      rows.sort((a, b) => {
+        const ad = Math.min(a.row.lifeDays ?? 9999, a.row.nonLifeDays ?? 9999);
+        const bd = Math.min(b.row.lifeDays ?? 9999, b.row.nonLifeDays ?? 9999);
+        return ad - bd;
+      });
+      el.innerHTML = rows.slice(0, 8).map(({ row, alert }) => `
+        <div class="alert-item">
+          <div class="dot ${alert.type}"></div>
           <div>
-            <div class="name">${escapeHtml(row.nameTh || row.employeeId)}</div>
-            <div class="meta">รหัส ${escapeHtml(row.employeeId)} • ${escapeHtml(row.branch || 'ไม่ระบุสาขา')} • ${escapeHtml(alert.label)}</div>
+            <div class="name">${row.thName || 'ไม่ระบุชื่อ'}</div>
+            <div class="subline">รหัส ${row.employeeId || '-'} • ${row.branch || '-'} • ${alert.label}</div>
           </div>
-          <div class="tag ${alert.tone}">${escapeHtml(row.summaryStatus)}</div>
-        </div>`).join('');
+          <div class="tag ${alert.type}">${row.summaryStatus}</div>
+        </div>
+      `).join('');
     }
 
-    function renderMissingList(data) {
-      const container = document.getElementById('missingList');
-      const missing = data.filter(r => !r.hasLife || !r.hasNonLife);
-
-      if (!missing.length) {
-        container.innerHTML = `
-          <div class="item">
-            <div class="dot green"></div>
-            <div>
-              <div class="name">ยังไม่มีรายชื่อที่ขาดใบอนุญาต</div>
-              <div class="meta">เมื่ออัปโหลดข้อมูลแล้ว ระบบจะแสดงเฉพาะคนที่ยังไม่มีใบอนุญาตบางประเภทหรือทั้งสองประเภท</div>
-            </div>
-            <div class="tag green">ครบถ้วน</div>
-          </div>`;
+    function renderMissing(data) {
+      const missing = data.filter(row => !row.hasLife || !row.hasNonLife);
+      const el = document.getElementById('missingList');
+      if (!data.length) {
+        el.innerHTML = '<div class="empty-state">อัปโหลดไฟล์ CSV เพื่อให้ระบบสรุปรายชื่อผู้ที่ยังไม่มีใบอนุญาต</div>';
         return;
       }
-
-      container.innerHTML = missing.slice(0, 8).map((row) => {
+      if (!missing.length) {
+        el.innerHTML = `<div class="missing-item"><div class="dot success"></div><div><div class="name">ทุกคนมีใบอนุญาตครบแล้ว</div><div class="subline">สามารถส่งออก CSV ได้เมื่อมีพนักงานที่ขาดใบอนุญาต</div></div><div class="tag success">ครบถ้วน</div></div>`;
+        return;
+      }
+      el.innerHTML = missing.slice(0, 8).map(row => {
         const needed = [];
         if (!row.hasLife) needed.push('นช.');
         if (!row.hasNonLife) needed.push('นว.');
         return `
-          <div class="item">
+          <div class="missing-item">
             <div class="dot ${row.summaryTone}"></div>
             <div>
-              <div class="name">${escapeHtml(row.nameTh || row.employeeId)}</div>
-              <div class="meta">รหัส ${escapeHtml(row.employeeId)} • ${escapeHtml(row.branch || 'ไม่ระบุสาขา')} • ต้องติดตาม ${needed.join(' + ')}</div>
+              <div class="name">${row.thName || 'ไม่ระบุชื่อ'}</div>
+              <div class="subline">รหัส ${row.employeeId || '-'} • ${row.branch || '-'} • ต้องติดตาม ${needed.join(' + ')}</div>
             </div>
             <div class="tag ${row.summaryTone}">${needed.join(' / ')}</div>
-          </div>`;
+          </div>
+        `;
       }).join('');
     }
 
-    function renderBranches(allRows) {
-      const branches = ['ทั้งหมด', ...Array.from(new Set(allRows.map(r => r.branch).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'th'))];
-      const pillWrap = document.getElementById('branchPills');
-      const select = document.getElementById('branchSelect');
-
-      pillWrap.innerHTML = branches.map(branch => `
-        <button class="branch-pill ${appState.selectedBranch === branch ? 'active' : ''}" data-branch="${escapeHtml(branch)}">${escapeHtml(branch)}</button>`).join('');
-
-      select.innerHTML = branches.map(branch => `<option value="${escapeHtml(branch)}" ${appState.selectedBranch === branch ? 'selected' : ''}>${escapeHtml(branch)}</option>`).join('');
-
-      pillWrap.querySelectorAll('[data-branch]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          appState.selectedBranch = btn.getAttribute('data-branch');
-          document.getElementById('branchSelect').value = appState.selectedBranch;
-          rerender();
-        });
-      });
-
-      const summary = document.getElementById('branchSummary');
-      const targetBranches = appState.selectedBranch === 'ทั้งหมด' ? branches.slice(1) : [appState.selectedBranch];
-      if (!targetBranches.length) {
-        summary.innerHTML = `
-          <div class="item">
-            <div class="dot blue"></div>
-            <div>
-              <div class="name">ยังไม่มีข้อมูลสาขา</div>
-              <div class="meta">อัปโหลด CSV แล้วระบบจะสร้างสรุปรายสาขาอัตโนมัติ</div>
-            </div>
-            <div class="tag blue">รอข้อมูล</div>
-          </div>`;
+    function renderBranchSummary(data) {
+      const el = document.getElementById('branchSummary');
+      if (!data.length) {
+        el.innerHTML = '<div class="empty-state">เมื่ออัปโหลด CSV แล้ว ระบบจะแสดงสรุปภาพรวมแยกตามสาขาให้อัตโนมัติ</div>';
         return;
       }
-
-      summary.innerHTML = targetBranches.map(branch => {
-        const rows = allRows.filter(r => r.branch === branch);
+      const byBranch = Array.from(new Set(data.map(row => row.branch).filter(Boolean)));
+      el.innerHTML = byBranch.map(branch => {
+        const rows = data.filter(r => r.branch === branch);
+        const total = rows.length;
+        const full = rows.filter(r => r.hasLife && r.hasNonLife).length;
+        const missing = rows.filter(r => !r.hasLife || !r.hasNonLife).length;
+        const expiring = rows.filter(r => r.alerts.length > 0).length;
         return `
-          <div class="item">
-            <div class="dot blue"></div>
+          <div class="summary-item">
+            <div class="dot primary"></div>
             <div>
-              <div class="name">${escapeHtml(branch)}</div>
-              <div class="meta">พนักงาน ${rows.length} คน • มีครบ ${rows.filter(r => r.hasLife && r.hasNonLife).length} คน • ขาดใบอนุญาต ${rows.filter(r => !r.hasLife || !r.hasNonLife).length} คน • ใกล้หมดอายุ ${rows.filter(r => r.alerts.length).length} คน</div>
+              <div class="name">${branch}</div>
+              <div class="subline">พนักงาน ${total} คน • มีครบ ${full} คน • ขาดใบอนุญาต ${missing} คน • ใกล้หมดอายุ ${expiring} คน</div>
             </div>
-            <div class="tag blue">สรุปรายสาขา</div>
-          </div>`;
+            <div class="tag primary">สรุปรายสาขา</div>
+          </div>
+        `;
       }).join('');
     }
 
-    function filterAndSortRows() {
-      let rows = [...appState.mergedRows];
-      if (appState.selectedBranch !== 'ทั้งหมด') {
-        rows = rows.filter(r => r.branch === appState.selectedBranch);
-      }
-
-      const q = appState.search.trim().toLowerCase();
-      if (q) {
-        rows = rows.filter(r => [r.employeeId, r.nameTh, r.nameEn, r.domain, r.branch].some(v => normalizeCell(v).toLowerCase().includes(q)));
-      }
-
-      if (appState.statusFilter === 'ครบ') rows = rows.filter(r => r.hasLife && r.hasNonLife);
-      if (appState.statusFilter === 'ขาดบางประเภท') rows = rows.filter(r => (r.hasLife && !r.hasNonLife) || (!r.hasLife && r.hasNonLife));
-      if (appState.statusFilter === 'ไม่มีทั้งสอง') rows = rows.filter(r => !r.hasLife && !r.hasNonLife);
-      if (appState.statusFilter === 'ใกล้หมดอายุ') rows = rows.filter(r => r.alerts.length > 0);
-
-      if (appState.licenseTypeFilter === 'นช') rows = rows.filter(r => r.hasLife);
-      if (appState.licenseTypeFilter === 'นว') rows = rows.filter(r => r.hasNonLife);
-      if (appState.licenseTypeFilter === 'ทั้งสอง') rows = rows.filter(r => r.hasLife && r.hasNonLife);
-
-      if (appState.sortBy === 'name') {
-        rows.sort((a,b) => (a.nameTh || '').localeCompare(b.nameTh || '', 'th'));
-      } else if (appState.sortBy === 'employeeId') {
-        rows.sort((a,b) => (a.employeeId || '').localeCompare(b.employeeId || '', 'th'));
-      } else if (appState.sortBy === 'expiry') {
-        rows.sort((a,b) => earliestExpiry(a) - earliestExpiry(b));
-      } else {
-        rows.sort((a,b) => (a.branch || '').localeCompare(b.branch || '', 'th') || (a.nameTh || '').localeCompare(b.nameTh || '', 'th'));
-      }
-      return rows;
+    function renderBranchFilterOptions(data) {
+      const select = document.getElementById('branchFilter');
+      const current = select.value;
+      const branches = ['ทั้งหมด', ...Array.from(new Set(data.map(row => row.branch).filter(Boolean)))];
+      select.innerHTML = branches.map(branch => `<option value="${branch}">${branch}</option>`).join('');
+      select.value = branches.includes(current) ? current : 'ทั้งหมด';
     }
 
-    function licenseBoxHtml(title, hasLicense, statusLabel, licenseNo, issueDate, expiryDate) {
-      return `
-        <div class="license-box">
-          <div class="name">${title}</div>
-          <div class="meta">สถานะ: ${escapeHtml(statusLabel || (hasLicense ? 'มีใบอนุญาต' : 'ไม่มีใบอนุญาต'))}</div>
-          <div class="meta">เลขที่: ${escapeHtml(licenseNo || '—')}</div>
-          <div class="meta">วันที่ออกบัตร: ${issueDate ? escapeHtml(issueDate) : '—'}</div>
-          <div class="meta">วันหมดอายุ: ${expiryDate ? formatDate(expiryDate) : '—'}</div>
-        </div>`;
-    }
+    function getFilteredData() {
+      const search = document.getElementById('searchInput').value.trim().toLowerCase();
+      const branch = document.getElementById('branchFilter').value;
+      const status = document.getElementById('statusFilter').value;
+      const license = document.getElementById('licenseFilter').value;
 
-    function renderTable() {
-      const rows = filterAndSortRows();
-      const area = document.getElementById('tableArea');
-
-      if (!appState.mergedRows.length) {
-        area.innerHTML = `
-          <div class="empty-state">
-            <h3>ยังไม่มีข้อมูลสำหรับแสดงผล</h3>
-            <div>กรุณาอัปโหลดไฟล์ CSV จาก Google Form Responses ก่อน ระบบจึงจะเริ่มประมวลผลและแสดงตารางสรุปทั้งหมด</div>
-          </div>`;
-        return;
-      }
-
-      if (!rows.length) {
-        area.innerHTML = `
-          <div class="empty-state">
-            <h3>ไม่พบข้อมูลตามตัวกรองที่เลือก</h3>
-            <div>ลองเปลี่ยนคำค้นหา สาขา หรือสถานะ เพื่อดูข้อมูลส่วนอื่น</div>
-          </div>`;
-        return;
-      }
-
-      area.innerHTML = `
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>รหัส / พนักงาน</th>
-                <th>สาขา</th>
-                <th>นช. ประกันชีวิต</th>
-                <th>นว. วินาศภัย</th>
-                <th>สถานะรวม</th>
-                <th>แจ้งเตือน</th>
-                <th>หลักฐาน</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows.map(row => `
-                <tr>
-                  <td>
-                    <div class="person-cell">
-                      <div class="name">${escapeHtml(row.nameTh || 'ไม่ระบุชื่อ')}</div>
-                      <div class="small">รหัส ${escapeHtml(row.employeeId || '—')}</div>
-                      <div class="small">${escapeHtml(row.nameEn || '—')}</div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="branch-cell">
-                      <div class="name">${escapeHtml(row.branch || '—')}</div>
-                      <div class="small">${escapeHtml(row.domain || '—')}</div>
-                    </div>
-                  </td>
-                  <td>${licenseBoxHtml('นช. ประกันชีวิต', row.hasLife, row.lifeStatusLabel, row.lifeNo, row.lifeIssue, row.lifeExpiryDate)}</td>
-                  <td>${licenseBoxHtml('นว. วินาศภัย', row.hasNonLife, row.nonLifeStatusLabel, row.nonLifeNo, row.nonLifeIssue, row.nonLifeExpiryDate)}</td>
-                  <td><span class="tag ${row.summaryTone}">${escapeHtml(row.summaryStatus)}</span></td>
-                  <td>${row.alerts.length ? row.alerts.map(a => `<div class="tag ${a.tone}" style="margin-bottom:6px;">${escapeHtml(a.label)}</div>`).join('') : '<span class="tag green">ปกติ</span>'}</td>
-                  <td>
-                    <div class="toolbar" style="flex-direction:column; align-items:flex-start;">
-                      ${row.lifeImage ? `<button class="btn btn-secondary preview-single-btn" data-name="${escapeHtmlAttr(row.nameTh || row.employeeId)}" data-type="นช." data-url="${escapeHtmlAttr(row.lifeImage || '')}">ดูภาพ นช.</button>` : ''}
-                      ${row.nonLifeImage ? `<button class="btn btn-secondary preview-single-btn" data-name="${escapeHtmlAttr(row.nameTh || row.employeeId)}" data-type="นว." data-url="${escapeHtmlAttr(row.nonLifeImage || '')}">ดูภาพ นว.</button>` : ''}
-                      ${!row.lifeImage && !row.nonLifeImage ? `<span class="tag gray">ไม่มีไฟล์แนบ</span>` : ''}
-                    </div>
-                  </td>
-                </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>`;
-
-      area.querySelectorAll('.preview-single-btn').forEach(btn => {
-        btn.addEventListener('click', () => openPreviewSingle(btn.dataset.name, btn.dataset.type, btn.dataset.url));
+      return mergedData.filter(row => {
+        const searchable = [row.employeeId, row.thName, row.enName, row.domain, row.branch].join(' ').toLowerCase();
+        if (search && !searchable.includes(search)) return false;
+        if (branch !== 'ทั้งหมด' && row.branch !== branch) return false;
+        if (status === 'full' && !(row.hasLife && row.hasNonLife)) return false;
+        if (status === 'partial' && !((row.hasLife && !row.hasNonLife) || (!row.hasLife && row.hasNonLife))) return false;
+        if (status === 'none' && !(!row.hasLife && !row.hasNonLife)) return false;
+        if (status === 'expiring' && row.alerts.length === 0) return false;
+        if (license === 'life' && !row.hasLife) return false;
+        if (license === 'nonlife' && !row.hasNonLife) return false;
+        if (license === 'both' && !(row.hasLife && row.hasNonLife)) return false;
+        if (license === 'missing' && row.hasLife && row.hasNonLife) return false;
+        return true;
       });
     }
 
-    function toPreviewUrl(url) {
-      const safeUrl = String(url || '').trim();
-      const match = safeUrl.match(/\/file\/d\/([^/]+)/);
-      if (match) return `https://drive.google.com/file/d/${match[1]}/preview`;
-      return safeUrl;
-    }
-
-    function openPreviewSingle(name, type, url) {
-      const title = document.getElementById('modalTitle');
-      const sub = document.getElementById('modalSub');
-      const frame = document.getElementById('previewFrame');
-      title.textContent = `หลักฐานใบอนุญาต ${type} - ${name}`;
-
-      if (!url) {
-        sub.textContent = 'ไม่พบไฟล์แนบของพนักงานรายนี้';
-        frame.innerHTML = `<div class="empty-state" style="height:100%; display:flex; align-items:center; justify-content:center;">ยังไม่มีไฟล์แนบ</div>`;
-      } else {
-        const safeUrl = String(url).trim();
-        const previewUrl = toPreviewUrl(safeUrl);
-        const isImage = /\.(png|jpg|jpeg|gif|webp)(\?|$)/i.test(safeUrl);
-        sub.textContent = `เปิดดูไฟล์แนบประเภท ${type} ที่พนักงานอัปโหลดจาก Google Form`;
-        frame.innerHTML = `
-          <div style="padding:14px; height:100%; overflow:auto; background:#fff;">
-            <div style="font-weight:900; margin-bottom:10px;">${type}</div>
-            <div style="margin-bottom:10px;"><a href="${escapeHtmlAttr(safeUrl)}" target="_blank" rel="noopener noreferrer">เปิดไฟล์ในแท็บใหม่</a></div>
-            <div style="height:52vh; border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#fff;">
-              ${isImage ? `<img src="${escapeHtmlAttr(safeUrl)}" alt="${escapeHtmlAttr(type)}">` : `<iframe src="${escapeHtmlAttr(previewUrl)}"></iframe>`}
-            </div>
-          </div>`;
+    function renderTable(data) {
+      const el = document.getElementById('employeeTable');
+      if (!mergedData.length) {
+        el.innerHTML = '<tr><td colspan="7"><div class="empty-state">อัปโหลดไฟล์ CSV เพื่อเริ่มแสดงข้อมูลพนักงาน</div></td></tr>';
+        return;
       }
-      document.getElementById('previewModal').classList.add('open');
+      if (!data.length) {
+        el.innerHTML = '<tr><td colspan="7"><div class="empty-state">ไม่พบข้อมูลตามตัวกรองที่เลือก</div></td></tr>';
+        return;
+      }
+
+      el.innerHTML = data.map(row => {
+        const hasLifeImage = Boolean(safe(row.lifeImage));
+        const hasNonLifeImage = Boolean(safe(row.nonLifeImage));
+        return `
+          <tr>
+            <td>
+              <div class="employee-cell">
+                <div class="name">${row.thName || 'ไม่ระบุชื่อ'}</div>
+                <div class="emp-id">รหัส ${row.employeeId || '-'}</div>
+                <div class="tiny">${row.enName || '—'}</div>
+              </div>
+            </td>
+            <td>
+              <div class="stack">
+                <div class="name">${row.branch || '-'}</div>
+                <div class="tiny">${row.domain || '—'}</div>
+              </div>
+            </td>
+            <td>${licenseHTML('นช. ประกันชีวิต', row.lifeStatusRaw, row.lifeNo, row.lifeIssue, row.lifeExpiry)}</td>
+            <td>${licenseHTML('นว. วินาศภัย', row.nonLifeStatusRaw, row.nonLifeNo, row.nonLifeIssue, row.nonLifeExpiry)}</td>
+            <td><div class="tag ${row.summaryTone}">${row.summaryStatus}</div></td>
+            <td>${row.alerts.length ? row.alerts.map(a => `<div class="tag ${a.type}" style="margin-bottom:6px;">${a.label}</div>`).join('') : '<div class="tag success">ปกติ</div>'}</td>
+            <td>
+              <div class="evidence-actions">
+                ${hasLifeImage ? `<button class="btn btn-secondary" type="button" onclick='openModal(${JSON.stringify({ name: row.thName || 'ไม่ระบุชื่อ', type: 'นช.', rawUrl: row.lifeImage }).replace(/'/g, '&#39;')})'>ดูภาพ นช.</button>` : ''}
+                ${hasNonLifeImage ? `<button class="btn btn-secondary" type="button" onclick='openModal(${JSON.stringify({ name: row.thName || 'ไม่ระบุชื่อ', type: 'นว.', rawUrl: row.nonLifeImage }).replace(/'/g, '&#39;')})'>ดูภาพ นว.</button>` : ''}
+                ${!hasLifeImage && !hasNonLifeImage ? `<div class="tag gray">ไม่มีไฟล์แนบ</div>` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
-    function closePreview() {
-      document.getElementById('previewModal').classList.remove('open');
-    }
-
-    function escapeHtml(value) {
-      return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
-    }
-
-    function escapeHtmlAttr(value) {
-      return escapeHtml(value);
-    }
-
-    function exportMissingCsv() {
-      const rows = appState.mergedRows.filter(r => !r.hasLife || !r.hasNonLife);
-      if (!rows.length) return;
-      const header = ['รหัสพนักงาน','ชื่อพนักงาน','สาขา','สถานะ นช.','สถานะ นว.','ต้องติดตาม','วันหมดอายุ นช.','วันหมดอายุ นว.'];
+    function exportMissingCSV() {
+      const rows = getFilteredData().filter(row => !row.hasLife || !row.hasNonLife);
+      if (!rows.length) {
+        alert('ไม่มีข้อมูลสำหรับส่งออกในมุมมองปัจจุบัน');
+        return;
+      }
+      const header = ['รหัสพนักงาน','ชื่อพนักงาน','สาขา','มี นช.','มี นว.','ต้องติดตาม','วันหมดอายุ นช.','วันหมดอายุ นว.'];
       const body = rows.map(row => {
         const needed = [];
         if (!row.hasLife) needed.push('นช.');
         if (!row.hasNonLife) needed.push('นว.');
         return [
           row.employeeId,
-          row.nameTh,
+          row.thName,
           row.branch,
           row.hasLife ? 'มี' : 'ไม่มี',
           row.hasNonLife ? 'มี' : 'ไม่มี',
           needed.join(' / '),
-          row.lifeExpiryDate ? formatDate(row.lifeExpiryDate) : '',
-          row.nonLifeExpiryDate ? formatDate(row.nonLifeExpiryDate) : ''
+          row.lifeExpiry ? formatDate(row.lifeExpiry) : '',
+          row.nonLifeExpiry ? formatDate(row.nonLifeExpiry) : ''
         ];
       });
       const csv = [header, ...body].map(cols => cols.map(v => `"${String(v ?? '').replaceAll('"', '""')}"`).join(',')).join('\n');
       const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
+      a.href = url;
       a.download = 'missing_license_employees.csv';
       a.click();
-      URL.revokeObjectURL(a.href);
-    }
-
-    function downloadSampleCsv() {
-      const headers = [
-        'Timestamp','รหัสพนักงาน','สาขาปฏิบัติงาน','คำนำหน้า (ภาษาไทย)','ชื่อ (ภาษาไทย)','นามสกุล (ภาษาไทย)','คำนำหน้า (ภาษาอังกฤษ)','First Name (ภาษาอังกฤษ)','Last Name (ภาษาอังกฤษ)','User Domain (เช่น phanumarsr)','ข้อมูลใบอนุญาตนายหน้าประกันชีวิต (นช.)','หมายเลขใบอนุญาตนายหน้าประกันชีวิต (ถ้ามี)','วันที่ออกบัตร (นช.)','วันที่หมดอายุ (นช.)','แนบรูปภาพ/ไฟล์ ใบอนุญาตนายหน้าประกันชีวิต (นช.)','ข้อมูลใบอนุญาตนายหน้าประกันวินาศภัย (นว.)','หมายเลขใบอนุญาตนายหน้าประกันวินาศภัย (ถ้ามี)','วันที่ออกบัตร (นว.)','วันที่หมดอายุ (นว.)','แนบรูปภาพ/ไฟล์ ใบอนุญาตนายหน้าประกันวินาศภัย (นว.)'
-      ];
-      const csv = '\uFEFF' + headers.map(v => `"${v}"`).join(',') + '\n';
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'license_dashboard_sample_header.csv';
-      a.click();
-      URL.revokeObjectURL(a.href);
-    }
-
-    function resetData() {
-      appState.rawRows = [];
-      appState.mergedRows = [];
-      appState.selectedBranch = 'ทั้งหมด';
-      appState.search = '';
-      appState.statusFilter = 'ทั้งหมด';
-      appState.licenseTypeFilter = 'ทั้งหมด';
-      appState.sortBy = 'branch_name';
-      appState.sourceFileName = '';
-      document.getElementById('csvFileInput').value = '';
-      document.getElementById('searchInput').value = '';
-      document.getElementById('statusFilter').value = 'ทั้งหมด';
-      document.getElementById('licenseTypeFilter').value = 'ทั้งหมด';
-      document.getElementById('sortBy').value = 'branch_name';
-      rerender();
-    }
-
-    function applyRows(rows, fileName) {
-      const mapped = rows.map(mapRow).filter(row => row.employeeId || row.nameTh || row.thaiFirstName);
-      const merged = mergeLatest(mapped).map(enrichRow);
-      appState.rawRows = mapped;
-      appState.mergedRows = merged;
-      appState.sourceFileName = fileName || 'ไฟล์ที่อัปโหลด';
-      appState.selectedBranch = 'ทั้งหมด';
-      rerender();
+      URL.revokeObjectURL(url);
     }
 
     function rerender() {
-      setSummaryStats(appState.mergedRows);
-      renderAlertList(appState.mergedRows);
-      renderMissingList(appState.mergedRows);
-      renderBranches(appState.mergedRows);
-      renderTable();
+      renderBranchFilterOptions(mergedData);
+      const filtered = getFilteredData();
+      renderStats(filtered);
+      renderAlerts(filtered);
+      renderMissing(filtered);
+      renderBranchSummary(filtered);
+      renderTable(filtered);
     }
 
-    document.getElementById('csvFileInput').addEventListener('change', async (event) => {
-      const file = event.target.files && event.target.files[0];
-      if (!file) return;
-      const text = await file.text();
-      const rows = parseCSV(text);
-      applyRows(rows, file.name);
-    });
+    function openModal(payload) {
+      const modal = document.getElementById('modal');
+      const preview = document.getElementById('imagePreview');
+      const previewUrl = toDrivePreviewUrl(payload.rawUrl);
+      const openUrl = toDriveOpenUrl(payload.rawUrl);
+      document.getElementById('modalTitle').textContent = `หลักฐานใบอนุญาต - ${payload.name}`;
+      document.getElementById('modalSub').textContent = `ประเภทใบอนุญาต: ${payload.type}`;
+      if (!payload.rawUrl) {
+        preview.innerHTML = 'ยังไม่มีไฟล์แนบของพนักงานรายนี้';
+      } else if (previewUrl.includes('drive.google.com')) {
+        preview.innerHTML = `<iframe src="${previewUrl}" allow="autoplay"></iframe>`;
+      } else {
+        preview.innerHTML = `<div><strong>${payload.type}</strong><br><a href="${openUrl}" target="_blank" rel="noopener noreferrer">เปิดไฟล์แนบ</a><br><span class="muted">${payload.rawUrl}</span></div>`;
+      }
+      modal.classList.add('open');
+    }
 
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-      appState.search = e.target.value || '';
-      renderTable();
-    });
+    function closeModal() {
+      document.getElementById('modal').classList.remove('open');
+      document.getElementById('imagePreview').innerHTML = 'ยังไม่มีข้อมูล';
+    }
 
-    document.getElementById('branchSelect').addEventListener('change', (e) => {
-      appState.selectedBranch = e.target.value;
+    function resetDashboard() {
+      rawRows = [];
+      mergedData = [];
+      updateFileInfo('', 0);
+      document.getElementById('searchInput').value = '';
+      document.getElementById('branchFilter').innerHTML = '<option value="ทั้งหมด">ทั้งหมด</option>';
+      document.getElementById('statusFilter').value = 'all';
+      document.getElementById('licenseFilter').value = 'all';
+      renderStats([]);
+      renderAlerts([]);
+      renderMissing([]);
+      renderBranchSummary([]);
+      renderTable([]);
+    }
+
+    function validateHeaders(rows) {
+      if (!rows.length) return false;
+      const headers = Object.keys(rows[0]);
+      return Object.values(EXACT_COLUMNS).every(column => headers.includes(column));
+    }
+
+    function handleCSVText(text, filename) {
+      const parsed = parseCSV(text);
+      if (!validateHeaders(parsed)) {
+        alert('หัวคอลัมน์ CSV ไม่ตรงกับไฟล์จาก Google Form ที่ระบบรองรับ');
+        return;
+      }
+      rawRows = parsed.map(mapRow).filter(row => row.employeeId || row.thName || row.domain);
+      mergedData = mergeLatest(rawRows).map(enrich);
+      updateFileInfo(filename, rawRows.length);
       rerender();
+    }
+
+    document.getElementById('csvInput').addEventListener('change', (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => handleCSVText(String(reader.result || ''), file.name);
+      reader.readAsText(file, 'utf-8');
+      event.target.value = '';
     });
 
-    document.getElementById('statusFilter').addEventListener('change', (e) => {
-      appState.statusFilter = e.target.value;
-      renderTable();
+    document.getElementById('resetBtn').addEventListener('click', resetDashboard);
+    document.getElementById('toggleMappingBtn').addEventListener('click', () => {
+      document.getElementById('mappingBox').classList.toggle('hidden');
+    });
+    document.getElementById('exportMissingBtn').addEventListener('click', exportMissingCSV);
+    document.getElementById('searchInput').addEventListener('input', rerender);
+    document.getElementById('branchFilter').addEventListener('change', rerender);
+    document.getElementById('statusFilter').addEventListener('change', rerender);
+    document.getElementById('licenseFilter').addEventListener('change', rerender);
+    document.getElementById('modal').addEventListener('click', (e) => {
+      if (e.target.id === 'modal') closeModal();
     });
 
-    document.getElementById('licenseTypeFilter').addEventListener('change', (e) => {
-      appState.licenseTypeFilter = e.target.value;
-      renderTable();
-    });
-
-    document.getElementById('sortBy').addEventListener('change', (e) => {
-      appState.sortBy = e.target.value;
-      renderTable();
-    });
-
-    document.getElementById('exportMissingBtn').addEventListener('click', exportMissingCsv);
-    document.getElementById('downloadSampleBtn').addEventListener('click', downloadSampleCsv);
-    document.getElementById('resetBtn').addEventListener('click', resetData);
-    document.getElementById('mappingBtn').addEventListener('click', () => {
-      const message = [
-        'คอลัมน์ที่ระบบใช้หลัก:',
-        '- Timestamp',
-        '- รหัสพนักงาน',
-        '- สาขาปฏิบัติงาน',
-        '- ข้อมูลใบอนุญาตนายหน้าประกันชีวิต (นช.)',
-        '- ข้อมูลใบอนุญาตนายหน้าประกันวินาศภัย (นว.)',
-        '- วันที่หมดอายุ (นช.)',
-        '- วันที่หมดอายุ (นว.)',
-        '- แนบรูปภาพ/ไฟล์ ใบอนุญาตนายหน้าประกันชีวิต (นช.)',
-        '- แนบรูปภาพ/ไฟล์ ใบอนุญาตนายหน้าประกันวินาศภัย (นว.)',
-        '',
-        'เงื่อนไขสถานะ:',
-        'ระบบนับว่า "มีใบอนุญาต" เฉพาะเมื่อค่าขึ้นต้นด้วยคำว่า "มีใบอนุญาต" เท่านั้น',
-        'และนับว่า "ไม่มีใบอนุญาต" เมื่อค่าขึ้นต้นด้วยคำว่า "ไม่มีใบอนุญาต"'
-      ].join('\n');
-      alert(message);
-    });
-
-    document.getElementById('closeModalBtn').addEventListener('click', closePreview);
-    document.getElementById('previewModal').addEventListener('click', (e) => {
-      if (e.target.id === 'previewModal') closePreview();
-    });
-
-    rerender();
+    resetDashboard();
   </script>
 </body>
 </html>
