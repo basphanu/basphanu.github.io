@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Insurance License Dashboard</title>
+  <style>
+    :root {
+      --bg: #f3f7fb;
+      --panel: rgba(255, 255, 255, 0.94);
+      --panel-strong: #ffffff;
+      --line: #d9e3ee;
+      --text: #17212f;
+      --muted: #6b7a90;
+      --blue: #2563eb;
+      --blue-soft: #e8f0ff;
+      --green: #0f766e;
+      --green-soft: #dff8f1;
+      --amber: #b45309;
+      --amber-soft: #fff2cf;
+      --red: #b91c1c;
+      --red-soft: #ffe2e2;
+      --slate-soft: #eef3f8;
+      --shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,.12), transparent 26%),
+        radial-gradient(circle at top right, rgba(14,165,233,.10), transparent 22%),
+        linear-gradient(180deg, #eef4fb 0%, #f8fbfd 100%);
+    }
+
+    .container {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(217, 227, 238, 0.95);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.25fr .95fr;
+      gap: 18px;
+      padding: 28px;
+      border-radius: var(--radius-xl);
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(242,247,255,.92));
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(30px, 4vw, 44px);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      margin: 14px 0 0;
+      font-size: 16px;
+      line-height: 1.75;
+      color: var(--muted);
+      max-width: 860px;
+    }
+
+    .chips, .toolbar, .filters, .branch-list, .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .chip {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .upload-card {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      justify-content: space-between;
+    }
+
+    .dropzone {
+      border: 1.5px dashed #bfd2e6;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #ffffff, #f7fbff);
+      padding: 18px;
+    }
+
+    .dropzone-title {
+      font-size: 15px;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    .subtle {
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 14px;
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    .btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; box-shadow: 0 16px 28px rgba(37,99,235,.22); }
+    .btn-secondary { background: #fff; border: 1px solid var(--line); color: var(--text); }
+    .btn-soft { background: var(--blue-soft); color: var(--blue); }
+    .btn-danger { background: #fff1f2; color: var(--red); }
+
+    input[type="file"] { display: none; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .stat-card {
+      padding: 18px;
+      min-height: 130px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::after {
+      content: "";
+      position: absolute;
+      right: -30px;
+      bottom: -42px;
+      width: 118px;
+      height: 118px;
+      border-radius: 999px;
+      background: rgba(37,99,235,.06);
+    }
+    .tone-blue { background: linear-gradient(160deg, #ffffff, #eef5ff); }
+    .tone-green { background: linear-gradient(160deg, #ffffff, #eefdf7); }
+    .tone-amber { background: linear-gradient(160deg, #ffffff, #fff9eb); }
+    .tone-red { background: linear-gradient(160deg, #ffffff, #fff5f5); }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .stat-value {
+      margin-top: 12px;
+      font-size: clamp(28px, 3vw, 40px);
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+    }
+    .stat-hint {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .section {
+      padding: 20px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: -0.03em;
+    }
+
+    .section-sub {
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 14px;
+    }
+
+    .stack-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .item {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: #94a3b8;
+    }
+    .dot.green { background: #10b981; }
+    .dot.amber { background: #f59e0b; }
+    .dot.red { background: #ef4444; }
+    .dot.blue { background: #3b82f6; }
+
+    .name {
+      font-size: 15px;
+      font-weight: 900;
+      margin-bottom: 3px;
+    }
+
+    .meta {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .tag.blue { background: var(--blue-soft); color: var(--blue); }
+    .tag.green { background: var(--green-soft); color: var(--green); }
+    .tag.amber { background: var(--amber-soft); color: var(--amber); }
+    .tag.red { background: var(--red-soft); color: var(--red); }
+    .tag.gray { background: #eef3f8; color: #516073; }
+
+    .branch-pill {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .branch-pill.active {
+      background: var(--blue-soft);
+      color: var(--blue);
+      border-color: #bfd4ff;
+    }
+
+    .filter-bar {
+      display: grid;
+      grid-template-columns: 1.15fr .7fr .7fr .7fr .7fr;
+      gap: 12px;
+      margin-top: 16px;
+      margin-bottom: 14px;
+    }
+
+    .input, .select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      padding: 12px 14px;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      min-width: 1450px;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #f8fbff;
+      color: #334155;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 15px 14px;
+      border-bottom: 1px solid #edf2f7;
+      vertical-align: top;
+      font-size: 14px;
+    }
+
+    tbody tr:hover { background: #fbfdff; }
+
+    .person-cell, .branch-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .small { font-size: 12px; color: var(--muted); }
+
+    .license-box {
+      min-width: 196px;
+      padding: 11px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fcfdff;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .empty-state {
+      padding: 42px 24px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed #bfd2e6;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+    }
+
+    .empty-state h3 {
+      margin: 0 0 8px;
+      color: var(--text);
+      font-size: 22px;
+      letter-spacing: -0.03em;
+    }
+
+    .status-note {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: #f8fbff;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, .58);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 24px;
+    }
+    .modal.open { display: flex; }
+    .modal-card {
+      width: min(980px, 100%);
+      background: #fff;
+      border-radius: 26px;
+      border: 1px solid var(--line);
+      box-shadow: 0 30px 80px rgba(15, 23, 42, .26);
+      overflow: hidden;
+    }
+    .modal-head, .modal-body { padding: 20px 22px; }
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    .preview-frame {
+      width: 100%;
+      height: min(70vh, 680px);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: linear-gradient(145deg, #eef5ff, #f8fafc);
+      overflow: hidden;
+    }
+    .preview-frame iframe, .preview-frame img {
+      width: 100%;
+      height: 100%;
+      border: none;
+      object-fit: contain;
+      background: #fff;
+    }
+
+    @media (max-width: 1200px) {
+      .hero, .grid-2 { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .filter-bar { grid-template-columns: 1fr 1fr 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .container { padding: 16px; }
+      .hero, .section { padding: 18px; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .filter-bar { grid-template-columns: 1fr; }
+      .item { grid-template-columns: auto 1fr; }
+      .item > :last-child { grid-column: 2 / -1; justify-self: start; }
+      .stat-value { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="panel hero">
+      <div>
+        <div class="chips">
+          <span class="chip">รองรับ CSV จาก Google Form</span>
+          <span class="chip">เตรียมต่อ Google Sheet</span>
+          <span class="chip">Merge ข้อมูลล่าสุดอัตโนมัติ</span>
+        </div>
+        <h1>ระบบแสดงฐานข้อมูล<br>ใบอนุญาตนายหน้าประกัน</h1>
+        <p>
+          สำหรับติดตามพนักงานสาขา <strong>สระบุรี / นครนายก</strong> โดยเริ่มต้นเป็นเว็บเปล่า
+          เมื่ออัปโหลดไฟล์ CSV แล้วระบบจึงเริ่มประมวลผล, รวมข้อมูลซ้ำด้วยรายการล่าสุด,
+          สรุปผู้ที่ยังไม่มีใบอนุญาต, แจ้งเตือนวันหมดอายุล่วงหน้า 60 วัน และเปิดดูภาพหลักฐานที่พนักงานแนบมาได้ทันที
+        </p>
+      </div>
+      <div class="panel upload-card">
+        <div>
+          <div class="dropzone-title">นำเข้าข้อมูลจาก CSV</div>
+          <div class="subtle">เวอร์ชันนี้ยังไม่ดึง Google Sheet ตรง แต่โครงสร้างเตรียมไว้สำหรับเชื่อมต่อในอนาคตแล้ว</div>
+        </div>
+
+        <div class="dropzone">
+          <div class="toolbar" style="justify-content:space-between; align-items:flex-start;">
+            <div>
+              <div class="dropzone-title" style="font-size:14px; margin-bottom:4px;">สถานะข้อมูล</div>
+              <div class="subtle" id="sourceFileName">ยังไม่มีไฟล์ข้อมูล</div>
+            </div>
+            <span class="tag blue" id="sourceCountBadge">0 รายการ</span>
+          </div>
+          <div class="status-note" id="mergeRuleText">
+            กติกา Merge: ใช้ <strong>รหัสพนักงาน</strong> เป็นคีย์หลัก และเก็บเฉพาะรายการที่มี <strong>Timestamp ใหม่ล่าสุด</strong>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <label class="btn btn-primary" for="csvFileInput">อัปโหลด CSV</label>
+          <button class="btn btn-secondary" id="resetBtn">ล้างข้อมูล</button>
+          <button class="btn btn-soft" id="mappingBtn">ดู Mapping คอลัมน์</button>
+        </div>
+        <input type="file" id="csvFileInput" accept=".csv,text/csv">
+      </div>
+    </section>
+
+    <section class="stats">
+      <div class="panel stat-card tone-blue">
+        <div class="stat-label">พนักงานทั้งหมด</div>
+        <div class="stat-value" id="totalEmployees">0</div>
+        <div class="stat-hint">หลัง Merge ข้อมูลซ้ำเรียบร้อยแล้ว</div>
+      </div>
+      <div class="panel stat-card tone-green">
+        <div class="stat-label">มีใบอนุญาตครบ 2 ประเภท</div>
+        <div class="stat-value" id="fullLicense">0</div>
+        <div class="stat-hint">มีทั้ง นช. และ นว.</div>
+      </div>
+      <div class="panel stat-card tone-amber">
+        <div class="stat-label">ยังขาดอย่างน้อย 1 ประเภท</div>
+        <div class="stat-value" id="missingSome">0</div>
+        <div class="stat-hint">ใช้ติดตามสอบหรืออบรมต่อ</div>
+      </div>
+      <div class="panel stat-card tone-red">
+        <div class="stat-label">ยังไม่มีทั้งสองประเภท</div>
+        <div class="stat-value" id="missingBoth">0</div>
+        <div class="stat-hint">กลุ่มที่ต้องเร่งติดตาม</div>
+      </div>
+      <div class="panel stat-card tone-amber">
+        <div class="stat-label">ใกล้หมดอายุภายใน 60 วัน</div>
+        <div class="stat-value" id="expiringSoon">0</div>
+        <div class="stat-hint">เตือนเฉพาะคนที่มีใบอนุญาตจริง</div>
+      </div>
+      <div class="panel stat-card tone-blue">
+        <div class="stat-label">จำนวนสาขา</div>
+        <div class="stat-value" id="branchCount">0</div>
+        <div class="stat-hint">ดูได้ทั้งแบบรวมและรายสาขา</div>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="panel section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">แจ้งเตือนวันหมดอายุใบอนุญาต</h2>
+            <p class="section-sub">เตือนล่วงหน้า 60 วัน และไม่นำคนที่เลือกสถานะว่าไม่มีใบอนุญาตมาคิดผิดพลาด</p>
+          </div>
+        </div>
+        <div class="stack-list" id="alertList"></div>
+      </div>
+
+      <div class="panel section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">สรุปพนักงานที่ยังไม่มีใบอนุญาต</h2>
+            <p class="section-sub">พร้อม Export เป็น CSV เฉพาะรายชื่อที่ยังขาดใบอนุญาตจริง</p>
+          </div>
+          <button class="btn btn-primary" id="exportMissingBtn" disabled>Export CSV</button>
+        </div>
+        <div class="stack-list" id="missingList"></div>
+      </div>
+    </section>
+
+    <section class="panel section" style="margin-bottom:18px;">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">ภาพรวมตามสาขา</h2>
+          <p class="section-sub">เลือกดูรวมทั้งหมด หรือแยกสรุปเฉพาะสาขาได้</p>
+        </div>
+      </div>
+      <div class="branch-list" id="branchPills"></div>
+      <div class="stack-list" id="branchSummary" style="margin-top:16px;"></div>
+    </section>
+
+    <section class="panel section">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">ฐานข้อมูลพนักงานใบอนุญาตนายหน้าประกัน</h2>
+          <p class="section-sub">ข้อมูลจะปรากฏหลังจากอัปโหลด CSV แล้วเท่านั้น โดยระบบใช้ค่าจากคอลัมน์สถานะของฟอร์มตรงๆ</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" id="downloadSampleBtn">ดาวน์โหลดหัวตารางตัวอย่าง</button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <input class="input" id="searchInput" type="text" placeholder="ค้นหาชื่อ, รหัสพนักงาน, User Domain">
+        <select class="select" id="branchSelect">
+          <option value="ทั้งหมด">ทุกสาขา</option>
+        </select>
+        <select class="select" id="statusFilter">
+          <option value="ทั้งหมด">ทุกสถานะ</option>
+          <option value="ครบ">มีครบ 2 ประเภท</option>
+          <option value="ขาดบางประเภท">ยังขาดบางประเภท</option>
+          <option value="ไม่มีทั้งสอง">ยังไม่มีทั้งสองประเภท</option>
+          <option value="ใกล้หมดอายุ">ใกล้หมดอายุภายใน 60 วัน</option>
+        </select>
+        <select class="select" id="licenseTypeFilter">
+          <option value="ทั้งหมด">ทุกประเภทใบอนุญาต</option>
+          <option value="นช">เฉพาะผู้มีใบ นช.</option>
+          <option value="นว">เฉพาะผู้มีใบ นว.</option>
+          <option value="ทั้งสอง">เฉพาะผู้มีครบทั้งสองประเภท</option>
+        </select>
+        <select class="select" id="sortBy">
+          <option value="branch_name">เรียงตามสาขา / ชื่อ</option>
+          <option value="name">เรียงตามชื่อ</option>
+          <option value="employeeId">เรียงตามรหัสพนักงาน</option>
+          <option value="expiry">เรียงตามวันหมดอายุใกล้สุด</option>
+        </select>
+      </div>
+
+      <div id="tableArea">
+        <div class="empty-state">
+          <h3>ยังไม่มีข้อมูลสำหรับแสดงผล</h3>
+          <div>กรุณาอัปโหลดไฟล์ CSV จาก Google Form Responses ก่อน ระบบจึงจะเริ่มประมวลผลและแสดงตารางสรุปทั้งหมด</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal" id="previewModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div style="font-size:20px; font-weight:900; letter-spacing:-0.03em;" id="modalTitle">ภาพหลักฐาน</div>
+          <div class="subtle" id="modalSub">ดูไฟล์แนบจากข้อมูลที่พนักงานอัปโหลด</div>
+        </div>
+        <button class="btn btn-secondary" id="closeModalBtn">ปิด</button>
+      </div>
+      <div class="modal-body">
+        <div class="preview-frame" id="previewFrame"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const appState = {
+      rawRows: [],
+      mergedRows: [],
+      selectedBranch: 'ทั้งหมด',
+      search: '',
+      statusFilter: 'ทั้งหมด',
+      licenseTypeFilter: 'ทั้งหมด',
+      sortBy: 'branch_name',
+      sourceFileName: ''
+    };
+
+    const COLUMN_ALIASES = {
+      timestamp: ['Timestamp'],
+      employeeId: ['รหัสพนักงาน'],
+      branch: ['สาขาปฏิบัติงาน', 'สาขา'],
+      thaiTitle: ['คำนำหน้า (ภาษาไทย)'],
+      thaiFirstName: ['ชื่อ (ภาษาไทย)'],
+      thaiLastName: ['นามสกุล (ภาษาไทย)'],
+      engTitle: ['คำนำหน้า (ภาษาอังกฤษ)'],
+      engFirstName: ['First Name (ภาษาอังกฤษ)'],
+      engLastName: ['Last Name (ภาษาอังกฤษ)'],
+      domain: ['User Domain (เช่น phanumarsr)', 'User Domain'],
+      lifeStatus: ['ข้อมูลใบอนุญาตนายหน้าประกันชีวิต (นช.)'],
+      lifeNo: ['หมายเลขใบอนุญาตนายหน้าประกันชีวิต (ถ้ามี)'],
+      lifeIssue: ['วันที่ออกบัตร (นช.)'],
+      lifeExpiry: ['วันที่หมดอายุ (นช.)'],
+      lifeImage: ['แนบรูปภาพ/ไฟล์ ใบอนุญาตนายหน้าประกันชีวิต (นช.)'],
+      nonLifeStatus: ['ข้อมูลใบอนุญาตนายหน้าประกันวินาศภัย (นว.)'],
+      nonLifeNo: ['หมายเลขใบอนุญาตนายหน้าประกันวินาศภัย (ถ้ามี)'],
+      nonLifeIssue: ['วันที่ออกบัตร (นว.)'],
+      nonLifeExpiry: ['วันที่หมดอายุ (นว.)'],
+      nonLifeImage: ['แนบรูปภาพ/ไฟล์ ใบอนุญาตนายหน้าประกันวินาศภัย (นว.)']
+    };
+
+    function normalizeCell(value) {
+      if (value === null || value === undefined) return '';
+      return String(value).trim();
+    }
+
+    function parseCSV(text) {
+      const rows = [];
+      let current = '';
+      let row = [];
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i += 1) {
+        const ch = text[i];
+        const next = text[i + 1];
+
+        if (ch === '"') {
+          if (inQuotes && next === '"') {
+            current += '"';
+            i += 1;
+          } else {
+            inQuotes = !inQuotes;
+          }
+          continue;
+        }
+
+        if (ch === ',' && !inQuotes) {
+          row.push(current);
+          current = '';
+          continue;
+        }
+
+        if ((ch === '\n' || ch === '\r') && !inQuotes) {
+          if (ch === '\r' && next === '\n') i += 1;
+          row.push(current);
+          if (row.some(cell => cell !== '')) rows.push(row);
+          row = [];
+          current = '';
+          continue;
+        }
+
+        current += ch;
+      }
+
+      if (current.length || row.length) {
+        row.push(current);
+        if (row.some(cell => cell !== '')) rows.push(row);
+      }
+
+      if (!rows.length) return [];
+
+      const headers = rows[0].map(h => normalizeCell(h).replace(/^\uFEFF/, ''));
+      return rows.slice(1).map(cols => {
+        const obj = {};
+        headers.forEach((header, index) => {
+          obj[header] = normalizeCell(cols[index] || '');
+        });
+        return obj;
+      });
+    }
+
+    function getField(row, aliases) {
+      for (const key of aliases) {
+        if (row[key] !== undefined) return normalizeCell(row[key]);
+      }
+      return '';
+    }
+
+    function mapRow(row) {
+      return {
+        timestamp: getField(row, COLUMN_ALIASES.timestamp),
+        employeeId: getField(row, COLUMN_ALIASES.employeeId),
+        branch: getField(row, COLUMN_ALIASES.branch),
+        thaiTitle: getField(row, COLUMN_ALIASES.thaiTitle),
+        thaiFirstName: getField(row, COLUMN_ALIASES.thaiFirstName),
+        thaiLastName: getField(row, COLUMN_ALIASES.thaiLastName),
+        engTitle: getField(row, COLUMN_ALIASES.engTitle),
+        engFirstName: getField(row, COLUMN_ALIASES.engFirstName),
+        engLastName: getField(row, COLUMN_ALIASES.engLastName),
+        domain: getField(row, COLUMN_ALIASES.domain),
+        lifeStatus: getField(row, COLUMN_ALIASES.lifeStatus),
+        lifeNo: getField(row, COLUMN_ALIASES.lifeNo),
+        lifeIssue: getField(row, COLUMN_ALIASES.lifeIssue),
+        lifeExpiry: getField(row, COLUMN_ALIASES.lifeExpiry),
+        lifeImage: getField(row, COLUMN_ALIASES.lifeImage),
+        nonLifeStatus: getField(row, COLUMN_ALIASES.nonLifeStatus),
+        nonLifeNo: getField(row, COLUMN_ALIASES.nonLifeNo),
+        nonLifeIssue: getField(row, COLUMN_ALIASES.nonLifeIssue),
+        nonLifeExpiry: getField(row, COLUMN_ALIASES.nonLifeExpiry),
+        nonLifeImage: getField(row, COLUMN_ALIASES.nonLifeImage)
+      };
+    }
+
+    function parseFlexibleDate(value) {
+      const v = normalizeCell(value);
+      if (!v) return null;
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
+        const d = new Date(v + 'T00:00:00');
+        return Number.isNaN(d.getTime()) ? null : d;
+      }
+
+      if (/^\d{4}\/\d{2}\/\d{2}/.test(v)) {
+        const safe = v.replace(' GMT+7', '+07:00').replace(' GMT+07:00', '+07:00');
+        const d = new Date(safe);
+        return Number.isNaN(d.getTime()) ? null : d;
+      }
+
+      const direct = new Date(v);
+      return Number.isNaN(direct.getTime()) ? null : direct;
+    }
+
+    function normalizeLicenseStatus(status) {
+      const raw = normalizeCell(status);
+      const compact = raw.replace(/\s+/g, '');
+
+      if (!compact) return { hasLicense: false, label: 'ไม่ระบุ' };
+      if (compact.startsWith('ไม่มีใบอนุญาต')) return { hasLicense: false, label: raw };
+      if (compact.startsWith('มีใบอนุญาต')) return { hasLicense: true, label: raw };
+      return { hasLicense: false, label: raw || 'ไม่ระบุ' };
+    }
+
+    function fullThaiName(row) {
+      return [row.thaiTitle, row.thaiFirstName, row.thaiLastName].filter(Boolean).join(' ').trim();
+    }
+
+    function fullEngName(row) {
+      return [row.engTitle, row.engFirstName, row.engLastName].filter(Boolean).join(' ').trim();
+    }
+
+    function daysUntil(date) {
+      if (!date) return null;
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const target = new Date(date);
+      target.setHours(0,0,0,0);
+      return Math.ceil((target.getTime() - today.getTime()) / 86400000);
+    }
+
+    function earliestExpiry(row) {
+      const candidates = [];
+      if (row.hasLife && row.lifeExpiryDate) candidates.push(row.lifeExpiryDate.getTime());
+      if (row.hasNonLife && row.nonLifeExpiryDate) candidates.push(row.nonLifeExpiryDate.getTime());
+      return candidates.length ? Math.min(...candidates) : Number.POSITIVE_INFINITY;
+    }
+
+    function mergeLatest(rows) {
+      const map = new Map();
+      rows.forEach((row) => {
+        const key = normalizeCell(row.employeeId) || `${normalizeCell(row.branch)}|${normalizeCell(row.thaiFirstName)}|${normalizeCell(row.thaiLastName)}`;
+        const existing = map.get(key);
+        if (!existing) {
+          map.set(key, row);
+          return;
+        }
+        const existingDate = parseFlexibleDate(existing.timestamp)?.getTime() || 0;
+        const currentDate = parseFlexibleDate(row.timestamp)?.getTime() || 0;
+        if (currentDate >= existingDate) map.set(key, row);
+      });
+      return Array.from(map.values());
+    }
+
+    function enrichRow(row) {
+      const lifeStatus = normalizeLicenseStatus(row.lifeStatus);
+      const nonLifeStatus = normalizeLicenseStatus(row.nonLifeStatus);
+      const lifeExpiryDate = lifeStatus.hasLicense ? parseFlexibleDate(row.lifeExpiry) : null;
+      const nonLifeExpiryDate = nonLifeStatus.hasLicense ? parseFlexibleDate(row.nonLifeExpiry) : null;
+      const lifeDays = lifeStatus.hasLicense ? daysUntil(lifeExpiryDate) : null;
+      const nonLifeDays = nonLifeStatus.hasLicense ? daysUntil(nonLifeExpiryDate) : null;
+
+      const alerts = [];
+      if (lifeStatus.hasLicense && lifeDays !== null && lifeDays <= 60) {
+        alerts.push({ tone: lifeDays < 0 ? 'red' : 'amber', label: `นช. ${lifeDays < 0 ? 'หมดอายุแล้ว' : `เหลือ ${lifeDays} วัน`}` });
+      }
+      if (nonLifeStatus.hasLicense && nonLifeDays !== null && nonLifeDays <= 60) {
+        alerts.push({ tone: nonLifeDays < 0 ? 'red' : 'amber', label: `นว. ${nonLifeDays < 0 ? 'หมดอายุแล้ว' : `เหลือ ${nonLifeDays} วัน`}` });
+      }
+
+      let summaryStatus = 'มีครบ 2 ประเภท';
+      let summaryTone = 'green';
+      if (!lifeStatus.hasLicense && !nonLifeStatus.hasLicense) {
+        summaryStatus = 'ยังไม่มีทั้งสองประเภท';
+        summaryTone = 'red';
+      } else if (!lifeStatus.hasLicense || !nonLifeStatus.hasLicense) {
+        summaryStatus = 'ยังขาดบางประเภท';
+        summaryTone = 'amber';
+      }
+
+      return {
+        ...row,
+        nameTh: fullThaiName(row),
+        nameEn: fullEngName(row),
+        hasLife: lifeStatus.hasLicense,
+        hasNonLife: nonLifeStatus.hasLicense,
+        lifeStatusLabel: lifeStatus.label,
+        nonLifeStatusLabel: nonLifeStatus.label,
+        lifeExpiryDate,
+        nonLifeExpiryDate,
+        lifeDays,
+        nonLifeDays,
+        alerts,
+        summaryStatus,
+        summaryTone
+      };
+    }
+
+    function formatDate(date) {
+      if (!date) return '—';
+      return new Intl.DateTimeFormat('th-TH', { dateStyle: 'medium' }).format(date);
+    }
+
+    function setSummaryStats(data) {
+      document.getElementById('totalEmployees').textContent = data.length;
+      document.getElementById('fullLicense').textContent = data.filter(r => r.hasLife && r.hasNonLife).length;
+      document.getElementById('missingSome').textContent = data.filter(r => (r.hasLife && !r.hasNonLife) || (!r.hasLife && r.hasNonLife)).length;
+      document.getElementById('missingBoth').textContent = data.filter(r => !r.hasLife && !r.hasNonLife).length;
+      document.getElementById('expiringSoon').textContent = data.filter(r => r.alerts.length > 0).length;
+      document.getElementById('branchCount').textContent = new Set(data.map(r => r.branch).filter(Boolean)).size;
+      document.getElementById('sourceCountBadge').textContent = `${appState.rawRows.length} รายการ`;
+      document.getElementById('sourceFileName').textContent = appState.sourceFileName || 'ยังไม่มีไฟล์ข้อมูล';
+      document.getElementById('exportMissingBtn').disabled = data.filter(r => !r.hasLife || !r.hasNonLife).length === 0;
+    }
+
+    function renderAlertList(data) {
+      const container = document.getElementById('alertList');
+      const items = data
+        .flatMap(row => row.alerts.map(alert => ({ row, alert })))
+        .sort((a, b) => earliestExpiry(a.row) - earliestExpiry(b.row));
+
+      if (!items.length) {
+        container.innerHTML = `
+          <div class="item">
+            <div class="dot green"></div>
+            <div>
+              <div class="name">ยังไม่มีรายการเตือน</div>
+              <div class="meta">หลังอัปโหลดข้อมูลแล้ว ระบบจะแจ้งเฉพาะคนที่มีใบอนุญาตจริงและใกล้หมดอายุภายใน 60 วัน</div>
+            </div>
+            <div class="tag green">พร้อมใช้งาน</div>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = items.slice(0, 8).map(({ row, alert }) => `
+        <div class="item">
+          <div class="dot ${alert.tone}"></div>
+          <div>
+            <div class="name">${escapeHtml(row.nameTh || row.employeeId)}</div>
+            <div class="meta">รหัส ${escapeHtml(row.employeeId)} • ${escapeHtml(row.branch || 'ไม่ระบุสาขา')} • ${escapeHtml(alert.label)}</div>
+          </div>
+          <div class="tag ${alert.tone}">${escapeHtml(row.summaryStatus)}</div>
+        </div>`).join('');
+    }
+
+    function renderMissingList(data) {
+      const container = document.getElementById('missingList');
+      const missing = data.filter(r => !r.hasLife || !r.hasNonLife);
+
+      if (!missing.length) {
+        container.innerHTML = `
+          <div class="item">
+            <div class="dot green"></div>
+            <div>
+              <div class="name">ยังไม่มีรายชื่อที่ขาดใบอนุญาต</div>
+              <div class="meta">เมื่ออัปโหลดข้อมูลแล้ว ระบบจะแสดงเฉพาะคนที่ยังไม่มีใบอนุญาตบางประเภทหรือทั้งสองประเภท</div>
+            </div>
+            <div class="tag green">ครบถ้วน</div>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = missing.slice(0, 8).map((row) => {
+        const needed = [];
+        if (!row.hasLife) needed.push('นช.');
+        if (!row.hasNonLife) needed.push('นว.');
+        return `
+          <div class="item">
+            <div class="dot ${row.summaryTone}"></div>
+            <div>
+              <div class="name">${escapeHtml(row.nameTh || row.employeeId)}</div>
+              <div class="meta">รหัส ${escapeHtml(row.employeeId)} • ${escapeHtml(row.branch || 'ไม่ระบุสาขา')} • ต้องติดตาม ${needed.join(' + ')}</div>
+            </div>
+            <div class="tag ${row.summaryTone}">${needed.join(' / ')}</div>
+          </div>`;
+      }).join('');
+    }
+
+    function renderBranches(allRows) {
+      const branches = ['ทั้งหมด', ...Array.from(new Set(allRows.map(r => r.branch).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'th'))];
+      const pillWrap = document.getElementById('branchPills');
+      const select = document.getElementById('branchSelect');
+
+      pillWrap.innerHTML = branches.map(branch => `
+        <button class="branch-pill ${appState.selectedBranch === branch ? 'active' : ''}" data-branch="${escapeHtml(branch)}">${escapeHtml(branch)}</button>`).join('');
+
+      select.innerHTML = branches.map(branch => `<option value="${escapeHtml(branch)}" ${appState.selectedBranch === branch ? 'selected' : ''}>${escapeHtml(branch)}</option>`).join('');
+
+      pillWrap.querySelectorAll('[data-branch]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          appState.selectedBranch = btn.getAttribute('data-branch');
+          document.getElementById('branchSelect').value = appState.selectedBranch;
+          rerender();
+        });
+      });
+
+      const summary = document.getElementById('branchSummary');
+      const targetBranches = appState.selectedBranch === 'ทั้งหมด' ? branches.slice(1) : [appState.selectedBranch];
+      if (!targetBranches.length) {
+        summary.innerHTML = `
+          <div class="item">
+            <div class="dot blue"></div>
+            <div>
+              <div class="name">ยังไม่มีข้อมูลสาขา</div>
+              <div class="meta">อัปโหลด CSV แล้วระบบจะสร้างสรุปรายสาขาอัตโนมัติ</div>
+            </div>
+            <div class="tag blue">รอข้อมูล</div>
+          </div>`;
+        return;
+      }
+
+      summary.innerHTML = targetBranches.map(branch => {
+        const rows = allRows.filter(r => r.branch === branch);
+        return `
+          <div class="item">
+            <div class="dot blue"></div>
+            <div>
+              <div class="name">${escapeHtml(branch)}</div>
+              <div class="meta">พนักงาน ${rows.length} คน • มีครบ ${rows.filter(r => r.hasLife && r.hasNonLife).length} คน • ขาดใบอนุญาต ${rows.filter(r => !r.hasLife || !r.hasNonLife).length} คน • ใกล้หมดอายุ ${rows.filter(r => r.alerts.length).length} คน</div>
+            </div>
+            <div class="tag blue">สรุปรายสาขา</div>
+          </div>`;
+      }).join('');
+    }
+
+    function filterAndSortRows() {
+      let rows = [...appState.mergedRows];
+      if (appState.selectedBranch !== 'ทั้งหมด') {
+        rows = rows.filter(r => r.branch === appState.selectedBranch);
+      }
+
+      const q = appState.search.trim().toLowerCase();
+      if (q) {
+        rows = rows.filter(r => [r.employeeId, r.nameTh, r.nameEn, r.domain, r.branch].some(v => normalizeCell(v).toLowerCase().includes(q)));
+      }
+
+      if (appState.statusFilter === 'ครบ') rows = rows.filter(r => r.hasLife && r.hasNonLife);
+      if (appState.statusFilter === 'ขาดบางประเภท') rows = rows.filter(r => (r.hasLife && !r.hasNonLife) || (!r.hasLife && r.hasNonLife));
+      if (appState.statusFilter === 'ไม่มีทั้งสอง') rows = rows.filter(r => !r.hasLife && !r.hasNonLife);
+      if (appState.statusFilter === 'ใกล้หมดอายุ') rows = rows.filter(r => r.alerts.length > 0);
+
+      if (appState.licenseTypeFilter === 'นช') rows = rows.filter(r => r.hasLife);
+      if (appState.licenseTypeFilter === 'นว') rows = rows.filter(r => r.hasNonLife);
+      if (appState.licenseTypeFilter === 'ทั้งสอง') rows = rows.filter(r => r.hasLife && r.hasNonLife);
+
+      if (appState.sortBy === 'name') {
+        rows.sort((a,b) => (a.nameTh || '').localeCompare(b.nameTh || '', 'th'));
+      } else if (appState.sortBy === 'employeeId') {
+        rows.sort((a,b) => (a.employeeId || '').localeCompare(b.employeeId || '', 'th'));
+      } else if (appState.sortBy === 'expiry') {
+        rows.sort((a,b) => earliestExpiry(a) - earliestExpiry(b));
+      } else {
+        rows.sort((a,b) => (a.branch || '').localeCompare(b.branch || '', 'th') || (a.nameTh || '').localeCompare(b.nameTh || '', 'th'));
+      }
+      return rows;
+    }
+
+    function licenseBoxHtml(title, hasLicense, statusLabel, licenseNo, issueDate, expiryDate) {
+      return `
+        <div class="license-box">
+          <div class="name">${title}</div>
+          <div class="meta">สถานะ: ${escapeHtml(statusLabel || (hasLicense ? 'มีใบอนุญาต' : 'ไม่มีใบอนุญาต'))}</div>
+          <div class="meta">เลขที่: ${escapeHtml(licenseNo || '—')}</div>
+          <div class="meta">วันที่ออกบัตร: ${issueDate ? escapeHtml(issueDate) : '—'}</div>
+          <div class="meta">วันหมดอายุ: ${expiryDate ? formatDate(expiryDate) : '—'}</div>
+        </div>`;
+    }
+
+    function renderTable() {
+      const rows = filterAndSortRows();
+      const area = document.getElementById('tableArea');
+
+      if (!appState.mergedRows.length) {
+        area.innerHTML = `
+          <div class="empty-state">
+            <h3>ยังไม่มีข้อมูลสำหรับแสดงผล</h3>
+            <div>กรุณาอัปโหลดไฟล์ CSV จาก Google Form Responses ก่อน ระบบจึงจะเริ่มประมวลผลและแสดงตารางสรุปทั้งหมด</div>
+          </div>`;
+        return;
+      }
+
+      if (!rows.length) {
+        area.innerHTML = `
+          <div class="empty-state">
+            <h3>ไม่พบข้อมูลตามตัวกรองที่เลือก</h3>
+            <div>ลองเปลี่ยนคำค้นหา สาขา หรือสถานะ เพื่อดูข้อมูลส่วนอื่น</div>
+          </div>`;
+        return;
+      }
+
+      area.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>รหัส / พนักงาน</th>
+                <th>สาขา</th>
+                <th>นช. ประกันชีวิต</th>
+                <th>นว. วินาศภัย</th>
+                <th>สถานะรวม</th>
+                <th>แจ้งเตือน</th>
+                <th>หลักฐาน</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(row => `
+                <tr>
+                  <td>
+                    <div class="person-cell">
+                      <div class="name">${escapeHtml(row.nameTh || 'ไม่ระบุชื่อ')}</div>
+                      <div class="small">รหัส ${escapeHtml(row.employeeId || '—')}</div>
+                      <div class="small">${escapeHtml(row.nameEn || '—')}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="branch-cell">
+                      <div class="name">${escapeHtml(row.branch || '—')}</div>
+                      <div class="small">${escapeHtml(row.domain || '—')}</div>
+                    </div>
+                  </td>
+                  <td>${licenseBoxHtml('นช. ประกันชีวิต', row.hasLife, row.lifeStatusLabel, row.lifeNo, row.lifeIssue, row.lifeExpiryDate)}</td>
+                  <td>${licenseBoxHtml('นว. วินาศภัย', row.hasNonLife, row.nonLifeStatusLabel, row.nonLifeNo, row.nonLifeIssue, row.nonLifeExpiryDate)}</td>
+                  <td><span class="tag ${row.summaryTone}">${escapeHtml(row.summaryStatus)}</span></td>
+                  <td>${row.alerts.length ? row.alerts.map(a => `<div class="tag ${a.tone}" style="margin-bottom:6px;">${escapeHtml(a.label)}</div>`).join('') : '<span class="tag green">ปกติ</span>'}</td>
+                  <td>
+                    <div class="toolbar" style="flex-direction:column; align-items:flex-start;">
+                      ${row.lifeImage ? `<button class="btn btn-secondary preview-single-btn" data-name="${escapeHtmlAttr(row.nameTh || row.employeeId)}" data-type="นช." data-url="${escapeHtmlAttr(row.lifeImage || '')}">ดูภาพ นช.</button>` : ''}
+                      ${row.nonLifeImage ? `<button class="btn btn-secondary preview-single-btn" data-name="${escapeHtmlAttr(row.nameTh || row.employeeId)}" data-type="นว." data-url="${escapeHtmlAttr(row.nonLifeImage || '')}">ดูภาพ นว.</button>` : ''}
+                      ${!row.lifeImage && !row.nonLifeImage ? `<span class="tag gray">ไม่มีไฟล์แนบ</span>` : ''}
+                    </div>
+                  </td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+
+      area.querySelectorAll('.preview-single-btn').forEach(btn => {
+        btn.addEventListener('click', () => openPreviewSingle(btn.dataset.name, btn.dataset.type, btn.dataset.url));
+      });
+    }
+
+    function toPreviewUrl(url) {
+      const safeUrl = String(url || '').trim();
+      const match = safeUrl.match(/\/file\/d\/([^/]+)/);
+      if (match) return `https://drive.google.com/file/d/${match[1]}/preview`;
+      return safeUrl;
+    }
+
+    function openPreviewSingle(name, type, url) {
+      const title = document.getElementById('modalTitle');
+      const sub = document.getElementById('modalSub');
+      const frame = document.getElementById('previewFrame');
+      title.textContent = `หลักฐานใบอนุญาต ${type} - ${name}`;
+
+      if (!url) {
+        sub.textContent = 'ไม่พบไฟล์แนบของพนักงานรายนี้';
+        frame.innerHTML = `<div class="empty-state" style="height:100%; display:flex; align-items:center; justify-content:center;">ยังไม่มีไฟล์แนบ</div>`;
+      } else {
+        const safeUrl = String(url).trim();
+        const previewUrl = toPreviewUrl(safeUrl);
+        const isImage = /\.(png|jpg|jpeg|gif|webp)(\?|$)/i.test(safeUrl);
+        sub.textContent = `เปิดดูไฟล์แนบประเภท ${type} ที่พนักงานอัปโหลดจาก Google Form`;
+        frame.innerHTML = `
+          <div style="padding:14px; height:100%; overflow:auto; background:#fff;">
+            <div style="font-weight:900; margin-bottom:10px;">${type}</div>
+            <div style="margin-bottom:10px;"><a href="${escapeHtmlAttr(safeUrl)}" target="_blank" rel="noopener noreferrer">เปิดไฟล์ในแท็บใหม่</a></div>
+            <div style="height:52vh; border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#fff;">
+              ${isImage ? `<img src="${escapeHtmlAttr(safeUrl)}" alt="${escapeHtmlAttr(type)}">` : `<iframe src="${escapeHtmlAttr(previewUrl)}"></iframe>`}
+            </div>
+          </div>`;
+      }
+      document.getElementById('previewModal').classList.add('open');
+    }
+
+    function closePreview() {
+      document.getElementById('previewModal').classList.remove('open');
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function escapeHtmlAttr(value) {
+      return escapeHtml(value);
+    }
+
+    function exportMissingCsv() {
+      const rows = appState.mergedRows.filter(r => !r.hasLife || !r.hasNonLife);
+      if (!rows.length) return;
+      const header = ['รหัสพนักงาน','ชื่อพนักงาน','สาขา','สถานะ นช.','สถานะ นว.','ต้องติดตาม','วันหมดอายุ นช.','วันหมดอายุ นว.'];
+      const body = rows.map(row => {
+        const needed = [];
+        if (!row.hasLife) needed.push('นช.');
+        if (!row.hasNonLife) needed.push('นว.');
+        return [
+          row.employeeId,
+          row.nameTh,
+          row.branch,
+          row.hasLife ? 'มี' : 'ไม่มี',
+          row.hasNonLife ? 'มี' : 'ไม่มี',
+          needed.join(' / '),
+          row.lifeExpiryDate ? formatDate(row.lifeExpiryDate) : '',
+          row.nonLifeExpiryDate ? formatDate(row.nonLifeExpiryDate) : ''
+        ];
+      });
+      const csv = [header, ...body].map(cols => cols.map(v => `"${String(v ?? '').replaceAll('"', '""')}"`).join(',')).join('\n');
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'missing_license_employees.csv';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function downloadSampleCsv() {
+      const headers = [
+        'Timestamp','รหัสพนักงาน','สาขาปฏิบัติงาน','คำนำหน้า (ภาษาไทย)','ชื่อ (ภาษาไทย)','นามสกุล (ภาษาไทย)','คำนำหน้า (ภาษาอังกฤษ)','First Name (ภาษาอังกฤษ)','Last Name (ภาษาอังกฤษ)','User Domain (เช่น phanumarsr)','ข้อมูลใบอนุญาตนายหน้าประกันชีวิต (นช.)','หมายเลขใบอนุญาตนายหน้าประกันชีวิต (ถ้ามี)','วันที่ออกบัตร (นช.)','วันที่หมดอายุ (นช.)','แนบรูปภาพ/ไฟล์ ใบอนุญาตนายหน้าประกันชีวิต (นช.)','ข้อมูลใบอนุญาตนายหน้าประกันวินาศภัย (นว.)','หมายเลขใบอนุญาตนายหน้าประกันวินาศภัย (ถ้ามี)','วันที่ออกบัตร (นว.)','วันที่หมดอายุ (นว.)','แนบรูปภาพ/ไฟล์ ใบอนุญาตนายหน้าประกันวินาศภัย (นว.)'
+      ];
+      const csv = '\uFEFF' + headers.map(v => `"${v}"`).join(',') + '\n';
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'license_dashboard_sample_header.csv';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function resetData() {
+      appState.rawRows = [];
+      appState.mergedRows = [];
+      appState.selectedBranch = 'ทั้งหมด';
+      appState.search = '';
+      appState.statusFilter = 'ทั้งหมด';
+      appState.licenseTypeFilter = 'ทั้งหมด';
+      appState.sortBy = 'branch_name';
+      appState.sourceFileName = '';
+      document.getElementById('csvFileInput').value = '';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('statusFilter').value = 'ทั้งหมด';
+      document.getElementById('licenseTypeFilter').value = 'ทั้งหมด';
+      document.getElementById('sortBy').value = 'branch_name';
+      rerender();
+    }
+
+    function applyRows(rows, fileName) {
+      const mapped = rows.map(mapRow).filter(row => row.employeeId || row.nameTh || row.thaiFirstName);
+      const merged = mergeLatest(mapped).map(enrichRow);
+      appState.rawRows = mapped;
+      appState.mergedRows = merged;
+      appState.sourceFileName = fileName || 'ไฟล์ที่อัปโหลด';
+      appState.selectedBranch = 'ทั้งหมด';
+      rerender();
+    }
+
+    function rerender() {
+      setSummaryStats(appState.mergedRows);
+      renderAlertList(appState.mergedRows);
+      renderMissingList(appState.mergedRows);
+      renderBranches(appState.mergedRows);
+      renderTable();
+    }
+
+    document.getElementById('csvFileInput').addEventListener('change', async (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const text = await file.text();
+      const rows = parseCSV(text);
+      applyRows(rows, file.name);
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      appState.search = e.target.value || '';
+      renderTable();
+    });
+
+    document.getElementById('branchSelect').addEventListener('change', (e) => {
+      appState.selectedBranch = e.target.value;
+      rerender();
+    });
+
+    document.getElementById('statusFilter').addEventListener('change', (e) => {
+      appState.statusFilter = e.target.value;
+      renderTable();
+    });
+
+    document.getElementById('licenseTypeFilter').addEventListener('change', (e) => {
+      appState.licenseTypeFilter = e.target.value;
+      renderTable();
+    });
+
+    document.getElementById('sortBy').addEventListener('change', (e) => {
+      appState.sortBy = e.target.value;
+      renderTable();
+    });
+
+    document.getElementById('exportMissingBtn').addEventListener('click', exportMissingCsv);
+    document.getElementById('downloadSampleBtn').addEventListener('click', downloadSampleCsv);
+    document.getElementById('resetBtn').addEventListener('click', resetData);
+    document.getElementById('mappingBtn').addEventListener('click', () => {
+      const message = [
+        'คอลัมน์ที่ระบบใช้หลัก:',
+        '- Timestamp',
+        '- รหัสพนักงาน',
+        '- สาขาปฏิบัติงาน',
+        '- ข้อมูลใบอนุญาตนายหน้าประกันชีวิต (นช.)',
+        '- ข้อมูลใบอนุญาตนายหน้าประกันวินาศภัย (นว.)',
+        '- วันที่หมดอายุ (นช.)',
+        '- วันที่หมดอายุ (นว.)',
+        '- แนบรูปภาพ/ไฟล์ ใบอนุญาตนายหน้าประกันชีวิต (นช.)',
+        '- แนบรูปภาพ/ไฟล์ ใบอนุญาตนายหน้าประกันวินาศภัย (นว.)',
+        '',
+        'เงื่อนไขสถานะ:',
+        'ระบบนับว่า "มีใบอนุญาต" เฉพาะเมื่อค่าขึ้นต้นด้วยคำว่า "มีใบอนุญาต" เท่านั้น',
+        'และนับว่า "ไม่มีใบอนุญาต" เมื่อค่าขึ้นต้นด้วยคำว่า "ไม่มีใบอนุญาต"'
+      ].join('\n');
+      alert(message);
+    });
+
+    document.getElementById('closeModalBtn').addEventListener('click', closePreview);
+    document.getElementById('previewModal').addEventListener('click', (e) => {
+      if (e.target.id === 'previewModal') closePreview();
+    });
+
+    rerender();
+  </script>
+</body>
+</html>
