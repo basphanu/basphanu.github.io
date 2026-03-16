@@ -3,111 +3,81 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ระบบสรุปและตรวจสอบการใช้น้ำมันรถ - Live Google Sheet</title>
+  <title>ระบบสรุปและตรวจสอบการใช้น้ำมันรถ - v3 fixed preview</title>
   <style>
     :root{
-      --bg:#f6f8fb;
-      --card:#ffffff;
-      --line:#e5e7eb;
-      --text:#1f2937;
-      --muted:#6b7280;
-      --blue:#2563eb;
-      --green:#16a34a;
-      --orange:#ea580c;
-      --red:#dc2626;
-      --soft-blue:#eff6ff;
-      --soft-green:#f0fdf4;
-      --soft-orange:#fff7ed;
-      --soft-red:#fef2f2;
-      --shadow:0 8px 24px rgba(15,23,42,.06);
-      --radius:18px;
+      --bg:#f6f8fb;--card:#fff;--line:#e5e7eb;--text:#1f2937;--muted:#6b7280;
+      --blue:#2563eb;--green:#16a34a;--orange:#ea580c;--red:#dc2626;
+      --soft-blue:#eff6ff;--soft-green:#f0fdf4;--soft-orange:#fff7ed;--soft-red:#fef2f2;
+      --shadow:0 8px 24px rgba(15,23,42,.06);--radius:18px;
     }
     *{box-sizing:border-box}
     html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans Thai",sans-serif}
     body{min-height:100vh;overflow-y:auto}
-    .page{max-width:1380px;margin:0 auto;padding:18px}
+    .page{max-width:1420px;margin:0 auto;padding:18px}
     .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
     .top{padding:20px;display:flex;gap:16px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
     h1{margin:0;font-size:clamp(1.45rem,2.5vw,2.1rem);line-height:1.2;color:#1d4ed8}
     .sub{margin-top:8px;color:var(--muted);font-size:.96rem}
     .tag-live{display:inline-flex;align-items:center;gap:8px;background:var(--soft-green);border:1px solid #bbf7d0;color:#166534;border-radius:999px;padding:8px 12px;font-weight:800;font-size:.88rem}
     .controls{margin-top:16px;padding:18px}
-    .grid{display:grid;grid-template-columns:1.6fr .8fr auto auto;gap:12px;align-items:end}
+    .grid-top{display:grid;grid-template-columns:1.5fr .8fr auto auto;gap:12px;align-items:end}
+    .grid-filter{display:grid;grid-template-columns:.9fr .9fr .9fr .9fr auto auto;gap:12px;align-items:end}
     .field{display:flex;flex-direction:column;gap:6px;min-width:0}
     .field label{font-size:.92rem;font-weight:800;color:#374151}
     .field input,.field select{width:100%;padding:12px 14px;border:1px solid #d1d5db;border-radius:12px;font-size:.97rem;background:#fff}
     .btn{appearance:none;border:0;border-radius:12px;padding:12px 18px;color:#fff;font-size:.97rem;font-weight:800;cursor:pointer;white-space:nowrap}
-    .btn-primary{background:var(--blue)}
-    .btn-secondary{background:#0f766e}
-    .btn-export{background:var(--green)}
-    .btn:disabled{opacity:.55;cursor:not-allowed}
+    .btn-primary{background:var(--blue)} .btn-secondary{background:#0f766e} .btn-export{background:var(--green)} .btn:disabled{opacity:.55;cursor:not-allowed}
     .meta{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
     .pill{display:inline-flex;gap:6px;align-items:center;padding:8px 12px;border-radius:999px;background:#f8fafc;border:1px solid var(--line);font-weight:700;font-size:.9rem;color:#374151}
     .notice{margin-top:12px;padding:14px 16px;border-radius:14px;border:1px solid #bfdbfe;background:#eff6ff;color:#1e40af;font-size:.95rem;display:none}
     .notice.error{border-color:#fecaca;background:var(--soft-red);color:#b91c1c}
     .hint{margin-top:10px;color:var(--muted);font-size:.9rem;line-height:1.55}
     .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:16px}
-    .stat{padding:18px}
-    .stat .label{color:var(--muted);font-size:.92rem;font-weight:700;margin-bottom:8px}
-    .stat .value{font-size:clamp(1.5rem,2.8vw,2.2rem);font-weight:900;line-height:1.1}
+    .stat{padding:18px}.stat .label{color:var(--muted);font-size:.92rem;font-weight:700;margin-bottom:8px}.stat .value{font-size:clamp(1.45rem,2.8vw,2.2rem);font-weight:900;line-height:1.1}
     .red{color:var(--red)} .blue{color:var(--blue)} .orange{color:var(--orange)}
-    .section{margin-top:16px}
-    .section .head{padding:16px 18px;border-bottom:1px solid var(--line);font-size:1.02rem;font-weight:900}
+    .section{margin-top:16px}.section .head{padding:16px 18px;border-bottom:1px solid var(--line);font-size:1.02rem;font-weight:900}
     .scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
-    table{width:100%;border-collapse:collapse;min-width:1120px}
+    table{width:100%;border-collapse:collapse;min-width:1180px}
     th,td{padding:12px 14px;border-bottom:1px solid #edf2f7;vertical-align:middle}
     th{background:#f9fafb;color:#4b5563;text-align:left;font-weight:900}
     tbody tr:hover{background:#fafafa}
     .num{text-align:right}
-    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:.8rem;font-weight:900}
-    .badge.warn{background:#ffedd5;color:#c2410c}
     .soft-blue{background:rgba(37,99,235,.06);color:#1d4ed8;font-weight:800}
     .soft-green{background:rgba(22,163,74,.06);color:#15803d;font-weight:800}
     .soft-orange{background:rgba(234,88,12,.06)}
+    .cell-highcost{background:rgba(220,38,38,.08);color:#b91c1c;font-weight:900}
+    .cell-highgap{background:rgba(234,88,12,.10);color:#c2410c;font-weight:900}
     .muted{color:#9ca3af}
-    .empty{padding:56px 24px;text-align:center;color:#9ca3af}
-    .empty strong{display:block;color:#4b5563;font-size:1.1rem;margin-bottom:8px}
+    .empty{padding:56px 24px;text-align:center;color:#9ca3af}.empty strong{display:block;color:#4b5563;font-size:1.1rem;margin-bottom:8px}
     .footer-note{margin-top:12px;color:#64748b;font-size:.9rem}
-    @media (max-width:1100px){
-      .grid{grid-template-columns:1fr 1fr}
-      .grid .field:first-child{grid-column:1/-1}
-      .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
-    }
-    @media (max-width:640px){
-      .page{padding:12px}
-      .top,.controls,.stat{padding:16px}
-      .grid{grid-template-columns:1fr}
-      .stats{grid-template-columns:1fr}
-      .btn{width:100%}
-    }
+    @media (max-width:1200px){.grid-top,.grid-filter{grid-template-columns:1fr 1fr}.grid-top .url-field,.grid-filter .wide{grid-column:1/-1}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:700px){.page{padding:12px}.top,.controls,.stat{padding:16px}.grid-top,.grid-filter,.stats{grid-template-columns:1fr}.btn{width:100%}}
   </style>
 </head>
 <body>
   <div class="page">
     <div class="card top">
       <div>
-        <div class="tag-live">LIVE FILE • ดึงข้อมูลจริงจาก Google Sheet</div>
+        <div class="tag-live">LIVE FILE • v3 fixed preview</div>
         <h1>ระบบสรุปและตรวจสอบการใช้น้ำมันรถ</h1>
-        <div class="sub">ไฟล์นี้ไม่มีข้อมูลตัวอย่างฝังอยู่ ถ้าขึ้นข้อมูล แปลว่าดึงมาจาก Google Sheet หรือ CSV ที่เลือกจริงเท่านั้น</div>
+        <div class="sub">แจ้งเตือนจะแสดงในช่องเดิมของค่าเฉลี่ยและไมล์หาย ไม่เพิ่มคอลัมน์ใหม่ และย้ายตัวกรองไว้หลังส่วนดึงข้อมูลแล้ว</div>
       </div>
       <div style="display:flex;gap:12px;flex-wrap:wrap">
         <button id="refreshBtnTop" class="btn btn-primary" type="button">รีเฟรชข้อมูล</button>
-        <button id="exportBtnTop" class="btn btn-export" type="button" disabled>ส่งออก CSV</button>
+        <button id="exportBtnTop" class="btn btn-export" type="button" disabled>ส่งออก CSV ตามตัวกรอง</button>
       </div>
     </div>
 
     <div class="card controls">
-      <div class="grid">
-        <div class="field">
+      <div class="grid-top">
+        <div class="field url-field">
           <label for="sheetUrl">Google Sheet CSV URL</label>
           <input id="sheetUrl" type="text" />
         </div>
         <div class="field">
           <label for="autoLoad">โหลดอัตโนมัติเมื่อเปิดหน้า</label>
-          <select id="autoLoad">
-            <option value="on">เปิด</option>
-            <option value="off">ปิด</option>
-          </select>
+          <select id="autoLoad"><option value="on">เปิด</option><option value="off">ปิด</option></select>
         </div>
         <button id="saveBtn" class="btn btn-secondary" type="button">บันทึกค่า</button>
         <button id="refreshBtn" class="btn btn-primary" type="button">รีเฟรชข้อมูล</button>
@@ -116,43 +86,55 @@
       <div class="meta">
         <span class="pill">แหล่งข้อมูล: <strong id="sourceLabel">Google Sheet</strong></span>
         <span class="pill">อัปเดตล่าสุด: <strong id="updatedLabel">-</strong></span>
-        <label class="pill" style="cursor:pointer">
-          อัปโหลด CSV สำรอง
-          <input id="fileInput" type="file" accept=".csv" style="display:none" />
-        </label>
+        <span class="pill">ข้อมูลที่แสดง: <strong id="filteredInfo">0 รายการ</strong></span>
+        <label class="pill" style="cursor:pointer">อัปโหลด CSV สำรอง<input id="fileInput" type="file" accept=".csv" style="display:none" /></label>
       </div>
 
       <div id="notice" class="notice"></div>
-      <div class="hint">
-        ลิงก์ที่ตั้งไว้ตอนนี้คือ publish CSV โดยตรงตามที่ให้มาอีกครั้งแล้ว หากเปิดผ่านไฟล์ในเครื่องแล้ว browser บล็อกการดึงข้ามโดเมน ให้รันผ่าน GitHub Pages หรือเปิดด้วย Chrome เพื่อทดสอบอีกครั้ง
-      </div>
+      <div class="hint">ส่วนดึงข้อมูลแยกจากส่วนกรองข้อมูลแล้ว เพื่อให้ยังกรองได้สะดวกหลังโหลดจาก Google Sheet หรืออัปโหลด CSV แบบ Manual</div>
     </div>
 
     <div id="stats" class="stats" style="display:none">
-      <div class="card stat">
-        <div class="label">รายการบันทึกทั้งหมด</div>
-        <div id="statRows" class="value">0 รายการ</div>
+      <div class="card stat"><div class="label">รายการบันทึกที่แสดง</div><div id="statRows" class="value">0 รายการ</div></div>
+      <div class="card stat"><div class="label">ค่าน้ำมันรวม</div><div id="statCost" class="value red">฿ 0.00</div></div>
+      <div class="card stat"><div class="label">ระยะทางรวม</div><div id="statDistance" class="value blue">0 กม.</div></div>
+      <div class="card stat"><div class="label">ค่าเฉลี่ยเกิน 4 บาท</div><div id="statHighCost" class="value orange">0 รายการ</div></div>
+    </div>
+
+    <div class="card controls">
+      <div class="grid-filter">
+        <div class="field">
+          <label for="sortMode">ประเภทการจัดเรียง</label>
+          <select id="sortMode">
+            <option value="plate">เรียงตามหมายเลขทะเบียน</option>
+            <option value="date">เรียงตามวันที่</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="branchFilter">ดูข้อมูลสาขา</label>
+          <select id="branchFilter">
+            <option value="all">ทั้งหมด</option>
+            <option value="นครนายก">นครนายก</option>
+            <option value="สระบุรี">สระบุรี</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="startDate">วันที่เริ่มกิจกรรม</label>
+          <input id="startDate" type="date" />
+        </div>
+        <div class="field">
+          <label for="endDate">วันที่จบกิจกรรม</label>
+          <input id="endDate" type="date" />
+        </div>
+        <button id="applyFilterBtn" class="btn btn-secondary" type="button">ใช้ตัวกรอง</button>
+        <button id="exportBtnBottom" class="btn btn-export" type="button" disabled>ส่งออก CSV ตามตัวกรอง</button>
       </div>
-      <div class="card stat">
-        <div class="label">ค่าน้ำมันรวมทั้งหมด</div>
-        <div id="statCost" class="value red">฿ 0.00</div>
-      </div>
-      <div class="card stat">
-        <div class="label">ระยะทางรวมทั้งหมด</div>
-        <div id="statDistance" class="value blue">0 กม.</div>
-      </div>
-      <div class="card stat">
-        <div class="label">พบความผิดปกติของไมล์</div>
-        <div id="statGaps" class="value orange">0 รายการ</div>
-      </div>
+      <div class="hint">กรองข้อมูลหลังจากดึงข้อมูลหรืออัปโหลด CSV แล้ว และรองรับชื่อสาขาแบบไทยหรืออังกฤษ เช่น Saraburi</div>
     </div>
 
     <div class="card section">
-      <div class="head">ข้อมูลการใช้น้ำมันรายวัน (จัดกลุ่มตามทะเบียนรถ)</div>
-      <div id="empty" class="empty">
-        <strong>ยังไม่มีข้อมูล</strong>
-        กดรีเฟรชข้อมูลเพื่อดึงจาก Google Sheet จริง
-      </div>
+      <div class="head">ข้อมูลการใช้น้ำมันรายวัน</div>
+      <div id="empty" class="empty"><strong>ยังไม่มีข้อมูล</strong>กดรีเฟรชข้อมูลเพื่อดึงจาก Google Sheet จริง</div>
       <div id="tableWrap" class="scroll-x" style="display:none">
         <table>
           <thead>
@@ -175,40 +157,33 @@
       </div>
     </div>
 
-    <div class="footer-note">
-      หมายเหตุ: ถ้ากดพรีวิวจากไฟล์ canvas เก่า จะเห็นข้อมูลจำลองและปุ่มบางปุ่มใช้ไม่ได้ ไฟล์นี้เป็นเวอร์ชันใช้งานจริงเท่านั้น
-    </div>
+    <div class="footer-note">พรีวิวนี้แก้เรื่องเตือนในช่องเดิม และปรับตรรกะกรองสาขา/วันที่ให้ยืดหยุ่นขึ้นแล้ว</div>
   </div>
 
   <script>
     const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3QPNBWFXmmaWPc1axKq-_xvYpvACLqxYykPAkn2udbtxow8s2-10SyBoBdA-jQSrKu-vJ-7_Awx2Q/pub?output=csv';
     const STORAGE = {
-      url: 'mileage-live-sheet-url',
-      auto: 'mileage-live-auto',
-      updated: 'mileage-live-updated'
+      url:'mileage-v3-sheet-url', auto:'mileage-v3-auto', updated:'mileage-v3-updated',
+      sort:'mileage-v3-sort', branch:'mileage-v3-branch', start:'mileage-v3-start', end:'mileage-v3-end'
     };
 
-    const state = {
-      rows: [],
-      processed: []
-    };
+    const state = { rows:[], filtered:[] };
 
     function parseNumber(v){
-      if(v===null || v===undefined || v==='') return 0;
-      const n = Number(String(v).replace(/,/g,'').trim());
-      return Number.isFinite(n) ? n : 0;
+      if(v===null||v===undefined||v==='') return 0;
+      const n=Number(String(v).replace(/,/g,'').trim());
+      return Number.isFinite(n)?n:0;
     }
 
     function parseCSVLine(line){
       const out=[]; let cur=''; let inQuotes=false;
       for(let i=0;i<line.length;i++){
         const ch=line[i], next=line[i+1];
-        if(ch === '"'){
-          if(inQuotes && next === '"'){ cur+='"'; i++; }
-          else inQuotes=!inQuotes;
-        } else if(ch === ',' && !inQuotes){
+        if(ch==='"'){
+          if(inQuotes && next==='"'){ cur+='"'; i++; } else inQuotes=!inQuotes;
+        }else if(ch===',' && !inQuotes){
           out.push(cur.trim()); cur='';
-        } else {
+        }else{
           cur+=ch;
         }
       }
@@ -217,18 +192,18 @@
     }
 
     function parseCSV(text){
-      const lines = String(text).replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(x=>x.trim()!=='');
-      if(lines.length < 2) return [];
-      const headers = parseCSVLine(lines[0]);
-      const rows = [];
+      const lines=String(text).replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(x=>x.trim()!=='');
+      if(lines.length<2) return [];
+      const headers=parseCSVLine(lines[0]);
+      const rows=[];
       for(let i=1;i<lines.length;i++){
-        const cols = parseCSVLine(lines[i]);
-        const obj = {};
-        headers.forEach((h,idx)=>obj[h]=cols[idx] ?? '');
-        if(String(obj['วันที่ทำกิจกรรม'] || '').trim()){
-          obj['เลขไมล์เริ่มต้น'] = parseNumber(obj['เลขไมล์เริ่มต้น']);
-          obj['เลขไมล์สิ้นสุด'] = parseNumber(obj['เลขไมล์สิ้นสุด']);
-          obj['ค่าน้ำมันตามใบเสร็จ'] = parseNumber(obj['ค่าน้ำมันตามใบเสร็จ']);
+        const cols=parseCSVLine(lines[i]);
+        const obj={};
+        headers.forEach((h,idx)=>obj[h]=cols[idx]??'');
+        if(String(obj['วันที่ทำกิจกรรม']||'').trim()){
+          obj['เลขไมล์เริ่มต้น']=parseNumber(obj['เลขไมล์เริ่มต้น']);
+          obj['เลขไมล์สิ้นสุด']=parseNumber(obj['เลขไมล์สิ้นสุด']);
+          obj['ค่าน้ำมันตามใบเสร็จ']=parseNumber(obj['ค่าน้ำมันตามใบเสร็จ']);
           rows.push(obj);
         }
       }
@@ -237,31 +212,43 @@
 
     function parseDMY(value){
       if(!value) return null;
-      const s = String(value).trim();
-      let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      const s=String(value).trim();
+      let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
       if(m){
-        const d=+m[1], mo=+m[2], y=+m[3];
-        const dt = new Date(y,mo-1,d);
-        return Number.isNaN(dt.getTime()) ? null : dt;
+        const d=+m[1], mo=+m[2];
+        let y=+m[3];
+        if(y>2400) y-=543;
+        const dt=new Date(y,mo-1,d);
+        return Number.isNaN(dt.getTime())?null:dt;
       }
-      m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+      m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
       if(m){
-        const y=+m[1], mo=+m[2], d=+m[3];
-        const dt = new Date(y,mo-1,d);
-        return Number.isNaN(dt.getTime()) ? null : dt;
+        let y=+m[1];
+        const mo=+m[2], d=+m[3];
+        if(y>2400) y-=543;
+        const dt=new Date(y,mo-1,d);
+        return Number.isNaN(dt.getTime())?null:dt;
       }
-      const dt = new Date(s);
-      return Number.isNaN(dt.getTime()) ? null : dt;
+      const dt=new Date(s);
+      return Number.isNaN(dt.getTime())?null:dt;
+    }
+
+    function toISODate(v){
+      const dt=parseDMY(v);
+      if(!dt) return '';
+      const m=String(dt.getMonth()+1).padStart(2,'0');
+      const d=String(dt.getDate()).padStart(2,'0');
+      return `${dt.getFullYear()}-${m}-${d}`;
     }
 
     function formatDate(v){
-      const dt = parseDMY(v);
+      const dt=parseDMY(v);
       return dt ? dt.toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'}) : String(v||'');
     }
 
     function formatDateTime(v){
       if(!v) return '-';
-      const dt = new Date(v);
+      const dt=new Date(v);
       return Number.isNaN(dt.getTime()) ? String(v) : dt.toLocaleString('th-TH',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
     }
 
@@ -270,189 +257,208 @@
     }
 
     function esc(v){
-      return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-    }
-
-    function processRows(rows){
-      const sorted = [...rows].sort((a,b)=>{
-        const carA = String(a['หมายเลขทะเบียนรถ'] || '').trim();
-        const carB = String(b['หมายเลขทะเบียนรถ'] || '').trim();
-        if(carA !== carB) return carA.localeCompare(carB,'th');
-        const tA = parseDMY(a['วันที่ทำกิจกรรม'])?.getTime() || 0;
-        const tB = parseDMY(b['วันที่ทำกิจกรรม'])?.getTime() || 0;
-        return tA - tB;
-      });
-
-      let lastCar = null;
-      let lastEnd = null;
-      return sorted.map(r=>{
-        const car = String(r['หมายเลขทะเบียนรถ'] || '').trim();
-        const start = parseNumber(r['เลขไมล์เริ่มต้น']);
-        const end = parseNumber(r['เลขไมล์สิ้นสุด']);
-        const fuel = parseNumber(r['ค่าน้ำมันตามใบเสร็จ']);
-        const distance = Math.max(0, end - start);
-        const gap = car === lastCar && lastEnd !== null ? Math.max(0, start - lastEnd) : 0;
-        const avg = distance > 0 ? fuel / distance : 0;
-        lastCar = car;
-        lastEnd = end;
-        return {...r, distance, gap, avg};
-      });
+      return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
 
     function showNotice(text, isError=false){
-      const box = document.getElementById('notice');
-      box.textContent = text;
-      box.style.display = text ? 'block' : 'none';
-      box.className = isError ? 'notice error' : 'notice';
+      const box=document.getElementById('notice');
+      box.textContent=text;
+      box.style.display=text?'block':'none';
+      box.className=isError?'notice error':'notice';
     }
 
-    function render(data){
-      const tbody = document.getElementById('tbody');
-      const empty = document.getElementById('empty');
-      const wrap = document.getElementById('tableWrap');
-      const stats = document.getElementById('stats');
-      tbody.innerHTML = '';
+    function normalizeBranch(value){
+      const s=String(value||'').trim().toLowerCase();
+      if(!s) return '';
+      if(s.includes('นครนายก') || s.includes('nakhonnayok') || s.includes('nakhon nayok')) return 'นครนายก';
+      if(s.includes('สระบุรี') || s.includes('saraburi')) return 'สระบุรี';
+      return s;
+    }
+
+    function sortAndCompute(rows, sortMode){
+      const sorted=[...rows].sort((a,b)=>{
+        const carA=String(a['หมายเลขทะเบียนรถ']||'').trim();
+        const carB=String(b['หมายเลขทะเบียนรถ']||'').trim();
+        const tA=parseDMY(a['วันที่ทำกิจกรรม'])?.getTime()||0;
+        const tB=parseDMY(b['วันที่ทำกิจกรรม'])?.getTime()||0;
+        if(sortMode==='date'){
+          if(tA!==tB) return tA-tB;
+          return carA.localeCompare(carB,'th');
+        }
+        if(carA!==carB) return carA.localeCompare(carB,'th');
+        return tA-tB;
+      });
+
+      let lastCar=null, lastEnd=null;
+      return sorted.map(r=>{
+        const car=String(r['หมายเลขทะเบียนรถ']||'').trim();
+        const start=parseNumber(r['เลขไมล์เริ่มต้น']);
+        const end=parseNumber(r['เลขไมล์สิ้นสุด']);
+        const fuel=parseNumber(r['ค่าน้ำมันตามใบเสร็จ']);
+        const distance=Math.max(0,end-start);
+        const gap=(car===lastCar && lastEnd!==null)?Math.max(0,start-lastEnd):0;
+        const avg=distance>0?fuel/distance:0;
+        const highCost=avg>4;
+        const highGap=gap>40;
+        lastCar=car;
+        lastEnd=end;
+        return {...r,distance,gap,avg,highCost,highGap};
+      });
+    }
+
+    function getFilteredRows(){
+      const sortMode=document.getElementById('sortMode').value;
+      const branch=document.getElementById('branchFilter').value;
+      const start=document.getElementById('startDate').value;
+      const end=document.getElementById('endDate').value;
+      let rows=[...state.rows];
+      if(branch!=='all') rows=rows.filter(r=>normalizeBranch(r['ประจำสาขา'])===branch);
+      if(start) rows=rows.filter(r=>{ const iso=toISODate(r['วันที่ทำกิจกรรม']); return iso && iso>=start; });
+      if(end) rows=rows.filter(r=>{ const iso=toISODate(r['วันที่ทำกิจกรรม']); return iso && iso<=end; });
+      return sortAndCompute(rows, sortMode);
+    }
+
+    function render(){
+      state.filtered=getFilteredRows();
+      const data=state.filtered;
+      const tbody=document.getElementById('tbody');
+      const empty=document.getElementById('empty');
+      const wrap=document.getElementById('tableWrap');
+      const stats=document.getElementById('stats');
+      tbody.innerHTML='';
+      document.getElementById('filteredInfo').textContent=`${data.length} รายการ`;
 
       if(!data.length){
-        empty.style.display = 'block';
-        wrap.style.display = 'none';
-        stats.style.display = 'none';
-        document.getElementById('exportBtnTop').disabled = true;
+        empty.style.display='block';
+        wrap.style.display='none';
+        stats.style.display='none';
+        document.getElementById('exportBtnTop').disabled=true;
+        document.getElementById('exportBtnBottom').disabled=true;
         return;
       }
 
-      empty.style.display = 'none';
-      wrap.style.display = 'block';
-      stats.style.display = 'grid';
-      document.getElementById('exportBtnTop').disabled = false;
+      empty.style.display='none';
+      wrap.style.display='block';
+      stats.style.display='grid';
+      document.getElementById('exportBtnTop').disabled=false;
+      document.getElementById('exportBtnBottom').disabled=false;
 
       for(const row of data){
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
+        const avgClass=row.highCost?'cell-highcost':'soft-green';
+        const gapClass=row.highGap?'cell-highgap':'soft-orange';
+        const avgText=row.highCost?`❗ ${fmt(row.avg)}`:fmt(row.avg);
+        const gapText=row.gap>0?(row.highGap?`❗ ${fmt(row.gap,0)} กม.`:`⚠ ${fmt(row.gap,0)} กม.`):'<span class="muted">-</span>';
+
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
           <td>${esc(formatDate(row['วันที่ทำกิจกรรม']))}</td>
-          <td><strong>${esc(row['หมายเลขทะเบียนรถ'] || '')}</strong></td>
-          <td>${esc(row['ชื่อ-สกุล ผู้ทำกิจกรรม'] || '')}</td>
-          <td>${esc(row['ประจำสาขา'] || '')}</td>
+          <td><strong>${esc(row['หมายเลขทะเบียนรถ']||'')}</strong></td>
+          <td>${esc(row['ชื่อ-สกุล ผู้ทำกิจกรรม']||'')}</td>
+          <td>${esc(row['ประจำสาขา']||'')}</td>
           <td class="num">${fmt(row['เลขไมล์เริ่มต้น'],0)}</td>
           <td class="num">${fmt(row['เลขไมล์สิ้นสุด'],0)}</td>
           <td class="num soft-blue">${fmt(row.distance,0)}</td>
           <td class="num">${fmt(row['ค่าน้ำมันตามใบเสร็จ'])}</td>
-          <td>${esc(row['ประเภทการเติมน้ำมัน'] || '')}</td>
-          <td class="num soft-green">${fmt(row.avg)}</td>
-          <td class="num soft-orange">${row.gap > 0 ? `<span class="badge warn">⚠ ${fmt(row.gap,0)} กม.</span>` : '<span class="muted">-</span>'}</td>
-        `;
+          <td>${esc(row['ประเภทการเติมน้ำมัน']||'')}</td>
+          <td class="num ${avgClass}">${avgText}</td>
+          <td class="num ${gapClass}">${gapText}</td>`;
         tbody.appendChild(tr);
       }
 
-      document.getElementById('statRows').textContent = `${data.length} รายการ`;
-      document.getElementById('statCost').textContent = `฿ ${fmt(data.reduce((s,r)=>s + parseNumber(r['ค่าน้ำมันตามใบเสร็จ']),0))}`;
-      document.getElementById('statDistance').textContent = `${fmt(data.reduce((s,r)=>s + parseNumber(r.distance),0),0)} กม.`;
-      document.getElementById('statGaps').textContent = `${data.filter(r=>r.gap > 0).length} รายการ`;
+      document.getElementById('statRows').textContent=`${data.length} รายการ`;
+      document.getElementById('statCost').textContent=`฿ ${fmt(data.reduce((s,r)=>s+parseNumber(r['ค่าน้ำมันตามใบเสร็จ']),0))}`;
+      document.getElementById('statDistance').textContent=`${fmt(data.reduce((s,r)=>s+parseNumber(r.distance),0),0)} กม.`;
+      document.getElementById('statHighCost').textContent=`${data.filter(r=>r.highCost).length} รายการ`;
     }
 
     function buildExportCSV(data){
-      const headers = ['ประทับเวลา','วันที่ทำกิจกรรม','ชื่อ-สกุล ผู้ทำกิจกรรม','ประจำสาขา','หมายเลขทะเบียนรถ','เลขไมล์เริ่มต้น','เลขไมล์สิ้นสุด','ระยะทางที่ใช้ (กม.)','ค่าน้ำมันตามใบเสร็จ','ประเภทการเติมน้ำมัน','เฉลี่ย (บาท/กม.)','ตรวจสอบไมล์หาย (กม.)'];
-      const quote = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
-      const rows = data.map(r => [
-        r['ประทับเวลา'] || '',
-        r['วันที่ทำกิจกรรม'] || '',
-        r['ชื่อ-สกุล ผู้ทำกิจกรรม'] || '',
-        r['ประจำสาขา'] || '',
-        r['หมายเลขทะเบียนรถ'] || '',
-        r['เลขไมล์เริ่มต้น'],
-        r['เลขไมล์สิ้นสุด'],
-        r.distance,
-        r['ค่าน้ำมันตามใบเสร็จ'],
-        r['ประเภทการเติมน้ำมัน'] || '',
-        Number(r.avg || 0).toFixed(2),
-        r.gap
-      ]);
-      return '\uFEFF' + [headers.join(','), ...rows.map(r => r.map(quote).join(','))].join('\n');
+      const headers=['ประทับเวลา','วันที่ทำกิจกรรม','ชื่อ-สกุล ผู้ทำกิจกรรม','ประจำสาขา','หมายเลขทะเบียนรถ','เลขไมล์เริ่มต้น','เลขไมล์สิ้นสุด','ระยะทางที่ใช้ (กม.)','ค่าน้ำมันตามใบเสร็จ','ประเภทการเติมน้ำมัน','เฉลี่ย (บาท/กม.)','เตือนค่าเฉลี่ยสูงเกิน 4 บาท','เตือนไมล์หายเกิน 40 กม.','ตรวจสอบไมล์หาย (กม.)'];
+      const quote=v=>`"${String(v??'').replace(/"/g,'""')}"`;
+      const rows=data.map(r=>[r['ประทับเวลา']||'',r['วันที่ทำกิจกรรม']||'',r['ชื่อ-สกุล ผู้ทำกิจกรรม']||'',r['ประจำสาขา']||'',r['หมายเลขทะเบียนรถ']||'',r['เลขไมล์เริ่มต้น'],r['เลขไมล์สิ้นสุด'],r.distance,r['ค่าน้ำมันตามใบเสร็จ'],r['ประเภทการเติมน้ำมัน']||'',Number(r.avg||0).toFixed(2),r.highCost?'เกิน 4 บาท':'',r.highGap?'เกิน 40 กม.':'',r.gap]);
+      return '\uFEFF'+[headers.join(','),...rows.map(r=>r.map(quote).join(','))].join('\n');
     }
 
     function exportCSV(){
-      if(!state.processed.length) return;
-      const blob = new Blob([buildExportCSV(state.processed)], {type:'text/csv;charset=utf-8;'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `mileage_report_live_${new Date().toISOString().slice(0,10)}.csv`;
+      if(!state.filtered.length) return;
+      const blob=new Blob([buildExportCSV(state.filtered)],{type:'text/csv;charset=utf-8;'});
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download=`mileage_report_filtered_${new Date().toISOString().slice(0,10)}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
-      showNotice('ส่งออก CSV เรียบร้อยแล้ว');
+      setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+      showNotice('ส่งออก CSV ตามตัวกรองเรียบร้อยแล้ว');
     }
 
     async function fetchLiveData(){
-      const url = document.getElementById('sheetUrl').value.trim();
-      if(!url){
-        showNotice('ไม่พบลิงก์ Google Sheet CSV', true);
-        return;
-      }
+      const url=document.getElementById('sheetUrl').value.trim();
+      if(!url){ showNotice('ไม่พบลิงก์ Google Sheet CSV',true); return; }
       showNotice('กำลังดึงข้อมูลจาก Google Sheet...');
       try{
-        const res = await fetch(url, {cache:'no-store'});
+        const res=await fetch(url,{cache:'no-store'});
         if(!res.ok) throw new Error(`HTTP ${res.status}`);
-        const text = await res.text();
-        const rows = parseCSV(text);
-        state.rows = rows;
-        state.processed = processRows(rows);
-        render(state.processed);
-        const now = new Date().toISOString();
-        localStorage.setItem(STORAGE.updated, now);
-        document.getElementById('updatedLabel').textContent = formatDateTime(now);
-
-        if(state.processed.length){
-          const firstCar = state.processed[0]['หมายเลขทะเบียนรถ'] || '-';
-          showNotice(`ดึงข้อมูลสำเร็จ ${state.processed.length} รายการ • ตัวอย่างทะเบียนแรก ${firstCar}`);
-        }else{
-          showNotice('ดึงข้อมูลสำเร็จ แต่ไม่พบแถวข้อมูลที่ใช้งานได้', true);
-        }
+        const text=await res.text();
+        state.rows=parseCSV(text);
+        const now=new Date().toISOString();
+        localStorage.setItem(STORAGE.updated,now);
+        document.getElementById('updatedLabel').textContent=formatDateTime(now);
+        render();
+        showNotice(state.rows.length?`ดึงข้อมูลสำเร็จ ${state.rows.length} รายการ`:'ดึงข้อมูลสำเร็จ แต่ไม่พบแถวข้อมูลที่ใช้งานได้', !state.rows.length);
       }catch(err){
         console.error(err);
-        render([]);
-        showNotice('ดึงข้อมูลไม่สำเร็จ อาจเกิดจาก browser บล็อกการเรียกข้ามโดเมนเมื่อเปิดไฟล์แบบ file:// หรือชีตยังเข้าถึงไม่ได้ กรุณาลองเปิดผ่าน GitHub Pages หรือ Chrome', true);
+        state.rows=[];
+        render();
+        showNotice('ดึงข้อมูลไม่สำเร็จ กรุณาเปิดผ่าน GitHub Pages หรือ local server',true);
       }
     }
 
     function saveSettings(){
-      localStorage.setItem(STORAGE.url, document.getElementById('sheetUrl').value.trim());
-      localStorage.setItem(STORAGE.auto, document.getElementById('autoLoad').value);
-      showNotice('บันทึกค่าการเชื่อมต่อแล้ว');
+      localStorage.setItem(STORAGE.url,document.getElementById('sheetUrl').value.trim());
+      localStorage.setItem(STORAGE.auto,document.getElementById('autoLoad').value);
+      localStorage.setItem(STORAGE.sort,document.getElementById('sortMode').value);
+      localStorage.setItem(STORAGE.branch,document.getElementById('branchFilter').value);
+      localStorage.setItem(STORAGE.start,document.getElementById('startDate').value);
+      localStorage.setItem(STORAGE.end,document.getElementById('endDate').value);
+      showNotice('บันทึกค่าการตั้งค่าแล้ว');
+    }
+
+    function bindRerender(){
+      ['sortMode','branchFilter','startDate','endDate'].forEach(id=>document.getElementById(id).addEventListener('change',render));
+      document.getElementById('applyFilterBtn').addEventListener('click',render);
     }
 
     function init(){
-      document.getElementById('sheetUrl').value = localStorage.getItem(STORAGE.url) || DEFAULT_SHEET_URL;
-      document.getElementById('autoLoad').value = localStorage.getItem(STORAGE.auto) || 'on';
-      document.getElementById('updatedLabel').textContent = formatDateTime(localStorage.getItem(STORAGE.updated) || '');
-
-      document.getElementById('saveBtn').addEventListener('click', saveSettings);
-      document.getElementById('refreshBtn').addEventListener('click', fetchLiveData);
-      document.getElementById('refreshBtnTop').addEventListener('click', fetchLiveData);
-      document.getElementById('exportBtnTop').addEventListener('click', exportCSV);
-
-      document.getElementById('fileInput').addEventListener('change', (e)=>{
-        const file = e.target.files && e.target.files[0];
+      document.getElementById('sheetUrl').value=localStorage.getItem(STORAGE.url)||DEFAULT_SHEET_URL;
+      document.getElementById('autoLoad').value=localStorage.getItem(STORAGE.auto)||'on';
+      document.getElementById('sortMode').value=localStorage.getItem(STORAGE.sort)||'plate';
+      document.getElementById('branchFilter').value=localStorage.getItem(STORAGE.branch)||'all';
+      document.getElementById('startDate').value=localStorage.getItem(STORAGE.start)||'';
+      document.getElementById('endDate').value=localStorage.getItem(STORAGE.end)||'';
+      document.getElementById('updatedLabel').textContent=formatDateTime(localStorage.getItem(STORAGE.updated)||'');
+      document.getElementById('saveBtn').addEventListener('click',saveSettings);
+      document.getElementById('refreshBtn').addEventListener('click',fetchLiveData);
+      document.getElementById('refreshBtnTop').addEventListener('click',fetchLiveData);
+      document.getElementById('exportBtnTop').addEventListener('click',exportCSV);
+      document.getElementById('exportBtnBottom').addEventListener('click',exportCSV);
+      bindRerender();
+      document.getElementById('fileInput').addEventListener('change',(e)=>{
+        const file=e.target.files&&e.target.files[0];
         if(!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev)=>{
+        const reader=new FileReader();
+        reader.onload=(ev)=>{
           try{
-            const rows = parseCSV(String(ev.target.result || ''));
-            state.rows = rows;
-            state.processed = processRows(rows);
-            render(state.processed);
-            showNotice(`อ่านไฟล์ CSV สำรองสำเร็จ ${state.processed.length} รายการ`);
+            state.rows=parseCSV(String(ev.target.result||''));
+            render();
+            showNotice(`อ่านไฟล์ CSV สำรองสำเร็จ ${state.rows.length} รายการ`);
           }catch(err){
             console.error(err);
-            showNotice('อ่านไฟล์ CSV สำรองไม่สำเร็จ', true);
+            showNotice('อ่านไฟล์ CSV สำรองไม่สำเร็จ',true);
           }
         };
         reader.readAsText(file);
       });
-
-      if((localStorage.getItem(STORAGE.auto) || 'on') === 'on'){
-        fetchLiveData();
-      }
+      if((localStorage.getItem(STORAGE.auto)||'on')==='on') fetchLiveData();
     }
 
     init();
