@@ -224,7 +224,7 @@
     <div class="toolbar">
       <div class="title-wrap">
         <h1>ระบบสรุปและตรวจสอบการใช้น้ำมันรถ</h1>
-        <p>อัปโหลดไฟล์ CSV จาก Google Form เพื่อประมวลผลทันที เปิดได้ตรงในเบราว์เซอร์</p>
+        <p>อัปโหลดไฟล์ CSV จาก Google Form เพื่อประมวลผลทันที เปิดได้ตรงในเบราว์เซอร์ และอ่านวันที่แบบวัน/เดือน/ปีได้ถูกต้อง</p>
       </div>
 
       <div class="toolbar-actions">
@@ -353,12 +353,73 @@
         rowObj['เลขไมล์สิ้นสุด'] = parseNumber(rowObj['เลขไมล์สิ้นสุด']);
         rowObj['ค่าน้ำมันตามใบเสร็จ'] = parseNumber(rowObj['ค่าน้ำมันตามใบเสร็จ']);
 
-        if (rowObj['วันที่ทำกิจกรรม']) {
+        if (String(rowObj['วันที่ทำกิจกรรม'] || '').trim()) {
           parsedData.push(rowObj);
         }
       }
 
       return parsedData;
+    }
+
+    function parseLocalDate(value) {
+      if (!value) return null;
+      const text = String(value).trim();
+
+      let match = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (match) {
+        const day = Number(match[1]);
+        const month = Number(match[2]);
+        const year = Number(match[3]);
+        const date = new Date(year, month - 1, day);
+        if (
+          date.getFullYear() === year &&
+          date.getMonth() === month - 1 &&
+          date.getDate() === day
+        ) {
+          return date;
+        }
+      }
+
+      match = text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+      if (match) {
+        const year = Number(match[1]);
+        const month = Number(match[2]);
+        const day = Number(match[3]);
+        const date = new Date(year, month - 1, day);
+        if (
+          date.getFullYear() === year &&
+          date.getMonth() === month - 1 &&
+          date.getDate() === day
+        ) {
+          return date;
+        }
+      }
+
+      match = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+      if (match) {
+        const day = Number(match[1]);
+        const month = Number(match[2]);
+        const year = Number(match[3]);
+        const hour = Number(match[4]);
+        const minute = Number(match[5]);
+        const second = Number(match[6] || 0);
+        const date = new Date(year, month - 1, day, hour, minute, second);
+        if (
+          date.getFullYear() === year &&
+          date.getMonth() === month - 1 &&
+          date.getDate() === day
+        ) {
+          return date;
+        }
+      }
+
+      const fallback = new Date(text);
+      return Number.isNaN(fallback.getTime()) ? null : fallback;
+    }
+
+    function getDateSortValue(value) {
+      const date = parseLocalDate(value);
+      return date ? date.getTime() : 0;
     }
 
     function formatNumber(num, decimals = 2) {
@@ -369,14 +430,22 @@
     }
 
     function formatDate(dateString) {
-      if (!dateString) return '';
-      const date = new Date(dateString);
-      if (Number.isNaN(date.getTime())) return String(dateString);
+      const date = parseLocalDate(dateString);
+      if (!date) return String(dateString || '');
       return date.toLocaleDateString('th-TH', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       });
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     function escapeCSVCell(cell) {
@@ -420,14 +489,14 @@
 
     function processData(rawData) {
       const sortedData = [...rawData].sort((a, b) => {
-        const carA = a['หมายเลขทะเบียนรถ'] || '';
-        const carB = b['หมายเลขทะเบียนรถ'] || '';
+        const carA = String(a['หมายเลขทะเบียนรถ'] || '').trim();
+        const carB = String(b['หมายเลขทะเบียนรถ'] || '').trim();
 
         if (carA !== carB) {
-          return carA.localeCompare(carB);
+          return carA.localeCompare(carB, 'th');
         }
 
-        return new Date(a['วันที่ทำกิจกรรม']).getTime() - new Date(b['วันที่ทำกิจกรรม']).getTime();
+        return getDateSortValue(a['วันที่ทำกิจกรรม']) - getDateSortValue(b['วันที่ทำกิจกรรม']);
       });
 
       let previousCar = null;
@@ -437,7 +506,7 @@
         const startMile = parseNumber(row['เลขไมล์เริ่มต้น']);
         const endMile = parseNumber(row['เลขไมล์สิ้นสุด']);
         const fuelCost = parseNumber(row['ค่าน้ำมันตามใบเสร็จ']);
-        const currentCar = row['หมายเลขทะเบียนรถ'] || '';
+        const currentCar = String(row['หมายเลขทะเบียนรถ'] || '').trim();
 
         const dailyDistance = Math.max(0, endMile - startMile);
         const costPerKm = dailyDistance > 0 ? fuelCost / dailyDistance : 0;
@@ -486,9 +555,9 @@
       data.forEach((row) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${formatDate(row['วันที่ทำกิจกรรม'])}</td>
-          <td><strong>${row['หมายเลขทะเบียนรถ'] || ''}</strong></td>
-          <td>${row['ชื่อ-สกุล ผู้ทำกิจกรรม'] || ''}</td>
+          <td>${escapeHTML(formatDate(row['วันที่ทำกิจกรรม']))}</td>
+          <td><strong>${escapeHTML(row['หมายเลขทะเบียนรถ'] || '')}</strong></td>
+          <td>${escapeHTML(row['ชื่อ-สกุล ผู้ทำกิจกรรม'] || '')}</td>
           <td class="text-right">${formatNumber(row['เลขไมล์เริ่มต้น'], 0)}</td>
           <td class="text-right">${formatNumber(row['เลขไมล์สิ้นสุด'], 0)}</td>
           <td class="text-right cell-blue">${formatNumber(row.dailyDistance, 0)}</td>
@@ -532,9 +601,14 @@
       tests.push(parseNumber('1,250') === 1250);
       tests.push(parseNumber('abc') === 0);
 
+      tests.push(formatDate('4/3/2026').includes('4'));
+      tests.push(formatDate('4/3/2026').includes('มีนาคม'));
+      tests.push(getDateSortValue('4/3/2026') < getDateSortValue('13/3/2026'));
+      tests.push(getDateSortValue('2026-03-04') < getDateSortValue('2026-03-13'));
+
       const sampleCSV = [
         'วันที่ทำกิจกรรม,หมายเลขทะเบียนรถ,เลขไมล์เริ่มต้น,เลขไมล์สิ้นสุด,ค่าน้ำมันตามใบเสร็จ',
-        '2026-03-14,กข1234,1000,1100,500'
+        '4/3/2026,กข1234,1000,1100,500'
       ].join('\n');
 
       const parsed = parseCSVText(sampleCSV);
@@ -545,15 +619,33 @@
 
       const quotedCSV = [
         'วันที่ทำกิจกรรม,ชื่อ-สกุล ผู้ทำกิจกรรม,หมายเลขทะเบียนรถ,เลขไมล์เริ่มต้น,เลขไมล์สิ้นสุด,ค่าน้ำมันตามใบเสร็จ',
-        '2026-03-14,"นาย,สมชาย",กข1234,1000,1100,500'
+        '13/3/2026,"นาย,สมชาย",กข1234,1000,1100,500'
       ].join('\n');
       const quotedParsed = parseCSVText(quotedCSV);
       tests.push(quotedParsed[0]['ชื่อ-สกุล ผู้ทำกิจกรรม'] === 'นาย,สมชาย');
 
+      const sorted = processData([
+        {
+          'วันที่ทำกิจกรรม': '13/3/2026',
+          'หมายเลขทะเบียนรถ': '4266',
+          'เลขไมล์เริ่มต้น': 200,
+          'เลขไมล์สิ้นสุด': 300,
+          'ค่าน้ำมันตามใบเสร็จ': 500
+        },
+        {
+          'วันที่ทำกิจกรรม': '4/3/2026',
+          'หมายเลขทะเบียนรถ': '4266',
+          'เลขไมล์เริ่มต้น': 100,
+          'เลขไมล์สิ้นสุด': 180,
+          'ค่าน้ำมันตามใบเสร็จ': 400
+        }
+      ]);
+      tests.push(sorted[0]['วันที่ทำกิจกรรม'] === '4/3/2026');
+
       const csvOut = buildCSVContent([
         {
           ประทับเวลา: '2026-03-14 08:00',
-          วันที่ทำกิจกรรม: '2026-03-14',
+          วันที่ทำกิจกรรม: '13/3/2026',
           'ชื่อ-สกุล ผู้ทำกิจกรรม': 'ทดสอบ "A"',
           ประจำสาขา: 'สระบุรี',
           'หมายเลขทะเบียนรถ': 'กข1234',
@@ -571,6 +663,7 @@
 
       if (!tests.every(Boolean)) {
         console.error('Self-tests failed', tests);
+        showMessage('ระบบพร้อมใช้งาน แต่มีการแจ้งเตือนจากการทดสอบภายใน กรุณาตรวจสอบ Console');
       }
     }
 
@@ -578,15 +671,30 @@
       const file = event.target.files && event.target.files[0];
       if (!file) return;
 
+      showMessage('กำลังประมวลผลไฟล์...');
+
       const reader = new FileReader();
       reader.onload = (e) => {
-        const text = e.target && e.target.result ? String(e.target.result) : '';
-        state.rawData = parseCSVText(text);
-        state.processedData = processData(state.rawData);
-        renderTable(state.processedData);
-        updateStats(state.processedData);
-        document.getElementById('exportBtn').disabled = state.processedData.length === 0;
-        showMessage('');
+        try {
+          const text = e.target && e.target.result ? String(e.target.result) : '';
+          state.rawData = parseCSVText(text);
+          state.processedData = processData(state.rawData);
+          renderTable(state.processedData);
+          updateStats(state.processedData);
+          document.getElementById('exportBtn').disabled = state.processedData.length === 0;
+          showMessage(state.processedData.length ? 'อ่านไฟล์สำเร็จ และตีความวันที่แบบวัน/เดือน/ปีเรียบร้อยแล้ว' : 'ไม่พบข้อมูลที่ใช้งานได้ในไฟล์นี้');
+        } catch (error) {
+          console.error('Read file failed', error);
+          state.rawData = [];
+          state.processedData = [];
+          renderTable([]);
+          updateStats([]);
+          document.getElementById('exportBtn').disabled = true;
+          showMessage('อ่านไฟล์ไม่สำเร็จ กรุณาตรวจสอบว่าเป็นไฟล์ CSV จาก Google Form');
+        }
+      };
+      reader.onerror = () => {
+        showMessage('ไม่สามารถอ่านไฟล์ได้ กรุณาลองใหม่อีกครั้ง');
       };
       reader.readAsText(file);
     });
