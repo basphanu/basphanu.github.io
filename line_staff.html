@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบส่งยอดและรายงานรายทีม</title>
+    <title>ระบบส่งยอดและรายงานรายทีม (Auto-Fill Support)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -48,39 +48,45 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3 mb-4">
+                <div class="grid grid-cols-2 gap-3 mb-4 border-b pb-4">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1 text-blue-700">รหัสพนักงาน</label>
-                        <input type="text" id="empId" placeholder="เช่น 6601" class="w-full border border-blue-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                        <label class="block text-xs font-semibold text-gray-600 mb-1 text-blue-700 font-bold">รหัสพนักงาน</label>
+                        <input type="text" id="empId" placeholder="เช่น 27327" class="w-full border border-blue-100 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1 text-blue-700">ชื่อเล่น</label>
-                        <input type="text" id="staffName" placeholder="ระบุชื่อ" class="w-full border border-blue-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                        <label class="block text-xs font-semibold text-gray-600 mb-1 text-blue-700 font-bold">ชื่อเล่น</label>
+                        <input type="text" id="staffName" placeholder="ระบุชื่อ" class="w-full border border-blue-100 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
                     </div>
                 </div>
 
-                <div class="mb-6">
+                <div class="mb-6 mt-4">
                     <label class="block text-xs font-semibold text-gray-600 mb-1">ทีมของคุณ</label>
                     <select id="teamName" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none bg-white font-medium">
-                        <option value="">-- กำลังโหลดรายชื่อทีม --</option>
+                        <option value="">-- เลือกทีม --</option>
                     </select>
+                </div>
+
+                <div class="flex justify-center mb-6">
+                    <button onclick="fetchMyLastData()" class="bg-orange-100 hover:bg-orange-200 text-orange-700 text-xs font-bold py-2 px-4 rounded-full border border-orange-200 transition-all flex items-center gap-2">
+                        <span>🔄 ดึงข้อมูลลูกค้าจากรอบล่าสุดของฉัน</span>
+                    </button>
                 </div>
 
                 <hr class="my-4 border-gray-100">
 
                 <div class="flex justify-between items-center mb-3">
                     <h2 class="font-bold text-gray-700 uppercase tracking-wide">รายการลูกค้า</h2>
-                    <button onclick="addCustomerRow()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-full shadow-md transition-all active:scale-90">+ เพิ่มลูกค้า</button>
+                    <button onclick="addCustomerRow()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-full shadow-md transition-all active:scale-90">+ เพิ่มลูกค้าใหม่</button>
                 </div>
 
                 <div id="customerList" class="space-y-4"></div>
 
-                <div class="mt-8 space-y-3">
-                    <button onclick="processData()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl shadow-lg active:scale-95 transition-all text-lg">
-                        📊 คำนวณสรุป & Line
+                <div class="mt-8 space-y-4">
+                    <button onclick="processData()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-95 transition-all text-lg flex items-center justify-center gap-2">
+                        <span>📊 คำนวณสรุป & สร้าง Text</span>
                     </button>
-                    <button id="btnSubmit" onclick="sendToGoogleSheet()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md active:scale-95 transition-all hidden">
-                        ☁️ บันทึกลง Google Sheet
+                    <button id="btnSubmit" onclick="sendToGoogleSheet()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-95 transition-all text-lg flex items-center justify-center gap-2">
+                        <span>☁️ บันทึกลง Google Sheet</span>
                     </button>
                 </div>
             </div>
@@ -92,7 +98,7 @@
                         📋 คัดลอก
                     </button>
                 </div>
-                <p id="copyStatus" class="text-green-600 text-center text-xs mt-2 hidden font-bold">✅ คัดลอกเรียบร้อย!</p>
+                <p id="copyStatus" class="text-green-600 text-center text-xs mt-2 hidden font-bold">✅ คัดลอกข้อความเรียบร้อย!</p>
             </div>
         </div>
 
@@ -105,22 +111,22 @@
             <div class="bg-white rounded-xl shadow-lg p-5 border border-gray-200">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-2 font-bold uppercase">ตัวกรองการดึงข้อมูล</label>
+                        <label class="block text-xs font-semibold text-gray-600 mb-2 font-bold uppercase text-purple-700">ระบุเงื่อนไขการค้นหา</label>
                         
                         <div class="mb-3">
-                            <label class="block text-[10px] text-gray-400 font-bold mb-1 uppercase">1. เลือกวันที่</label>
+                            <label class="block text-[10px] text-gray-400 font-bold mb-1 uppercase">1. วันที่</label>
                             <input type="date" id="searchDate" class="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-purple-400 bg-gray-50">
                         </div>
 
-                        <div class="grid grid-cols-2 gap-2 mb-3">
+                        <div class="grid grid-cols-2 gap-2 mb-4">
                             <div>
-                                <label class="block text-[10px] text-gray-400 font-bold mb-1 uppercase">2. เลือกทีม</label>
+                                <label class="block text-[10px] text-gray-400 font-bold mb-1 uppercase">2. ทีม</label>
                                 <select id="searchTeam" class="border border-gray-300 rounded-lg p-2 text-sm w-full outline-none focus:ring-2 focus:ring-purple-400 bg-white font-medium">
-                                    <option value="">-- เลือกทีม --</option>
+                                    <option value="">-- ทีม --</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-[10px] text-gray-400 font-bold mb-1 uppercase">3. เลือกเวลา</label>
+                                <label class="block text-[10px] text-gray-400 font-bold mb-1 uppercase">3. เวลา</label>
                                 <select id="searchTime" class="border border-gray-300 rounded-lg p-2 text-sm w-full outline-none focus:ring-2 focus:ring-purple-400 bg-white font-medium">
                                     <option value="12">12.00</option>
                                     <option value="14">14.00</option>
@@ -131,34 +137,34 @@
                             </div>
                         </div>
                         <button onclick="fetchTeamReport()" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-4 rounded-xl text-md font-bold shadow-lg transition-all active:scale-95">
-                            🔍 ค้นหาข้อมูลรายทีม
+                            🔍 ค้นหายอดทีม
                         </button>
                     </div>
                 </div>
 
                 <div id="reportLoading" class="hidden text-center py-10">
                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
-                    <p class="text-xs text-gray-500 mt-2 font-medium">กำลังโหลดข้อมูล...</p>
+                    <p class="text-xs text-gray-500 mt-2 font-medium">กำลังโหลด...</p>
                 </div>
 
                 <div id="reportContent" class="mt-6 hidden animate-fadeIn">
                     <div class="bg-purple-50 p-4 rounded-xl border border-purple-100 shadow-inner">
                         <h4 class="font-bold text-purple-800 text-center border-b border-purple-200 pb-2 mb-3">สรุปยอดทีม <span id="displayTeamName"></span></h4>
-                        <p class="text-[10px] text-purple-400 text-center mb-2 font-bold">วันที่ <span id="displayDate"></span> รอบ <span id="displayTime"></span>.00</p>
+                        <p class="text-[10px] text-purple-400 text-center mb-2 font-bold italic">วันที่ <span id="displayDate"></span> รอบ <span id="displayTime"></span>.00</p>
                         <div id="teamStats" class="space-y-1 text-sm text-gray-700"></div>
                     </div>
                     <button onclick="generateTeamLineReport()" class="w-full mt-4 bg-green-500 text-white py-3 rounded-xl font-bold shadow-md active:scale-95 transition-all">
-                        📄 สร้างรายงานสำหรับ Line
+                        📋 สร้างข้อความสรุปทีม
                     </button>
                 </div>
             </div>
             
             <div id="teamResultArea" class="mt-6 hidden animate-fadeIn">
                 <div class="relative">
-                    <textarea id="teamLineText" readonly class="w-full h-[450px] p-4 text-[13px] bg-gray-50 border-2 border-purple-200 rounded-xl font-mono leading-relaxed shadow-inner"></textarea>
+                    <textarea id="teamLineText" readonly class="w-full h-[450px] p-4 text-[13px] bg-gray-50 border-2 border-purple-200 rounded-xl font-mono shadow-inner"></textarea>
                     <button onclick="copyToClipboard('teamLineText', 'teamCopyStatus')" class="absolute top-2 right-2 bg-white border px-2 py-1.5 rounded-lg text-xs font-bold shadow-sm">คัดลอก</button>
                 </div>
-                <p id="teamCopyStatus" class="text-purple-600 text-center text-xs mt-2 hidden font-bold">✅ คัดลอกรายงานทีมเรียบร้อย!</p>
+                <p id="teamCopyStatus" class="text-purple-600 text-center text-xs mt-2 hidden font-bold">✅ คัดลอกรายงานทีมแล้ว!</p>
             </div>
         </div>
     </div>
@@ -228,30 +234,38 @@
             const div = document.createElement('div');
             div.className = "customer-row border border-gray-200 p-4 rounded-xl bg-gray-50 relative shadow-sm animate-fadeIn";
             div.id = `row-${customerCount}`;
+            
+            // ใช้ข้อมูลจากตัวแปร data หากมีการส่งเข้ามา (สำหรับการดึงข้อมูลรอบก่อนหน้า)
+            const name = data ? data.name : '';
+            const type = data ? data.type : 'ใหม่';
+            const status = data ? data.status : 'Approve';
+            const cr = data ? data.cr : 0;
+            const yc = data ? data.yc : 0;
+
             div.innerHTML = `
                 <button onclick="removeRow(${customerCount})" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-md">✕</button>
                 <div class="space-y-3">
-                    <input type="text" placeholder="ชื่อลูกค้า" class="cust-name border border-gray-300 rounded-lg p-2.5 text-sm w-full outline-none focus:ring-2 focus:ring-blue-400">
+                    <input type="text" placeholder="ชื่อลูกค้า" class="cust-name border border-gray-300 rounded-lg p-2.5 text-sm w-full outline-none focus:ring-2 focus:ring-blue-400" value="${name}">
                     <div class="grid grid-cols-2 gap-3">
                         <select class="cust-type border border-gray-300 rounded-lg p-2 text-xs w-full bg-white font-medium">
-                            <option value="เก่า">ลูกค้าเก่า</option>
-                            <option value="ใหม่" selected>ลูกค้าใหม่</option>
+                            <option value="เก่า" ${type === 'เก่า' ? 'selected' : ''}>เก่า</option>
+                            <option value="ใหม่" ${type === 'ใหม่' ? 'selected' : ''}>ใหม่</option>
                         </select>
                         <select class="status border border-gray-300 rounded-lg p-2 text-xs w-full bg-white font-bold">
-                            <option value="Approve">Approve</option>
-                            <option value="Reject">Reject</option>
-                            <option value="Pending">Pending</option>
-                            <option value="รอเอกสาร">รอเอกสาร</option>
+                            <option value="Approve" ${status === 'Approve' ? 'selected' : ''}>Approve</option>
+                            <option value="Reject" ${status === 'Reject' ? 'selected' : ''}>Reject</option>
+                            <option value="Pending" ${status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="รอเอกสาร" ${status === 'รอเอกสาร' ? 'selected' : ''}>รอเอกสาร</option>
                         </select>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 bg-white p-3 rounded-xl border border-dashed border-gray-200 shadow-inner">
+                    <div class="grid grid-cols-2 gap-3 bg-white p-3 rounded-xl border border-dashed border-gray-200">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-blue-700">จำนวน CR:</span>
-                            <input type="number" min="0" class="qty-cr w-12 border border-blue-100 rounded p-1 text-center text-sm font-bold bg-blue-50" value="0">
+                            <span class="text-xs font-bold text-blue-700">CR:</span>
+                            <input type="number" min="0" class="qty-cr w-12 border border-blue-100 rounded p-1 text-center text-sm font-bold bg-blue-50" value="${cr}">
                         </div>
                         <div class="flex items-center justify-between border-l border-gray-100 pl-3">
-                            <span class="text-xs font-bold text-orange-700">จำนวน YC:</span>
-                            <input type="number" min="0" class="qty-yc w-12 border border-orange-100 rounded p-1 text-center text-sm font-bold bg-orange-50" value="0">
+                            <span class="text-xs font-bold text-orange-700">YC:</span>
+                            <input type="number" min="0" class="qty-yc w-12 border border-orange-100 rounded p-1 text-center text-sm font-bold bg-orange-50" value="${yc}">
                         </div>
                     </div>
                 </div>
@@ -261,15 +275,57 @@
 
         function removeRow(id) { document.getElementById(`row-${id}`).remove(); }
 
+        // ฟังก์ชันใหม่: ดึงข้อมูลล่าสุดของพนักงานคนนี้
+        async function fetchMyLastData() {
+            const empId = document.getElementById('empId').value;
+            const date = document.getElementById('docDate').value;
+            
+            if (!empId) return showMessage("❌ กรุณากรอกรหัสพนักงานก่อนดึงข้อมูลครับ");
+
+            showMessage("🔄 กำลังดึงข้อมูลล่าสุดของคุณ...");
+            
+            try {
+                const url = `${SCRIPT_URL}?action=getMyLastData&empId=${encodeURIComponent(empId)}&date=${encodeURIComponent(date)}&t=${Date.now()}`;
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (!result || result.length === 0) {
+                    return showMessage("ไม่พบข้อมูลเดิมของคุณในวันนี้ครับ<br><small class='text-gray-400'>คุณอาจจะยังไม่ได้ส่งยอดในรอบก่อนหน้า</small>");
+                }
+
+                // ล้างรายการเดิมออกก่อน
+                document.getElementById('customerList').innerHTML = "";
+                customerCount = 0;
+
+                // เพิ่มแถวลูกค้าจากข้อมูลที่ดึงมา
+                result.forEach(item => {
+                    addCustomerRow({
+                        name: item.name,
+                        type: item.type,
+                        status: item.status,
+                        cr: item.cr,
+                        yc: item.yc
+                    });
+                });
+
+                closeModal();
+                showMessage(`✅ ดึงข้อมูลลูกค้า ${result.length} คน มาให้แล้วครับ!<br><small class='text-blue-500'>อย่าลืมเช็คและอัปเดตสถานะก่อนบันทึกนะครับ</small>`);
+            } catch (e) {
+                showMessage("❌ เกิดข้อผิดพลาดในการดึงข้อมูลครับ");
+            }
+        }
+
         function processData() {
             const dateStr = new Date(document.getElementById('docDate').value).toLocaleDateString('th-TH');
             const time = document.getElementById('docTime').value;
             const staff = document.getElementById('staffName').value;
             const empId = document.getElementById('empId').value;
             const team = document.getElementById('teamName').value;
-            if (!empId || !staff || !team) return showMessage("❌ กรุณากรอกข้อมูลพนักงานให้ครบครับ");
+            if (!empId || !staff || !team) return showMessage("❌ กรุณากรอกข้อมูลพนักงานให้ครบก่อนครับ");
 
             const rows = document.querySelectorAll('.customer-row');
+            if (rows.length === 0) return showMessage("⚠️ กรุณาเพิ่มข้อมูลลูกค้าอย่างน้อย 1 รายการครับ");
+
             let stats = { old: 0, new: 0, cr: 0, yc: 0, total: rows.length, approve: 0, reject: 0, pending: 0, waiting: 0 };
             let customerDetails = "";
 
@@ -297,23 +353,38 @@
 
             document.getElementById('lineText').value = msg;
             document.getElementById('resultArea').classList.remove('hidden');
+            document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
             localStorage.setItem('emp_info', JSON.stringify({ empId, staff, team }));
         }
 
         async function sendToGoogleSheet() {
+            const empId = document.getElementById('empId').value;
+            const staff = document.getElementById('staffName').value;
+            const team = document.getElementById('teamName').value;
+            if (!empId || !staff || !team) return showMessage("❌ กรุณากรอกข้อมูลพนักงานให้ครบก่อนบันทึกครับ");
+
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true; btn.innerText = "กำลังบันทึก...";
+            
+            const rows = document.querySelectorAll('.customer-row');
             const payload = [];
-            document.querySelectorAll('.customer-row').forEach(row => {
-                payload.push({ action: "save", date: document.getElementById('docDate').value, time: document.getElementById('docTime').value, empId: document.getElementById('empId').value, staff: document.getElementById('staffName').value, team: document.getElementById('teamName').value, name: row.querySelector('.cust-name').value, type: row.querySelector('.cust-type').value, qCR: parseInt(row.querySelector('.qty-cr').value) || 0, qYC: parseInt(row.querySelector('.qty-yc').value) || 0, status: row.querySelector('.status').value });
+            rows.forEach(row => {
+                payload.push({ 
+                    action: "save", date: document.getElementById('docDate').value, time: document.getElementById('docTime').value, 
+                    empId: empId, staff: staff, team: team, 
+                    name: row.querySelector('.cust-name').value, type: row.querySelector('.cust-type').value, 
+                    qCR: parseInt(row.querySelector('.qty-cr').value) || 0, qYC: parseInt(row.querySelector('.qty-yc').value) || 0, 
+                    status: row.querySelector('.status').value 
+                });
             });
+
             try {
                 await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                showMessage("✅ บันทึกสำเร็จ!");
+                showMessage("✅ บันทึกข้อมูลสำเร็จ!<br>ก๊อบปี้ข้อความไปส่ง Line ได้เลยครับ");
             } catch (e) {
-                showMessage("❌ ผิดพลาด: " + e.message);
+                showMessage("❌ บันทึกไม่สำเร็จ: " + e.message);
             } finally {
-                btn.disabled = false; btn.innerText = "บันทึกลง Google Sheet";
+                btn.disabled = false; btn.innerText = "☁️ บันทึกลง Google Sheet";
             }
         }
 
@@ -321,45 +392,23 @@
             const team = document.getElementById('searchTeam').value;
             const time = document.getElementById('searchTime').value;
             const date = document.getElementById('searchDate').value;
-            if (!team || !date) return showMessage("⚠️ กรุณาเลือกวันที่และทีมที่ต้องการสรุปครับ");
-            
+            if (!team || !date) return showMessage("⚠️ กรุณาเลือกวันที่และทีมก่อนค้นหาครับ");
             const loading = document.getElementById('reportLoading');
             const content = document.getElementById('reportContent');
             loading.classList.remove('hidden'); content.classList.add('hidden');
             document.getElementById('teamResultArea').classList.add('hidden');
-            
             try {
                 const url = `${SCRIPT_URL}?action=getTeamReport&team=${encodeURIComponent(team)}&time=${encodeURIComponent(time)}&date=${encodeURIComponent(date)}&t=${Date.now()}`;
                 const response = await fetch(url);
                 const result = await response.json(); 
-
                 if (!result || !result.details || result.details.length === 0) {
                     loading.classList.add('hidden');
-                    const displayDateStr = new Date(date).toLocaleDateString('th-TH');
-                    return showMessage("ไม่พบข้อมูลของทีม " + team + "<br>ประจำวันที่ " + displayDateStr + " รอบ " + time + ".00 ครับ");
+                    return showMessage(`ไม่พบข้อมูลของทีม ${team}<br>วันที่ ${new Date(date).toLocaleDateString('th-TH')} รอบ ${time}.00 ครับ`);
                 }
-
-                teamDataResult = result;
-                teamDataResult.selectedTime = time;
-                teamDataResult.selectedDate = new Date(date).toLocaleDateString('th-TH');
-                
-                document.getElementById('displayTeamName').innerText = team;
-                document.getElementById('displayDate').innerText = teamDataResult.selectedDate;
-                document.getElementById('displayTime').innerText = time;
-                
+                teamDataResult = result; teamDataResult.selectedTime = time; teamDataResult.selectedDate = new Date(date).toLocaleDateString('th-TH');
+                document.getElementById('displayTeamName').innerText = team; document.getElementById('displayDate').innerText = teamDataResult.selectedDate; document.getElementById('displayTime').innerText = time;
                 const statsDiv = document.getElementById('teamStats');
-                statsDiv.innerHTML = `
-                    <p>👨‍💼 พนักงานส่งงาน: ${teamDataResult.staffCount} คน</p>
-                    <p class='font-bold text-gray-800 mt-2'>จำนวนลูกค้า ${teamDataResult.total} คน</p>
-                    <p>เก่า ${teamDataResult.old} คน ใหม่ ${teamDataResult.new} คน</p>
-                    <p class='font-semibold text-blue-800 uppercase'>CR ${teamDataResult.cr} ใบ YC ${teamDataResult.yc} ใบ รวม ${teamDataResult.cr + teamDataResult.yc} ใบ</p>
-                    <div class='mt-3 p-3 bg-white rounded-lg border border-purple-200 text-xs shadow-sm'>
-                        <p class='text-green-600 font-bold mb-1'>✅ Approve: ${teamDataResult.approve} คน</p>
-                        <p class='text-red-600 font-bold mb-1'>❌ Reject: ${teamDataResult.reject} คน</p>
-                        <p class='text-yellow-600 font-bold mb-1'>🅿️ Pending: ${teamDataResult.pending} คน</p>
-                        <p class='text-gray-600 font-bold'>⏳📄 รอเอกสาร: ${teamDataResult.waiting} คน</p>
-                    </div>
-                `;
+                statsDiv.innerHTML = `<p>👨‍💼 พนักงานส่งงาน: ${teamDataResult.staffCount} คน</p><p class='font-bold text-gray-800 mt-2'>จำนวนลูกค้า ${teamDataResult.total} คน</p><p>เก่า ${teamDataResult.old} คน ใหม่ ${teamDataResult.new} คน</p><p class='font-semibold text-blue-800 uppercase'>CR ${teamDataResult.cr} ใบ YC ${teamDataResult.yc} ใบ รวม ${teamDataResult.cr + teamDataResult.yc} ใบ</p><div class='mt-3 p-3 bg-white rounded-lg border border-purple-200 text-xs shadow-sm'><p class='text-green-600 font-bold mb-1'>✅ Approve: ${teamDataResult.approve} คน</p><p class='text-red-600 font-bold mb-1'>❌ Reject: ${teamDataResult.reject} คน</p><p class='text-yellow-600 font-bold mb-1'>🅿️ Pending: ${teamDataResult.pending} คน</p><p class='text-gray-600 font-bold'>⏳📄 รอเอกสาร: ${teamDataResult.waiting} คน</p></div>`;
                 content.classList.remove('hidden');
             } catch (e) { showMessage("❌ เกิดข้อผิดพลาดในการดึงข้อมูลจาก Server ครับ"); }
             finally { loading.classList.add('hidden'); }
@@ -374,37 +423,27 @@
                 if (!grouped[key]) grouped[key] = [];
                 grouped[key].push(d);
             });
-
             for (const key in grouped) {
                 const [id, name] = key.split('|');
                 msg += `🆔 พนักงาน: [${id}] ${name}\n`;
                 grouped[key].forEach((cust, idx) => {
-                    let cardInfo = [];
-                    if (cust.cr > 0) cardInfo.push(`CR ${cust.cr}`);
-                    if (cust.yc > 0) cardInfo.push(`YC ${cust.yc}`);
+                    let cardInfo = []; if (cust.cr > 0) cardInfo.push(`CR ${cust.cr}`); if (cust.yc > 0) cardInfo.push(`YC ${cust.yc}`);
                     msg += `${idx + 1}. ${cust.name} (${cust.type})\n   📝 [${cardInfo.join(' + ') || 'ไม่มีบัตร'}] -> ${statusEmojis[cust.status]} ${cust.status}\n`;
                 });
                 msg += `\n`;
             }
-
             msg += `—————————\nสรุปผลงานรายทีม\nจำนวนลูกค้า ${teamDataResult.total} คน\nเก่า ${teamDataResult.old} คน ใหม่ ${teamDataResult.new} คน\nCR ${teamDataResult.cr} ใบ YC ${teamDataResult.yc} ใบ รวม ${teamDataResult.cr + teamDataResult.yc} ใบ\n✅ Approve: ${teamDataResult.approve} คน\n❌ Reject: ${teamDataResult.reject} คน\n🅿️ Pending: ${teamDataResult.pending} คน\n⏳📄 รอเอกสาร: ${teamDataResult.waiting} คน\n-------------------`;
-            
-            document.getElementById('teamLineText').value = msg;
-            document.getElementById('teamResultArea').classList.remove('hidden');
-            document.getElementById('teamResultArea').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('teamLineText').value = msg; document.getElementById('teamResultArea').classList.remove('hidden'); document.getElementById('teamResultArea').scrollIntoView({ behavior: 'smooth' });
         }
 
         function copyToClipboard(id, statusId) {
-            const copyText = document.getElementById(id);
-            copyText.select();
-            document.execCommand("copy");
-            const status = document.getElementById(statusId);
-            status.classList.remove('hidden');
+            const copyText = document.getElementById(id); copyText.select(); document.execCommand("copy");
+            const status = document.getElementById(statusId); status.classList.remove('hidden');
             setTimeout(() => status.classList.add('hidden'), 2000);
         }
 
         function showMessage(text) {
-            document.getElementById('modalContent').innerHTML = `<div class='text-sm font-medium'>${text}</div>`;
+            document.getElementById('modalContent').innerHTML = `<div class='text-sm font-medium text-gray-700 leading-relaxed'>${text}</div>`;
             document.getElementById('statusModal').classList.remove('hidden');
         }
 
