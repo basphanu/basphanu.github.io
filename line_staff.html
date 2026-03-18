@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบส่งยอดและรายงานรายทีม (V2.8)</title>
+    <title>ระบบส่งยอดและรายงานรายทีม (V2.9)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -324,7 +324,18 @@
                     }
                     showMessage("✅ ดึงข้อมูลล่าสุดของวันที่เลือกมาให้เรียบร้อยครับ");
                 } else {
-                    showMessage("⚠️ ไม่พบข้อมูลของรหัสนี้ใน<b>วันที่เลือก</b>ครับ<br><span class='text-xs text-gray-500 mt-1'>(หากเป็นการส่งยอดรอบแรกของวัน ให้เริ่มกรอกใหม่ได้เลย)</span>");
+                    // ---- เมื่อไม่พบข้อมูล ให้เคลียร์ข้อมูลเก่าทั้งหมดและเปิดกล่องว่าง 1 กล่อง ----
+                    document.getElementById('insCount').value = 0;
+                    document.getElementById('insPremium').value = 0;
+                    document.getElementById('noCustomer').checked = false;
+                    document.getElementById('customerSection').style.display = 'block';
+                    document.getElementById('customerList').innerHTML = ''; 
+                    customerCount = 0;
+                    
+                    // เพิ่มกล่องว่าง 1 กล่อง
+                    addCustomerRow();
+                    
+                    showMessage("⚠️ ไม่พบข้อมูลของรหัสนี้ใน<b>วันที่เลือก</b>ครับ<br><span class='text-xs text-gray-500 mt-1'>(ระบบได้เตรียมกล่องข้อมูลเปล่าสำหรับส่งยอดรอบแรกของวันให้แล้วครับ)</span>");
                 }
             } catch (error) {
                 showMessage("❌ ไม่สามารถเชื่อมต่อระบบเพื่อดึงข้อมูลได้");
