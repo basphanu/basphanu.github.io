@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบส่งยอดและรายงานรายทีม (No Sales Support)</title>
+    <title>ระบบส่งยอดและรายงานรายทีม (Final Version)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -67,16 +67,16 @@
                     </select>
                 </div>
 
-                <!-- ระบบ No Sales -->
+                <!-- ระบบ No Sales (Updated Labels) -->
                 <div class="flex flex-col gap-2 mb-6">
                     <div class="flex justify-center">
-                        <button onclick="fetchMyLastData()" class="bg-orange-500 hover:bg-orange-600 text-white text-[11px] font-bold py-2 px-4 rounded-full shadow-md transition-all flex items-center gap-2 active:scale-95">
-                            <span>🔄 รีเฟรชข้อมูลลูกค้า</span>
+                        <button onclick="fetchMyLastData()" class="bg-orange-500 hover:bg-orange-600 text-white text-[11px] font-bold py-2.5 px-6 rounded-full shadow-md transition-all flex items-center gap-2 active:scale-95">
+                            <span>🔄 ดึงข้อมูลลูกค้ารอบก่อนหน้า</span>
                         </button>
                     </div>
-                    <div class="flex items-center justify-center gap-2 mt-2">
-                        <input type="checkbox" id="noSalesCheckbox" onchange="toggleNoSales()" class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
-                        <label for="noSalesCheckbox" class="text-sm font-bold text-red-600 cursor-pointer">🔴 รอบนี้ไม่มียอดขาย</label>
+                    <div class="flex items-center justify-center gap-2 mt-2 bg-red-50 py-2 px-4 rounded-lg border border-red-100">
+                        <input type="checkbox" id="noSalesCheckbox" onchange="toggleNoSales()" class="w-5 h-5 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                        <label for="noSalesCheckbox" class="text-sm font-bold text-red-600 cursor-pointer">🔴 วันนี้ยังไม่ได้ยอด</label>
                     </div>
                 </div>
 
@@ -91,7 +91,7 @@
                 </div>
 
                 <div id="noSalesNotice" class="hidden p-4 bg-red-50 border border-red-200 rounded-xl text-center mb-4 animate-fadeIn">
-                    <p class="text-red-700 font-bold text-sm">⚠️ ระบบจะบันทึกสถานะ "ไม่มียอดขาย" ในรอบนี้</p>
+                    <p class="text-red-700 font-bold text-sm">⚠️ ระบบจะบันทึกสถานะ "วันนี้ยังไม่ได้ยอด" ลงในรอบนี้</p>
                 </div>
 
                 <div class="mt-8 space-y-4 text-center">
@@ -129,7 +129,7 @@
                         </div>
                         <div class="grid grid-cols-2 gap-2 mb-4">
                             <div>
-                                <label class="block text-[10px] text-gray-400 font-bold mb-1 uppercase">2. ทีม</label>
+                                <label class="block text-[10px] text-gray-400 font-bold mb-1 uppercase">2. เลือกทีม</label>
                                 <select id="searchTeam" class="border border-gray-300 rounded-lg p-2 text-sm w-full outline-none focus:ring-2 focus:ring-purple-400 bg-white font-medium">
                                     <option value="">-- ทีม --</option>
                                 </select>
@@ -191,7 +191,7 @@
         let customerCount = 0;
         let teamDataResult = null;
 
-        const statusEmojis = { "Approve": "✅", "Reject": "❌", "Pending": "🅿️", "รอเอกสาร": "⏳📄" };
+        const statusEmojis = { "Approve": "✅", "Reject": "❌", "Pending": "🅿️", "รอเอกสาร": "🔖" };
 
         function switchTab(tab) {
             document.getElementById('section-input').classList.toggle('hidden', tab !== 'input');
@@ -264,14 +264,14 @@
                             <option value="รอเอกสาร" ${data?.status === 'รอเอกสาร' ? 'selected' : ''}>รอเอกสาร</option>
                         </select>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 bg-white p-3 rounded-xl border border-dashed border-gray-200 shadow-inner">
+                    <div class="grid grid-cols-2 gap-3 bg-white p-3 rounded-xl border border-dashed border-gray-200 shadow-inner text-[11px]">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-blue-700">CR:</span>
-                            <input type="number" min="0" class="qty-cr w-12 border border-blue-100 rounded p-1 text-center text-sm font-bold bg-blue-50" value="${data?.cr || 0}">
+                            <span class="font-bold text-blue-700">CR:</span>
+                            <input type="number" min="0" class="qty-cr w-12 border border-blue-100 rounded p-1 text-center font-bold bg-blue-50" value="${data?.cr || 0}">
                         </div>
                         <div class="flex items-center justify-between border-l border-gray-100 pl-3">
-                            <span class="text-xs font-bold text-orange-700">YC:</span>
-                            <input type="number" min="0" class="qty-yc w-12 border border-orange-100 rounded p-1 text-center text-sm font-bold bg-orange-50" value="${data?.yc || 0}">
+                            <span class="font-bold text-orange-700">YC:</span>
+                            <input type="number" min="0" class="qty-yc w-12 border border-orange-100 rounded p-1 text-center font-bold bg-orange-50" value="${data?.yc || 0}">
                         </div>
                     </div>
                 </div>
@@ -319,10 +319,10 @@
             let msg = `📅 รายงานยอด: ${dateStr} (รอบ ${time}.00)\n👥 ทีม: ${team}\n🆔 พนักงาน: [${empId}] ${staff}\n-------------------\n`;
 
             if (isNoSales) {
-                msg += `🔴 รอบนี้ยังไม่มียอดขายครับ\n`;
+                msg += `🔴 วันนี้ยังไม่ได้ยอดครับ\n`;
             } else {
                 const rows = document.querySelectorAll('.customer-row');
-                if (rows.length === 0) return showMessage("⚠️ กรุณาเพิ่มลูกค้าหรือติ๊กช่อง 'ไม่มียอดขาย' ครับ");
+                if (rows.length === 0) return showMessage("⚠️ กรุณาเพิ่มลูกค้าหรือเลือก 'วันนี้ยังไม่ได้ยอด' ครับ");
                 
                 let stats = { old: 0, new: 0, cr: 0, yc: 0, total: rows.length, approve: 0, reject: 0, pending: 0, waiting: 0 };
                 let customerDetails = "";
@@ -341,7 +341,7 @@
                 });
 
                 msg += customerDetails;
-                msg += `-------------------\n📊 สรุปรวมรอบนี้:\nจำนวนลูกค้า ${stats.total} คน\nเก่า ${stats.old} คน ใหม่ ${stats.new} คน\nCR ${stats.cr} ใบ YC ${stats.yc} ใบ รวม ${stats.cr + stats.yc} ใบ\n✅ Approve: ${stats.approve} คน\n❌ Reject: ${stats.reject} คน\n🅿️ Pending: ${stats.pending} คน\n⏳📄 รอเอกสาร: ${stats.waiting} คน`;
+                msg += `-------------------\n📊 สรุปรวมรอบนี้:\nจำนวนลูกค้า ${stats.total} คน\nเก่า ${stats.old} คน ใหม่ ${stats.new} คน\nCR ${stats.cr} ใบ YC ${stats.yc} ใบ รวม ${stats.cr + stats.yc} ใบ\n✅ Approve: ${stats.approve} คน\n❌ Reject: ${stats.reject} คน\n🅿️ Pending: ${stats.pending} คน\n🔖 รอเอกสาร: ${stats.waiting} คน`;
             }
 
             document.getElementById('lineText').value = msg;
@@ -395,7 +395,7 @@
                 document.getElementById('displayTeamName').innerText = team; document.getElementById('displayDate').innerText = teamDataResult.selectedDate; document.getElementById('displayTime').innerText = time;
                 
                 const statsDiv = document.getElementById('teamStats');
-                statsDiv.innerHTML = `<p>👨‍💼 พนักงานส่งงาน: ${teamDataResult.staffCount} คน</p><p class='font-bold text-gray-800 mt-2 text-md'>จำนวนลูกค้า ${teamDataResult.total} คน</p><p>เก่า ${teamDataResult.old} คน ใหม่ ${teamDataResult.new} คน</p><p class='font-semibold text-blue-800 uppercase'>CR ${teamDataResult.cr} ใบ YC ${teamDataResult.yc} ใบ รวม ${teamDataResult.cr + teamDataResult.yc} ใบ</p><div class='mt-3 p-3 bg-white rounded-lg border border-purple-200 text-xs shadow-sm'><p class='text-green-600 font-bold mb-1'>✅ Approve: ${teamDataResult.approve} คน</p><p class='text-red-600 font-bold mb-1'>❌ Reject: ${teamDataResult.reject} คน</p><p class='text-yellow-600 font-bold mb-1'>🅿️ Pending: ${teamDataResult.pending} คน</p><p class='text-gray-600 font-bold'>⏳📄 รอเอกสาร: ${teamDataResult.waiting} คน</p></div>`;
+                statsDiv.innerHTML = `<p>👨‍💼 พนักงานส่งงาน: ${teamDataResult.staffCount} คน</p><p class='font-bold text-gray-800 mt-2 text-md'>จำนวนลูกค้า ${teamDataResult.total} คน</p><p>เก่า ${teamDataResult.old} คน ใหม่ ${teamDataResult.new} คน</p><p class='font-semibold text-blue-800 uppercase'>CR ${teamDataResult.cr} ใบ YC ${teamDataResult.yc} ใบ รวม ${teamDataResult.cr + teamDataResult.yc} ใบ</p><div class='mt-3 p-3 bg-white rounded-lg border border-purple-200 text-xs shadow-sm'><p class='text-green-600 font-bold mb-1'>✅ Approve: ${teamDataResult.approve} คน</p><p class='text-red-600 font-bold mb-1'>❌ Reject: ${teamDataResult.reject} คน</p><p class='text-yellow-600 font-bold mb-1'>🅿️ Pending: ${teamDataResult.pending} คน</p><p class='text-gray-600 font-bold'>🔖 รอเอกสาร: ${teamDataResult.waiting} คน</p></div>`;
                 content.classList.remove('hidden');
             } catch (e) { showMessage("❌ เกิดข้อผิดพลาดในการดึงข้อมูลครับ"); }
             finally { loading.classList.add('hidden'); }
@@ -410,7 +410,7 @@
                 const [id, name] = key.split('|'); msg += `🆔 พนักงาน: [${id}] ${name}\n`;
                 const records = grouped[key];
                 if (records.length === 1 && records[0].name === "ไม่มียอด") {
-                    msg += `   🔴 ยังไม่มียอดขายในรอบนี้\n`;
+                    msg += `   🔴 วันนี้ยังไม่ได้ยอด\n`;
                 } else {
                     records.forEach((cust, idx) => {
                         let cardInfo = []; if (cust.cr > 0) cardInfo.push(`CR ${cust.cr}`); if (cust.yc > 0) cardInfo.push(`YC ${cust.yc}`);
@@ -419,7 +419,7 @@
                 }
                 msg += `\n`;
             }
-            msg += `—————————\nสรุปผลงานรายทีม\nจำนวนลูกค้า ${teamDataResult.total} คน\nเก่า ${teamDataResult.old} คน ใหม่ ${teamDataResult.new} คน\nCR ${teamDataResult.cr} ใบ YC ${teamDataResult.yc} ใบ รวม ${teamDataResult.cr + teamDataResult.yc} ใบ\n✅ Approve: ${teamDataResult.approve} คน\n❌ Reject: ${teamDataResult.reject} คน\n🅿️ Pending: ${teamDataResult.pending} คน\n⏳📄 รอเอกสาร: ${teamDataResult.waiting} คน\n-------------------`;
+            msg += `—————————\nสรุปผลงานรายทีม\nจำนวนลูกค้า ${teamDataResult.total} คน\nเก่า ${teamDataResult.old} คน ใหม่ ${teamDataResult.new} คน\nCR ${teamDataResult.cr} ใบ YC ${teamDataResult.yc} ใบ รวม ${teamDataResult.cr + teamDataResult.yc} ใบ\n✅ Approve: ${teamDataResult.approve} คน\n❌ Reject: ${teamDataResult.reject} คน\n🅿️ Pending: ${teamDataResult.pending} คน\n🔖 รอเอกสาร: ${teamDataResult.waiting} คน\n-------------------`;
             document.getElementById('teamLineText').value = msg; document.getElementById('teamResultArea').classList.remove('hidden'); document.getElementById('teamResultArea').scrollIntoView({ behavior: 'smooth' });
         }
 
