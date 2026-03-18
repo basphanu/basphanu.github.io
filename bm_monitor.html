@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Branch Summary - Solid iOS Minimal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        body { 
+            font-family: 'IBM Plex Sans Thai', sans-serif; 
+            background-color: #F2F2F7; 
+            color: #1C1C1E;
+            letter-spacing: 0.01em;
+        }
+        
+        /* สไตล์หน้าเว็บปกติ */
+        .ios-card {
+            background: #FFFFFF;
+            border-radius: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E5E5EA;
+        }
+        .ios-button-primary { background-color: #007AFF; border-radius: 16px; transition: all 0.2s ease; }
+        .ios-button-export { background-color: #34C759; border-radius: 12px; font-size: 13px; font-weight: 700; }
+        
+        /* ตารางสไตล์ Minimal */
+        .table-ios thead th {
+            background-color: #F2F2F7;
+            color: #3A3A3C;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.75rem;
+            padding: 16px;
+            border-bottom: 2px solid #D1D1D6;
+        }
+        .table-ios tbody tr { border-bottom: 1px solid #F2F2F7; }
+        
+        /* ส่วนพนักงานดีเด่น - สีทึบ 100% */
+        .performer-card-solid {
+            background-color: #007AFF !important;
+            border-radius: 40px;
+            color: #FFFFFF !important;
+        }
+        .winner-box-solid {
+            background-color: #0056B3 !important;
+            border: 3px solid #FFFFFF !important;
+            border-radius: 32px;
+        }
+        
+        /* บอร์ดแจ้งเตือนพนักงานไม่มียอด - โทนสีส้ม */
+        .alert-card-orange {
+            background-color: #FF9500 !important;
+            border-radius: 32px;
+            color: #FFFFFF !important;
+            box-shadow: 0 10px 30px rgba(255, 149, 0, 0.2);
+        }
+        .staff-tag-orange {
+            background-color: #FFAC33 !important;
+            border: 2px solid #FFD18A !important;
+            border-radius: 16px;
+            padding: 12px 20px;
+        }
+
+        .badge-best {
+            background-color: #FFD60A !important;
+            color: #000000 !important;
+            font-weight: 700;
+            border-radius: 100px;
+            border: 2px solid #FFFFFF !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-24 text-[15px]">
+
+    <div class="max-w-5xl mx-auto p-6">
+        <!-- Control Panel -->
+        <div class="ios-card p-8 mb-10 border-t-4 border-blue-500">
+            <h2 class="text-slate-900 text-lg font-bold mb-6 flex items-center gap-2">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 text-blue-600"></i> แผงจัดการรายงานสาขา
+            </h2>
+            <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-bold text-slate-500 px-1 uppercase">ระบุวันที่</label>
+                        <input type="date" id="searchDate" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-base outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-bold text-slate-500 px-1 uppercase">สาขา/ทีม</label>
+                        <select id="searchBranch" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-base outline-none focus:ring-2 focus:ring-blue-500 appearance-none font-medium">
+                            <option value="All">สรุปผลงานพนักงานทุกคน</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button onclick="fetchBranchData()" class="w-full ios-button-primary text-white font-bold py-4 shadow-xl shadow-blue-100 flex items-center justify-center gap-3 text-lg text-white">
+                    <i data-lucide="refresh-cw" class="w-6 h-6"></i> ประมวลผลข้อมูลล่าสุด
+                </button>
+
+                <div id="exportButtons" class="hidden grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+                    <button onclick="exportPart('part1')" class="ios-button-export text-white py-4 shadow-md flex items-center justify-center gap-2">
+                        🏆 (1) สรุปยอดทีม
+                    </button>
+                    <button onclick="exportPart('part2')" class="ios-button-export text-white py-4 shadow-md flex items-center justify-center gap-2 bg-slate-700">
+                        📊 (2) ตารางรายคน
+                    </button>
+                    <button onclick="exportPart('part3')" class="ios-button-export text-white py-4 shadow-md flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600">
+                        🔍 (3) บอร์ดติดตาม
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboard" class="hidden space-y-20">
+            
+            <!-- Part 1: Summary + Teams -->
+            <div id="part1" class="space-y-12">
+                <div class="flex justify-between items-end border-b-2 border-slate-300 pb-8">
+                    <div>
+                        <h1 class="text-4xl font-bold text-slate-900 uppercase">Branch Summary</h1>
+                        <p class="text-slate-600 text-xl font-medium mt-1">ประจำวันที่ <span class="dispDate text-blue-600 font-bold">-</span></p>
+                    </div>
+                    <div class="bg-blue-600 px-6 py-2 rounded-full"><span class="text-xs font-bold text-white uppercase tracking-widest">TEAM RANKING</span></div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+                    <div class="ios-card p-6 border-b-4 border-blue-500 text-center">
+                        <p class="text-[11px] font-bold text-slate-500 uppercase mb-1">ลูกค้าใหม่</p>
+                        <h3 class="text-4xl font-bold text-slate-900 statNew">0</h3>
+                        <p class="text-[10px] text-slate-400 mt-2 uppercase">รวมสมัคร: <span class="statTotalCust">0</span></p>
+                    </div>
+                    <div class="ios-card p-6 border-b-4 border-green-500 text-center">
+                        <p class="text-[11px] font-bold text-slate-500 uppercase mb-1">อนุมัติใหม่</p>
+                        <h3 class="text-4xl font-bold text-green-600 statApprNew">0</h3>
+                        <p class="text-[10px] text-slate-400 mt-2 uppercase">อนุมัติเก่า: <span class="statApprOld">0</span></p>
+                    </div>
+                    <div class="ios-card p-6 border-b-4 border-orange-500 text-center">
+                        <p class="text-[11px] font-bold text-slate-500 uppercase mb-1">บัตร (CR/YC)</p>
+                        <h3 class="text-4xl font-bold text-orange-500 statTotalCards">0</h3>
+                        <p class="text-[10px] text-slate-400 mt-2 uppercase">C:<span class="statCR">0</span> Y:<span class="statYC">0</span></p>
+                    </div>
+                    <div class="ios-card p-6 border-b-4 border-slate-300 text-center">
+                        <p class="text-[11px] font-bold text-slate-500 uppercase mb-1">พนักงาน</p>
+                        <h3 class="text-4xl font-bold text-slate-900 statStaffCount">0</h3>
+                        <p class="text-[10px] text-slate-400 mt-2 uppercase font-bold tracking-widest">PERSONNELS</p>
+                    </div>
+                </div>
+
+                <!-- Best Performer -->
+                <div class="performer-card-solid p-12 shadow-xl relative">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-10">
+                        <div class="text-center md:text-left">
+                            <div class="bg-yellow-400 w-20 h-20 flex items-center justify-center rounded-3xl shadow-lg mb-6 text-4xl text-black">🏆</div>
+                            <h2 class="text-4xl font-bold uppercase tracking-tight text-white">พนักงานดีเด่น</h2>
+                            <p class="text-blue-100 text-2xl font-light opacity-90">ยอดลูกค้าใหม่ อนุมัติสูงสุดประจำวัน</p>
+                        </div>
+                        <div id="topStaffList" class="flex flex-wrap justify-center gap-8"></div>
+                    </div>
+                </div>
+
+                <div id="teamGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8"></div>
+            </div>
+
+            <!-- Part 2: Table -->
+            <div id="part2" class="space-y-10 pt-10">
+                <div class="flex justify-between items-end border-b-2 border-slate-300 pb-8 text-black">
+                    <div>
+                        <h1 class="text-4xl font-bold uppercase tracking-tight">Performance Table</h1>
+                        <p class="text-slate-600 text-xl font-medium mt-1">ประจำวันที่ <span class="dispDate text-blue-600 font-bold">-</span></p>
+                    </div>
+                    <div class="bg-slate-700 px-6 py-2 rounded-full"><span class="text-xs font-bold text-white uppercase tracking-widest">Detail List</span></div>
+                </div>
+                <div class="ios-card overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full table-ios">
+                            <thead>
+                                <tr>
+                                    <th class="text-left py-6 px-10">พนักงาน / ทีม</th>
+                                    <th class="text-center bg-green-50 text-green-700">อนุมัติใหม่</th>
+                                    <th class="text-center text-slate-800">อนุมัติเก่า</th>
+                                    <th class="text-center text-slate-800">สมัครรวม</th>
+                                    <th class="text-center text-slate-800 font-bold">CR / YC</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staffTableBody" class="text-slate-900 font-semibold"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 3: Alert Board -->
+            <div id="part3" class="space-y-10 pt-10">
+                <div class="flex justify-between items-end border-b-2 border-slate-300 pb-8 text-black">
+                    <div>
+                        <h1 class="text-4xl font-bold uppercase tracking-tight">Tracking Board</h1>
+                        <p class="text-slate-600 text-xl font-medium mt-1">ประจำวันที่ <span class="dispDate text-blue-600 font-bold">-</span></p>
+                    </div>
+                    <div class="bg-orange-600 px-6 py-2 rounded-full shadow-lg"><span class="text-xs font-bold text-white uppercase tracking-widest">Monitoring</span></div>
+                </div>
+                <div class="alert-card-orange p-12 shadow-2xl border-4 border-white">
+                    <div class="flex items-center gap-8 mb-12">
+                        <div class="bg-white w-20 h-20 flex items-center justify-center rounded-3xl text-4xl shadow-md text-orange-600">🔍</div>
+                        <div>
+                            <h2 class="text-4xl font-bold uppercase tracking-tight text-white leading-none">พนักงานที่ยังไม่มียอด</h2>
+                            <p class="text-orange-50 text-xl font-medium mt-3 opacity-95 uppercase tracking-wide">อนุมัติลูกค้าใหม่ประจำวัน</p>
+                        </div>
+                    </div>
+                    <div id="zeroApprList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+                    <div id="noAlertMsg" class="hidden text-orange-100 text-2xl font-bold italic py-8 text-center w-full uppercase tracking-widest border-2 border-dashed border-orange-200 rounded-3xl">Great Performance! All staff have new approvals today.</div>
+                </div>
+            </div>
+
+            <div class="text-center pt-16 border-t border-slate-200 opacity-20">
+                <p class="text-sm font-bold uppercase tracking-[0.6em] text-slate-900">Branch Performance Analytics 2026</p>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="captureEmpty" class="py-56 text-center text-slate-300 uppercase font-bold tracking-widest">
+            <i data-lucide="bar-chart-3" class="w-16 h-16 mx-auto mb-6 opacity-20 text-slate-500"></i>
+            <h3 class="text-2xl text-slate-400">กดปุ่มเพื่อเริ่มต้นประมวลผลข้อมูล</h3>
+        </div>
+    </div>
+
+    <!-- Status Modal -->
+    <div id="statusModal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-6 z-[100] backdrop-blur-md">
+        <div class="ios-card p-12 w-full max-w-sm text-center border-none shadow-2xl scale-105">
+            <div id="modalContent" class="text-slate-900 text-xl font-bold mb-10 leading-relaxed"></div>
+            <button onclick="document.getElementById('statusModal').classList.add('hidden')" class="w-full ios-button-primary text-white py-4 font-bold shadow-lg shadow-blue-500/30">ตกลงครับ</button>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw4DUHHwmiro5EP-iydO9mqYf_2tw9gkTJb8AcPqHlUET6tiplnch8cpEUNmTFMW_ILyA/exec"; 
+
+        document.getElementById('searchDate').valueAsDate = new Date();
+        lucide.createIcons();
+
+        async function fetchBranchData() {
+            const date = document.getElementById('searchDate').value;
+            const branch = document.getElementById('searchBranch').value;
+            if (!date) return alert("กรุณาระบุวันที่ครับ");
+            document.getElementById('captureEmpty').classList.add('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getBranchReportLatest&date=${encodeURIComponent(date)}&branch=${encodeURIComponent(branch)}&t=${Date.now()}`);
+                const data = await response.json();
+                if (!data || data.staffCount === 0) {
+                    document.getElementById('captureEmpty').classList.remove('hidden');
+                    return alert("ไม่พบข้อมูลพนักงานที่ส่งยอดครับ");
+                }
+                renderDashboard(data, date);
+                document.getElementById('exportButtons').classList.remove('hidden');
+            } catch (e) { alert("เกิดข้อผิดพลาดในการดึงข้อมูลครับ"); }
+        }
+
+        function renderDashboard(data, date) {
+            const thaiDate = new Date(date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.querySelectorAll('.dispDate').forEach(el => el.innerText = thaiDate);
+
+            const b = data.branchStats;
+            document.querySelectorAll('.statNew').forEach(el => el.innerText = b.new);
+            document.querySelectorAll('.statApprNew').forEach(el => el.innerText = b.approveNew || 0);
+            document.querySelectorAll('.statTotalCards').forEach(el => el.innerText = b.cr + b.yc);
+            document.querySelectorAll('.statStaffCount').forEach(el => el.innerText = data.staffCount);
+            
+            document.querySelectorAll('.statApprOld').forEach(el => el.innerText = b.approveOld || 0);
+            document.querySelectorAll('.statCR').forEach(el => el.innerText = b.cr);
+            document.querySelectorAll('.statYC').forEach(el => el.innerText = b.yc);
+            document.querySelectorAll('.statTotalCust').forEach(el => el.innerText = b.total);
+
+            const topList = document.getElementById('topStaffList');
+            topList.innerHTML = "";
+            const maxNewAppr = Math.max(...data.staffDetails.map(s => s.apprNew || 0));
+            const winners = data.staffDetails.filter(s => (s.apprNew || 0) === maxNewAppr && maxNewAppr > 0);
+            
+            if (winners.length > 0) {
+                winners.forEach(staff => {
+                    const div = document.createElement('div');
+                    div.className = "winner-box-solid px-12 py-8 flex items-center gap-10 shadow-lg animate-fadeIn";
+                    div.innerHTML = `<div><p class="text-[12px] font-bold text-blue-100 uppercase tracking-widest mb-1 opacity-80">${staff.team}</p><h4 class="font-bold text-3xl tracking-tight text-white">${staff.staff}</h4></div><div class="h-16 w-[1px] bg-white/30"></div><div class="text-center"><p class="text-[12px] font-bold text-blue-100 uppercase tracking-widest mb-1 opacity-80 font-medium">อนุมัติใหม่</p><p class="text-6xl font-bold text-yellow-300 drop-shadow-md">${staff.apprNew}</p></div>`;
+                    topList.appendChild(div);
+                });
+            } else { topList.innerHTML = `<p class="text-white opacity-40 text-xl font-bold uppercase tracking-[0.2em]">- NO DATA -</p>`; }
+
+            const teamGrid = document.getElementById('teamGrid');
+            teamGrid.innerHTML = "";
+            const sortedTeams = Object.entries(data.teamStats).sort((a, b) => (b[1].apprNew || 0) - (a[1].apprNew || 0));
+            sortedTeams.forEach(([teamName, s], index) => {
+                const card = document.createElement('div');
+                const isBest = index === 0 && (s.apprNew || 0) > 0;
+                card.className = `ios-card p-6 transition-all relative ${isBest ? 'ring-[4px] ring-yellow-400 border-none' : ''}`;
+                card.innerHTML = `${isBest ? '<div class="absolute -top-5 -right-1 badge-best px-6 py-2 rounded-full font-bold text-[14px] bg-[#FFD60A] text-black border-2 border-white shadow-md z-20">ทีมผลงานดีเด่น</div>' : ''}<div class="flex justify-between items-start mb-6 text-slate-800"><h4 class="font-bold text-2xl leading-tight pr-4">${teamName}</h4><span class="text-[11px] bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-bold whitespace-nowrap">${s.staffs.length} คน</span></div><div class="space-y-4 text-slate-900"><div class="flex justify-between items-end text-[16px] font-bold border-b border-slate-100 pb-3 text-slate-500"><span class="uppercase tracking-tight">อนุมัติใหม่</span><span class="text-green-600 text-3xl font-bold leading-none">${s.apprNew}</span></div><div class="grid grid-cols-2 gap-3 text-[13px] font-bold"><div class="bg-slate-50 p-3 rounded-xl text-slate-700 text-center border border-slate-100">เก่า: ${s.apprOld}</div><div class="bg-slate-50 p-3 rounded-xl text-slate-700 text-center border border-slate-100">สมัคร: ${s.new}</div></div></div>`;
+                teamGrid.appendChild(card);
+            });
+
+            const tableBody = document.getElementById('staffTableBody');
+            tableBody.innerHTML = "";
+            const sortedStaff = [...data.staffDetails].sort((a, b) => (b.apprNew || 0) - (a.apprNew || 0));
+            sortedStaff.forEach(staff => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-blue-50/20 transition-all";
+                // ปรับขนาดและสี อนุมัติใหม่ ให้เด่นสีเขียว และช่องอื่นยึดตามช่องอนุมัติเก่า ตามคำขอครับบาส
+                row.innerHTML = `
+                    <td class="px-10 py-6 text-left">
+                        <p class="font-bold text-slate-900 text-xl tracking-tight leading-none">${staff.staff}</p>
+                        <p class="text-[11px] text-slate-500 font-bold uppercase tracking-widest mt-2">ทีม ${staff.team}</p>
+                    </td>
+                    <td class="px-8 py-6 text-center bg-green-50/40">
+                        <span class="text-green-700 text-4xl font-bold">${staff.apprNew || 0}</span>
+                    </td>
+                    <td class="px-8 py-6 text-center text-2xl text-slate-700 font-semibold">${staff.apprOld || 0}</td>
+                    <td class="px-8 py-6 text-center text-2xl text-slate-700 font-semibold">${staff.custCount}</td>
+                    <td class="px-8 py-6 text-center text-slate-700 font-mono font-bold text-2xl">${staff.crCount} / ${staff.ycCount}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            const zeroList = document.getElementById('zeroApprList');
+            zeroList.innerHTML = "";
+            const lazyStaff = data.staffDetails.filter(s => (s.apprNew || 0) === 0);
+            if (lazyStaff.length > 0) {
+                document.getElementById('noAlertMsg').classList.add('hidden');
+                lazyStaff.forEach(staff => {
+                    const div = document.createElement('div');
+                    div.className = "staff-tag-orange flex items-center gap-4 animate-fadeIn shadow-lg border-2 border-white/50";
+                    div.innerHTML = `<div class="w-3 h-3 bg-yellow-400 rounded-full shadow-inner"></div><div class="flex flex-col"><span class="font-bold text-[18px] uppercase tracking-tight text-white leading-none">${staff.staff}</span><span class="text-[11px] text-orange-900/60 font-bold uppercase mt-1">ทีม ${staff.team}</span></div>`;
+                    zeroList.appendChild(div);
+                });
+            } else { document.getElementById('noAlertMsg').classList.remove('hidden'); }
+
+            document.getElementById('dashboard').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        async function exportPart(elementId) {
+            const btn = document.querySelector(`button[onclick="exportPart('${elementId}')"]`);
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = "⌛ กำลังสร้างภาพ...";
+
+            const target = document.getElementById(elementId);
+            
+            try {
+                const canvas = await html2canvas(target, {
+                    scale: 3, 
+                    backgroundColor: "#F2F2F7", 
+                    useCORS: true,
+                    logging: false,
+                    onclone: (clonedDoc) => {
+                        const el = clonedDoc.getElementById(elementId);
+                        el.style.padding = "60px";
+                        el.style.backgroundColor = "#F2F2F7";
+                        el.style.borderRadius = "0px";
+                        
+                        // บังคับรักษาค่าสีทึบในระบบ Export
+                        const pCard = el.querySelector('.performer-card-solid');
+                        if(pCard) pCard.style.backgroundColor = "#007AFF";
+                        const aCard = el.querySelector('.alert-card-orange');
+                        if(aCard) aCard.style.backgroundColor = "#FF9500";
+                        
+                        // บังคับตัวหนังสือสีขาว 100% ในพื้นที่ทึบ
+                        const whiteTexts = el.querySelectorAll('.performer-card-solid *, .alert-card-orange *, .staff-tag-orange span');
+                        whiteTexts.forEach(t => {
+                            if(!t.classList.contains('text-yellow-300')) {
+                                t.style.color = "#ffffff";
+                                t.style.opacity = "1";
+                            }
+                        });
+
+                        // บังคับสีเขียวในตารางให้เข้มชัดเจนตอนแคป
+                        const greenKPI = el.querySelectorAll('.text-green-700');
+                        greenKPI.forEach(t => { t.style.color = "#15803d"; });
+                    }
+                });
+
+                const link = document.createElement('a');
+                link.download = `Branch_Summary_${elementId}_${new Date().getTime()}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+                showModal("📸 บันทึกภาพสำเร็จ!<br>ตัวเลข KPI สีเขียวโดดเด่นชัดเจนแน่นอนครับ");
+            } catch (err) { alert("ขออภัย ไม่สามารถสร้างภาพได้ครับ"); }
+            finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        function showModal(text) {
+            document.getElementById('modalContent').innerHTML = text;
+            document.getElementById('statusModal').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
