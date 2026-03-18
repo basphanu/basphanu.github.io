@@ -1,518 +1,391 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Branch Operations Portal</title>
-  <style>
-    :root {
-      --bg-1: #0b1220;
-      --bg-2: #162033;
-      --card: rgba(255, 255, 255, 0.10);
-      --card-border: rgba(255, 255, 255, 0.14);
-      --text: #eef4ff;
-      --muted: #c8d4e8;
-      --accent-1: #2563eb;
-      --accent-2: #60a5fa;
-      --accent-3: #f59e0b;
-      --shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
-      --radius: 24px;
-    }
-
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Thai", sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(37, 99, 235, 0.20), transparent 28%),
-        radial-gradient(circle at top right, rgba(245, 158, 11, 0.14), transparent 28%),
-        linear-gradient(135deg, var(--bg-1), var(--bg-2));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-
-    .shell {
-      width: 100%;
-      max-width: 1120px;
-    }
-
-    .hero {
-      position: relative;
-      overflow: hidden;
-      border: 1px solid var(--card-border);
-      border-radius: 32px;
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(14px);
-      box-shadow: var(--shadow);
-      padding: 28px;
-    }
-
-    .hero::before,
-    .hero::after {
-      content: "";
-      position: absolute;
-      border-radius: 999px;
-      filter: blur(40px);
-      z-index: 0;
-    }
-
-    .hero::before {
-      width: 220px;
-      height: 220px;
-      background: rgba(37, 99, 235, 0.18);
-      top: -60px;
-      left: -40px;
-    }
-
-    .hero::after {
-      width: 260px;
-      height: 260px;
-      background: rgba(245, 158, 11, 0.12);
-      right: -70px;
-      bottom: -80px;
-    }
-
-    .hero-inner {
-      position: relative;
-      z-index: 1;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 14px;
-      border-radius: 999px;
-      background: rgba(37, 99, 235, 0.16);
-      border: 1px solid rgba(96, 165, 250, 0.25);
-      color: #eaf2ff;
-      font-size: 0.9rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-    }
-
-    h1 {
-      margin: 18px 0 10px;
-      font-size: clamp(2rem, 4vw, 3.4rem);
-      line-height: 1.12;
-    }
-
-    .subtitle {
-      max-width: 760px;
-      margin: 0;
-      color: var(--muted);
-      font-size: clamp(1rem, 2vw, 1.12rem);
-      line-height: 1.7;
-    }
-
-    .grid {
-      display: grid;
-      gap: 20px;
-    }
-
-    .employee-grid {
-      margin-top: 16px;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .manager-grid {
-      margin-top: 12px;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .app-card {
-      position: relative;
-      display: block;
-      text-decoration: none;
-      color: inherit;
-      border-radius: var(--radius);
-      padding: 22px;
-      min-height: 240px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.08));
-      border: 1px solid rgba(255,255,255,0.14);
-      box-shadow: 0 14px 36px rgba(0,0,0,0.18);
-      overflow: hidden;
-      transform: translateY(0) scale(1);
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-    }
-
-    .app-card:hover {
-      transform: translateY(-4px) scale(1.01);
-      box-shadow: 0 22px 46px rgba(0,0,0,0.25);
-      border-color: rgba(255,255,255,0.28);
-      background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.10));
-    }
-
-    .app-card:focus-visible {
-      outline: 3px solid rgba(56, 189, 248, 0.55);
-      outline-offset: 3px;
-    }
-
-    .app-card::before {
-      content: "";
-      position: absolute;
-      inset: auto -20% -40% auto;
-      width: 180px;
-      height: 180px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.08);
-      filter: blur(10px);
-    }
-
-    .icon {
-      width: 60px;
-      height: 60px;
-      border-radius: 18px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8rem;
-      margin-bottom: 18px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 8px 20px rgba(0,0,0,0.18);
-    }
-
-    .icon.blue {
-      background: linear-gradient(135deg, rgba(37,99,235,0.98), rgba(96,165,250,0.95));
-    }
-
-    .icon.green {
-      background: linear-gradient(135deg, rgba(14,165,233,0.95), rgba(59,130,246,0.92));
-    }
-
-    .icon.gold {
-      background: linear-gradient(135deg, rgba(245,158,11,0.95), rgba(251,191,36,0.92));
-    }
-
-    .card-title {
-      margin: 0 0 10px;
-      font-size: 1.25rem;
-      font-weight: 800;
-      line-height: 1.3;
-    }
-
-    .card-desc {
-      margin: 0 0 18px;
-      color: #dbe4f1;
-      line-height: 1.65;
-      font-size: 0.92rem;
-    }
-
-    .card-footer {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-size: 0.9rem;
-      font-weight: 700;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.12);
-    }
-
-    .card-footer span:last-child {
-      transition: transform 0.2s ease;
-    }
-
-    .app-card:hover .card-footer span:last-child {
-      transform: translateX(4px);
-    }
-
-    .section-label {
-      margin-top: 26px;
-      margin-bottom: 14px;
-      display: inline-flex;
-      align-items: center;
-      padding: 9px 16px;
-      border-radius: 999px;
-      font-size: 0.96rem;
-      font-weight: 800;
-      letter-spacing: 0.01em;
-    }
-
-    .employee-zone {
-      background: linear-gradient(135deg, rgba(37, 99, 235, 0.26), rgba(96, 165, 250, 0.22));
-      border: 1px solid rgba(96, 165, 250, 0.34);
-      color: #f3f8ff;
-      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.16);
-    }
-
-    .manager-zone {
-      background: linear-gradient(135deg, rgba(255, 214, 102, 0.24), rgba(255, 241, 194, 0.18));
-      border: 1px solid rgba(255, 224, 130, 0.32);
-      color: #fff9eb;
-      box-shadow: 0 10px 28px rgba(255, 193, 7, 0.14);
-    }
-
-    .employee-highlight {
-      margin-top: 18px;
-      padding: 22px;
-      border-radius: 28px;
-      background: linear-gradient(135deg, rgba(37,99,235,0.26), rgba(56,189,248,0.14));
-      border: 1px solid rgba(125,211,252,0.22);
-      box-shadow: 0 18px 40px rgba(37,99,235,0.18);
-    }
-
-    .employee-highlight h2 {
-      margin: 0 0 8px;
-      font-size: clamp(1.35rem, 2.5vw, 2rem);
-    }
-
-    .employee-highlight p {
-      margin: 0;
-      color: #dfeaff;
-      line-height: 1.7;
-      font-size: 1rem;
-    }
-
-    .employee-card {
-      border: 2px solid rgba(96,165,250,0.26);
-      background: linear-gradient(180deg, rgba(37,99,235,0.24), rgba(255,255,255,0.08));
-      min-height: 260px;
-    }
-
-    .employee-card:hover {
-      border-color: rgba(125,211,252,0.52);
-      box-shadow: 0 24px 50px rgba(37, 99, 235, 0.22);
-    }
-
-    .menu-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 14px;
-      padding: 7px 12px;
-      border-radius: 999px;
-      font-size: 0.82rem;
-      font-weight: 800;
-      letter-spacing: 0.02em;
-    }
-
-    .menu-badge.employee {
-      background: rgba(147, 197, 253, 0.16);
-      border: 1px solid rgba(147, 197, 253, 0.30);
-      color: #eff6ff;
-    }
-
-    .menu-badge.manager {
-      background: rgba(255, 236, 179, 0.18);
-      border: 1px solid rgba(255, 236, 179, 0.28);
-      color: #fffaf0;
-    }
-
-    .admin-section {
-      margin-top: 34px;
-      padding-top: 18px;
-      border-top: 1px solid rgba(255,255,255,0.10);
-    }
-
-    .admin-caption {
-      margin: 0 0 8px;
-      color: var(--muted);
-      font-size: 0.96rem;
-      line-height: 1.6;
-    }
-
-    .manager-mini-card {
-      min-height: auto;
-      padding: 16px;
-      border-radius: 18px;
-      border: 1px solid rgba(255, 224, 130, 0.22);
-      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.08));
-      box-shadow: 0 12px 24px rgba(0,0,0,0.14);
-    }
-
-    .manager-mini-card .menu-badge {
-      margin-bottom: 10px;
-      font-size: 0.74rem;
-      padding: 6px 10px;
-    }
-
-    .manager-mini-card .icon {
-      width: 44px;
-      height: 44px;
-      font-size: 1.2rem;
-      border-radius: 14px;
-      margin-bottom: 12px;
-    }
-
-    .manager-mini-card .card-title {
-      margin: 0;
-      font-size: 0.98rem;
-      line-height: 1.35;
-    }
-
-    .manager-mini-card .card-desc {
-      display: none;
-    }
-
-    .manager-mini-card .card-footer {
-      margin-top: 12px;
-      padding: 8px 12px;
-      font-size: 0.82rem;
-      gap: 8px;
-    }
-
-    .tips {
-      margin-top: 22px;
-      padding: 18px 20px;
-      border-radius: 20px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: var(--muted);
-      line-height: 1.7;
-      font-size: 0.96rem;
-    }
-
-    .tips strong {
-      color: #ffffff;
-    }
-
-    @media (max-width: 1024px) {
-      .employee-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 900px) {
-      .manager-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 768px) {
-      body {
-        align-items: flex-start;
-      }
-
-      .hero {
-        padding: 20px;
-        border-radius: 24px;
-      }
-
-      .employee-grid,
-      .manager-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .app-card {
-        min-height: auto;
-      }
-
-      .employee-card {
-        min-height: auto;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบส่งยอดและรายงานรายทีม (Fix Summary Issue)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kanit', sans-serif; }
+        .tab-active { @apply border-b-2 border-blue-600 text-blue-600; }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { opacity: 1; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
 </head>
-<body>
-  <main class="shell">
-    <section class="hero">
-      <div class="hero-inner">
-        <div class="eyebrow">🏢 Branch Operations Portal</div>
-        <h1>ศูนย์รวมระบบงานสาขา สำหรับใช้งานประจำวัน</h1>
+<body class="bg-gray-100 min-h-screen pb-10">
 
-        <div class="employee-highlight">
-          <h2>เมนูสำหรับพนักงาน</h2>
-          <p>ส่วนนี้เป็นเมนูหลักสำหรับการลงข้อมูลประจำวัน ให้เห็นเด่นชัดและกดใช้งานได้ง่ายบนมือถือ</p>
+    <div class="max-w-md mx-auto">
+        <!-- Tab Navigation -->
+        <div class="flex bg-white shadow-sm sticky top-0 z-10">
+            <button onclick="switchTab('input')" id="tab-input" class="flex-1 py-4 text-center font-semibold text-gray-500 tab-active">ส่งยอดรายวัน</button>
+            <button onclick="switchTab('report')" id="tab-report" class="flex-1 py-4 text-center font-semibold text-gray-500">รายงานรายทีม</button>
         </div>
 
-        <div class="section-label employee-zone">สำหรับพนักงาน</div>
-        <div class="grid employee-grid">
-          <!-- เมนูที่ 1: บันทึกผลงาน -->
-          <a class="app-card employee-card" href="https://docs.google.com/forms/d/e/1FAIpQLSfYgIiqvvCshveqGOWkAw2p4G5z2pablYq2e6sTjUSqXcd8OA/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">
-            <div class="menu-badge employee">พนักงาน</div>
-            <div class="icon blue">📝</div>
-            <h2 class="card-title">ลงบันทึกผลงานประจำวัน</h2>
-            <p class="card-desc">ปุ่มนี้สำหรับพนักงาน ใช้บันทึกผลงานประจำวัน เพื่อส่งข้อมูลเข้าระบบในแต่ละวัน</p>
-            <div class="card-footer">
-              <span>เปิดฟอร์มบันทึกผลงาน</span>
-              <span>↗</span>
+        <!-- Section 1: Input Form -->
+        <div id="section-input" class="p-4">
+            <header class="text-center py-4">
+                <h1 class="text-xl font-bold text-blue-600">บันทึกข้อมูลการส่งยอด</h1>
+            </header>
+
+            <div class="bg-white rounded-xl shadow-lg p-5 border border-gray-200">
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">วันที่ส่ง</label>
+                        <input type="date" id="docDate" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none bg-gray-50">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">รอบเวลา</label>
+                        <select id="docTime" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none bg-white font-medium">
+                            <option value="12">12.00</option>
+                            <option value="14">14.00</option>
+                            <option value="16">16.00</option>
+                            <option value="18">18.00</option>
+                            <option value="19">19.00</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-4 border-b pb-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1 text-blue-700 font-bold">รหัสพนักงาน</label>
+                        <input type="text" id="empId" placeholder="เช่น 27327" class="w-full border border-blue-100 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1 text-blue-700 font-bold">ชื่อเล่น</label>
+                        <input type="text" id="staffName" placeholder="ระบุชื่อ" class="w-full border border-blue-100 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                    </div>
+                </div>
+
+                <div class="mb-6 mt-4">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">ทีมของคุณ</label>
+                    <select id="teamName" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none bg-white font-medium">
+                        <option value="">-- เลือกทีม --</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-center mb-6">
+                    <button onclick="fetchMyLastData()" class="bg-orange-500 hover:bg-orange-600 text-white text-[11px] font-bold py-2.5 px-5 rounded-full shadow-md transition-all flex items-center gap-2 active:scale-95">
+                        <span>🔄 รีเฟรชข้อมูลลูกค้า (ล่าสุดเท่านั้น)</span>
+                    </button>
+                </div>
+
+                <hr class="my-4 border-gray-100">
+
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="font-bold text-gray-700 uppercase tracking-wide">รายการลูกค้า</h2>
+                    <button onclick="addCustomerRow()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-full shadow-md transition-all active:scale-90">+ เพิ่มลูกค้า</button>
+                </div>
+
+                <div id="customerList" class="space-y-4"></div>
+
+                <div class="mt-8 space-y-4 text-center">
+                    <p class="text-[10px] text-gray-400 mb-2">* ระบบจะบันทึกข้อมูลทับรอบเดิมให้อัตโนมัติหากส่งซ้ำ</p>
+                    <button onclick="processData()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-95 transition-all text-lg flex items-center justify-center gap-2">
+                        <span>📊 คำนวณสรุป & สร้าง Text</span>
+                    </button>
+                    <button id="btnSubmit" onclick="sendToGoogleSheet()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-95 transition-all text-lg flex items-center justify-center gap-2">
+                        <span>☁️ บันทึกลง Google Sheet</span>
+                    </button>
+                </div>
             </div>
-          </a>
 
-          <!-- เมนูที่ 2: บันทึกการเดินทาง -->
-          <a class="app-card employee-card" href="https://docs.google.com/forms/d/e/1FAIpQLSf0fFYbP8tvWNaNiXssNGi9CQzclyCWjZ8BRSwJFJe8_1Gw-g/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">
-            <div class="menu-badge employee">พนักงาน</div>
-            <div class="icon gold">🚙</div>
-            <h2 class="card-title">ลงบันทึกการเดินทาง</h2>
-            <p class="card-desc">ปุ่มนี้สำหรับพนักงานที่ใช้รถในการทำกิจกรรม Direct Sale ให้ลงข้อมูลการเดินทางหลังจบกิจกรรมในทุกวัน</p>
-            <div class="card-footer">
-              <span>เปิดฟอร์มบันทึกการเดินทาง</span>
-              <span>↗</span>
+            <div id="resultArea" class="mt-6 hidden animate-fadeIn">
+                <div class="relative">
+                    <textarea id="lineText" readonly class="w-full h-80 p-4 text-sm bg-white border-2 border-green-200 rounded-xl focus:outline-none font-mono shadow-inner"></textarea>
+                    <button onclick="copyToClipboard('lineText', 'copyStatus')" class="absolute top-2 right-2 bg-green-50 text-green-600 border border-green-200 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">
+                        📋 คัดลอก
+                    </button>
+                </div>
+                <p id="copyStatus" class="text-green-600 text-center text-xs mt-2 hidden font-bold">✅ คัดลอกเรียบร้อย!</p>
             </div>
-          </a>
+        </div>
 
-          <!-- เมนูที่ 3 (ใหม่): ส่งยอดพนักงานระหว่างวัน -->
-          <a class="app-card employee-card" href="line_staff.html" target="_blank" rel="noopener noreferrer">
-            <div class="menu-badge employee">พนักงาน</div>
-            <div class="icon green">📊</div>
-            <h2 class="card-title">ระบบส่งยอดและรายงานทีม</h2>
-            <p class="card-desc">ระบบสำหรับส่งยอดพนักงานระหว่างวัน และดูสรุปรายงานผลการดำเนินงานภายในทีม</p>
-            <div class="card-footer">
-              <span>เปิดระบบส่งยอดและรายงาน</span>
-              <span>↗</span>
+        <!-- Section 2: Team Report -->
+        <div id="section-report" class="p-4 hidden">
+            <header class="text-center py-4">
+                <h1 class="text-xl font-bold text-purple-600">รายงานสรุปภาพรวมทีม</h1>
+                <p class="text-[10px] text-gray-400">(ระบบดึงเฉพาะข้อมูลล่าสุดของแต่ละคนมาสรุป)</p>
+            </header>
+
+            <div class="bg-white rounded-xl shadow-lg p-5 border border-gray-200">
+                <div class="space-y-4">
+                    <div>
+                        <div class="mb-3">
+                            <label class="block text-[10px] text-gray-400 font-bold mb-1 uppercase">1. เลือกวันที่</label>
+                            <input type="date" id="searchDate" class="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-purple-400 bg-gray-50">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 mb-4">
+                            <div>
+                                <label class="block text-[10px] text-gray-400 font-bold mb-1 uppercase">2. เลือกทีม</label>
+                                <select id="searchTeam" class="border border-gray-300 rounded-lg p-2 text-sm w-full outline-none focus:ring-2 focus:ring-purple-400 bg-white font-medium">
+                                    <option value="">-- ทีม --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-gray-400 font-bold mb-1 uppercase">3. เลือกเวลา</label>
+                                <select id="searchTime" class="border border-gray-300 rounded-lg p-2 text-sm w-full outline-none focus:ring-2 focus:ring-purple-400 bg-white font-medium">
+                                    <option value="12">12.00</option>
+                                    <option value="14">14.00</option>
+                                    <option value="16">16.00</option>
+                                    <option value="18">18.00</option>
+                                    <option value="19">19.00</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button onclick="fetchTeamReport()" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-4 rounded-xl text-md font-bold shadow-lg transition-all active:scale-95">
+                            🔍 ค้นหายอดทีม
+                        </button>
+                    </div>
+                </div>
+
+                <div id="reportLoading" class="hidden text-center py-10">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+                    <p class="text-xs text-gray-500 mt-2 font-medium">กำลังโหลดและสรุปข้อมูล...</p>
+                </div>
+
+                <div id="reportContent" class="mt-6 hidden animate-fadeIn">
+                    <div class="bg-purple-50 p-4 rounded-xl border border-purple-100 shadow-inner">
+                        <h4 class="font-bold text-purple-800 text-center border-b border-purple-200 pb-2 mb-3">สรุปยอดทีม <span id="displayTeamName"></span></h4>
+                        <p class="text-[10px] text-purple-400 text-center mb-2 font-bold italic">วันที่ <span id="displayDate"></span> รอบ <span id="displayTime"></span>.00</p>
+                        <div id="teamStats" class="space-y-1 text-sm text-gray-700"></div>
+                    </div>
+                    <button onclick="generateTeamLineReport()" class="w-full mt-4 bg-green-500 text-white py-3 rounded-xl font-bold shadow-md active:scale-95 transition-all text-sm">
+                        📋 สร้างข้อความสรุปทีมส่งกลุ่ม Line
+                    </button>
+                </div>
             </div>
-          </a>
+            
+            <div id="teamResultArea" class="mt-6 hidden animate-fadeIn">
+                <div class="relative">
+                    <textarea id="teamLineText" readonly class="w-full h-[450px] p-4 text-[13px] bg-gray-50 border-2 border-purple-200 rounded-xl font-mono shadow-inner"></textarea>
+                    <button onclick="copyToClipboard('teamLineText', 'teamCopyStatus')" class="absolute top-2 right-2 bg-white border px-2 py-1.5 rounded-lg text-xs font-bold shadow-sm">คัดลอก</button>
+                </div>
+                <p id="teamCopyStatus" class="text-purple-600 text-center text-xs mt-2 hidden font-bold">✅ คัดลอกรายงานทีมเรียบร้อย!</p>
+            </div>
         </div>
+    </div>
 
-        <div class="admin-section">
-          <div class="section-label manager-zone">สำหรับผู้ดูแลระบบ</div>
-          <div class="grid manager-grid">
-            <a class="app-card manager-mini-card" href="https://docs.google.com/forms/d/e/1FAIpQLScyEhOwu2a0pTJKixX58KqyirnMMjvf-UytFWLAMA-EHi73Fg/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">
-              <div class="menu-badge manager">ผู้ดูแลระบบ</div>
-              <div class="icon green">🗂️</div>
-              <h2 class="card-title">Input Summary Data</h2>
-              <div class="card-footer"><span>เปิด</span><span>↗</span></div>
-            </a>
-            <a class="app-card manager-mini-card" href="employee_dashboard.html" target="_blank" rel="noopener noreferrer">
-              <div class="menu-badge manager">ผู้ดูแลระบบ</div>
-              <div class="icon blue">👥</div>
-              <h2 class="card-title">Employee Performance Dashboard</h2>
-              <div class="card-footer"><span>เปิด</span><span>↗</span></div>
-            </a>
-
-            <a class="app-card manager-mini-card" href="mileage_report.html" target="_blank" rel="noopener noreferrer">
-              <div class="menu-badge manager">ผู้ดูแลระบบ</div>
-              <div class="icon gold">🚗</div>
-              <h2 class="card-title">Vehicle Mileage & Fuel Check</h2>
-              <div class="card-footer"><span>เปิด</span><span>↗</span></div>
-            </a>
-
-            <a class="app-card manager-mini-card" href="branch_daily_target.html" target="_blank" rel="noopener noreferrer">
-              <div class="menu-badge manager">ผู้ดูแลระบบ</div>
-              <div class="icon blue">🎯</div>
-              <h2 class="card-title">Branch Daily Target</h2>
-              <div class="card-footer"><span>เปิด</span><span>↗</span></div>
-            </a>
-
-            <a class="app-card manager-mini-card" href="branch_end_of_day.html" target="_blank" rel="noopener noreferrer">
-              <div class="menu-badge manager">ผู้ดูแลระบบ</div>
-              <div class="icon green">📈</div>
-              <h2 class="card-title">Summary Branch Performance</h2>
-              <div class="card-footer"><span>เปิด</span><span>↗</span></div>
-            </a>
-
-            <a class="app-card manager-mini-card" href="insurance_license_dashboard.html" target="_blank" rel="noopener noreferrer">
-              <div class="menu-badge manager">ผู้ดูแลระบบ</div>
-              <div class="icon gold">🛡️</div>
-              <h2 class="card-title">Insurance License Dashboard</h2>
-              <div class="card-footer"><span>เปิด</span><span>↗</span></div>
-            </a>
-          </div>
+    <!-- Modal -->
+    <div id="statusModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-xs text-center shadow-2xl scale-110">
+            <div id="modalContent"></div>
+            <button onclick="closeModal()" class="mt-5 w-full bg-blue-600 text-white py-3 rounded-xl text-sm font-bold shadow-lg">ตกลง</button>
         </div>
+    </div>
 
-        <div class="tips">
-          <strong>หมายเหตุ:</strong> เมนูด้านบนสำหรับพนักงานใช้กรอกข้อมูลประจำวัน ส่วนเมนูด้านล่างสำหรับผู้ดูแลระบบใช้ดูข้อมูลสรุปหลังบ้าน
-        </div>
-      </div>
-    </section>
-  </main>
+    <script>
+        // SCRIPT URL ของคุณ
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw4DUHHwmiro5EP-iydO9mqYf_2tw9gkTJb8AcPqHlUET6tiplnch8cpEUNmTFMW_ILyA/exec"; 
+
+        document.getElementById('docDate').valueAsDate = new Date();
+        document.getElementById('searchDate').valueAsDate = new Date();
+        
+        let customerCount = 0;
+        let teamDataResult = null;
+
+        const statusEmojis = { "Approve": "✅", "Reject": "❌", "Pending": "🅿️", "รอเอกสาร": "⏳📄" };
+
+        function switchTab(tab) {
+            document.getElementById('section-input').classList.toggle('hidden', tab !== 'input');
+            document.getElementById('section-report').classList.toggle('hidden', tab !== 'report');
+            document.getElementById('tab-input').classList.toggle('tab-active', tab === 'input');
+            document.getElementById('tab-report').classList.toggle('tab-active', tab === 'report');
+        }
+
+        async function fetchTeamList() {
+            if (!SCRIPT_URL) return;
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getTeams`);
+                const teams = await response.json();
+                setTeamOptions(teams);
+            } catch (e) { setTeamOptions(["บิวตี้", "พี่ตุ๊ก", "พี่โม"]); }
+        }
+
+        function setTeamOptions(teams) {
+            const teamSelect = document.getElementById('teamName');
+            const searchSelect = document.getElementById('searchTeam');
+            const options = teams.map(t => `<option value="${t}">${t}</option>`).join('');
+            const placeholder = '<option value="">-- เลือกทีม --</option>';
+            teamSelect.innerHTML = placeholder + options;
+            searchSelect.innerHTML = placeholder + options;
+            const saved = localStorage.getItem('emp_info');
+            if (saved) {
+                const info = JSON.parse(saved);
+                if (document.getElementById('teamName').querySelector(`option[value='${info.team}']`)) {
+                    document.getElementById('teamName').value = info.team;
+                }
+            }
+        }
+
+        function addCustomerRow(data = null) {
+            customerCount++;
+            const container = document.getElementById('customerList');
+            const div = document.createElement('div');
+            div.className = "customer-row border border-gray-200 p-4 rounded-xl bg-gray-50 relative shadow-sm animate-fadeIn";
+            div.id = `row-${customerCount}`;
+            div.innerHTML = `
+                <button onclick="removeRow(${customerCount})" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-md">✕</button>
+                <div class="space-y-3">
+                    <input type="text" placeholder="ชื่อลูกค้า" class="cust-name border border-gray-300 rounded-lg p-2.5 text-sm w-full outline-none focus:ring-2 focus:ring-blue-400" value="${data?.name || ''}">
+                    <div class="grid grid-cols-2 gap-3">
+                        <select class="cust-type border border-gray-300 rounded-lg p-2 text-xs w-full bg-white font-medium">
+                            <option value="เก่า" ${data?.type === 'เก่า' ? 'selected' : ''}>เก่า</option>
+                            <option value="ใหม่" ${data?.type === 'ใหม่' || !data ? 'selected' : ''}>ใหม่</option>
+                        </select>
+                        <select class="status border border-gray-300 rounded-lg p-2 text-xs w-full bg-white font-bold">
+                            <option value="Approve" ${data?.status === 'Approve' ? 'selected' : ''}>Approve</option>
+                            <option value="Reject" ${data?.status === 'Reject' ? 'selected' : ''}>Reject</option>
+                            <option value="Pending" ${data?.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="รอเอกสาร" ${data?.status === 'รอเอกสาร' ? 'selected' : ''}>รอเอกสาร</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 bg-white p-3 rounded-xl border border-dashed border-gray-200 shadow-inner">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-blue-700 font-mono">CR:</span>
+                            <input type="number" min="0" class="qty-cr w-12 border border-blue-100 rounded p-1 text-center text-sm font-bold bg-blue-50" value="${data?.cr || 0}">
+                        </div>
+                        <div class="flex items-center justify-between border-l border-gray-100 pl-3">
+                            <span class="text-xs font-bold text-orange-700 font-mono">YC:</span>
+                            <input type="number" min="0" class="qty-yc w-12 border border-orange-100 rounded p-1 text-center text-sm font-bold bg-orange-50" value="${data?.yc || 0}">
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeRow(id) { document.getElementById(`row-${id}`).remove(); }
+
+        async function fetchMyLastData() {
+            const empId = document.getElementById('empId').value;
+            const date = document.getElementById('docDate').value;
+            if (!empId) return showMessage("❌ กรุณากรอกรหัสพนักงานก่อนครับ");
+            showMessage("🔄 กำลังดึงข้อมูลล่าสุดของคุณ...");
+            try {
+                const url = `${SCRIPT_URL}?action=getMyLastData&empId=${encodeURIComponent(empId)}&date=${encodeURIComponent(date)}&t=${Date.now()}`;
+                const response = await fetch(url);
+                const result = await response.json();
+                if (!result || result.length === 0) return showMessage("ไม่พบข้อมูลเดิมของคุณในวันนี้ครับ");
+                document.getElementById('customerList').innerHTML = ""; customerCount = 0;
+                result.forEach(item => addCustomerRow(item));
+                closeModal();
+            } catch (e) { showMessage("❌ เกิดข้อผิดพลาดในการดึงข้อมูลครับ"); }
+        }
+
+        function processData() {
+            const dateStr = new Date(document.getElementById('docDate').value).toLocaleDateString('th-TH');
+            const time = document.getElementById('docTime').value;
+            const staff = document.getElementById('staffName').value;
+            const empId = document.getElementById('empId').value;
+            const team = document.getElementById('teamName').value;
+            if (!empId || !staff || !team) return showMessage("❌ กรุณากรอกข้อมูลพนักงานให้ครบก่อนครับ");
+            const rows = document.querySelectorAll('.customer-row');
+            if (rows.length === 0) return showMessage("⚠️ กรุณาเพิ่มลูกค้าอย่างน้อย 1 รายการครับ");
+            let stats = { old: 0, new: 0, cr: 0, yc: 0, total: rows.length, approve: 0, reject: 0, pending: 0, waiting: 0 };
+            let customerDetails = "";
+            rows.forEach((row, i) => {
+                const name = row.querySelector('.cust-name').value || "ไม่ระบุชื่อ";
+                const type = row.querySelector('.cust-type').value;
+                const statusValue = row.querySelector('.status').value;
+                const qCR = parseInt(row.querySelector('.qty-cr').value) || 0;
+                const qYC = parseInt(row.querySelector('.qty-yc').value) || 0;
+                if (type === "เก่า") stats.old++; else stats.new++;
+                stats.cr += qCR; stats.yc += qYC;
+                if (statusValue === "Approve") stats.approve++; else if (statusValue === "Reject") stats.reject++; else if (statusValue === "Pending") stats.pending++; else stats.waiting++;
+                let cardInfo = []; if (qCR > 0) cardInfo.push(`CR ${qCR}`); if (qYC > 0) cardInfo.push(`YC ${qYC}`);
+                customerDetails += `${i+1}. ${name} (${type})\n   📝 [${cardInfo.join(' + ') || 'ไม่มีบัตร'}] -> ${statusEmojis[statusValue]} ${statusValue}\n`;
+            });
+            let msg = `📅 รายงานยอด: ${dateStr} (รอบ ${time}.00)\n👥 ทีม: ${team}\n🆔 พนักงาน: [${empId}] ${staff}\n-------------------\n${customerDetails || "ไม่มีข้อมูลลูกค้า\n"}-------------------\n📊 สรุปรวมรอบนี้:\nจำนวนลูกค้า ${stats.total} คน\nเก่า ${stats.old} คน ใหม่ ${stats.new} คน\nCR ${stats.cr} ใบ YC ${stats.yc} ใบ รวม ${stats.cr + stats.yc} ใบ\n✅ Approve: ${stats.approve} คน\n❌ Reject: ${stats.reject} คน\n🅿️ Pending: ${stats.pending} คน\n⏳📄 รอเอกสาร: ${stats.waiting} คน`;
+            document.getElementById('lineText').value = msg; document.getElementById('resultArea').classList.remove('hidden'); document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
+            localStorage.setItem('emp_info', JSON.stringify({ empId, staff, team }));
+        }
+
+        async function sendToGoogleSheet() {
+            const empId = document.getElementById('empId').value;
+            const staff = document.getElementById('staffName').value;
+            const team = document.getElementById('teamName').value;
+            if (!empId || !staff || !team) return showMessage("❌ กรุณากรอกข้อมูลพนักงานให้ครบก่อนครับ");
+            const btn = document.getElementById('btnSubmit'); btn.disabled = true; btn.innerText = "กำลังบันทึก/อัปเดต...";
+            const rows = document.querySelectorAll('.customer-row');
+            const payload = [];
+            rows.forEach(row => {
+                payload.push({ action: "save", date: document.getElementById('docDate').value, time: document.getElementById('docTime').value, empId: empId, staff: staff, team: team, name: row.querySelector('.cust-name').value, type: row.querySelector('.cust-type').value, qCR: parseInt(row.querySelector('.qty-cr').value) || 0, qYC: parseInt(row.querySelector('.qty-yc').value) || 0, status: row.querySelector('.status').value });
+            });
+            try {
+                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                showMessage("✅ อัปเดตข้อมูลสำเร็จ!<br>ก๊อบปี้ข้อความไปส่ง Line ได้เลยครับ");
+            } catch (e) { showMessage("❌ บันทึกไม่สำเร็จ: " + e.message); }
+            finally { btn.disabled = false; btn.innerText = "☁️ บันทึกลง Google Sheet"; }
+        }
+
+        async function fetchTeamReport() {
+            const team = document.getElementById('searchTeam').value;
+            const time = document.getElementById('searchTime').value;
+            const date = document.getElementById('searchDate').value;
+            if (!team || !date) return showMessage("⚠️ กรุณาเลือกวันที่และทีมครับ");
+            const loading = document.getElementById('reportLoading'); const content = document.getElementById('reportContent');
+            loading.classList.remove('hidden'); content.classList.add('hidden'); document.getElementById('teamResultArea').classList.add('hidden');
+            try {
+                const url = `${SCRIPT_URL}?action=getTeamReport&team=${encodeURIComponent(team)}&time=${encodeURIComponent(time)}&date=${encodeURIComponent(date)}&t=${Date.now()}`;
+                const response = await fetch(url); const result = await response.json(); 
+                if (!result || !result.details || result.details.length === 0) {
+                    loading.classList.add('hidden');
+                    return showMessage(`ไม่พบข้อมูลของทีม ${team}<br>วันที่ ${new Date(date).toLocaleDateString('th-TH')} รอบ ${time}.00 ครับ`);
+                }
+                teamDataResult = result; teamDataResult.selectedTime = time; teamDataResult.selectedDate = new Date(date).toLocaleDateString('th-TH');
+                document.getElementById('displayTeamName').innerText = team; document.getElementById('displayDate').innerText = teamDataResult.selectedDate; document.getElementById('displayTime').innerText = time;
+                const statsDiv = document.getElementById('teamStats');
+                statsDiv.innerHTML = `<p>👨‍💼 พนักงานส่งงาน: ${teamDataResult.staffCount} คน</p><p class='font-bold text-gray-800 mt-2 text-md'>จำนวนลูกค้า ${teamDataResult.total} คน</p><p>เก่า ${teamDataResult.old} คน ใหม่ ${teamDataResult.new} คน</p><p class='font-semibold text-blue-800 uppercase'>CR ${teamDataResult.cr} ใบ YC ${teamDataResult.yc} ใบ รวม ${teamDataResult.cr + teamDataResult.yc} ใบ</p><div class='mt-3 p-3 bg-white rounded-lg border border-purple-200 text-xs shadow-sm'><p class='text-green-600 font-bold mb-1'>✅ Approve: ${teamDataResult.approve} คน</p><p class='text-red-600 font-bold mb-1'>❌ Reject: ${teamDataResult.reject} คน</p><p class='text-yellow-600 font-bold mb-1'>🅿️ Pending: ${teamDataResult.pending} คน</p><p class='text-gray-600 font-bold'>⏳📄 รอเอกสาร: ${teamDataResult.waiting} คน</p></div>`;
+                content.classList.remove('hidden');
+            } catch (e) { showMessage("❌ เกิดข้อผิดพลาดในการดึงข้อมูลครับ"); }
+            finally { loading.classList.add('hidden'); }
+        }
+
+        function generateTeamLineReport() {
+            if (!teamDataResult) return;
+            let msg = `🚩 รายงานสรุปภาพรวมทีม: ${document.getElementById('searchTeam').value}\n📅 ข้อมูลวันที่: ${teamDataResult.selectedDate} รอบ ${teamDataResult.selectedTime}.00\n—————————\n\n`;
+            const grouped = {};
+            teamDataResult.details.forEach(d => { const key = `${d.empId}|${d.staff}`; if (!grouped[key]) grouped[key] = []; grouped[key].push(d); });
+            for (const key in grouped) {
+                const [id, name] = key.split('|'); msg += `🆔 พนักงาน: [${id}] ${name}\n`;
+                grouped[key].forEach((cust, idx) => {
+                    let cardInfo = []; if (cust.cr > 0) cardInfo.push(`CR ${cust.cr}`); if (cust.yc > 0) cardInfo.push(`YC ${cust.yc}`);
+                    msg += `${idx + 1}. ${cust.name} (${cust.type})\n   📝 [${cardInfo.join(' + ') || 'ไม่มีบัตร'}] -> ${statusEmojis[cust.status]} ${cust.status}\n`;
+                });
+                msg += `\n`;
+            }
+            msg += `—————————\nสรุปผลงานรายทีม\nจำนวนลูกค้า ${teamDataResult.total} คน\nเก่า ${teamDataResult.old} คน ใหม่ ${teamDataResult.new} คน\nCR ${teamDataResult.cr} ใบ YC ${teamDataResult.yc} ใบ รวม ${teamDataResult.cr + teamDataResult.yc} ใบ\n✅ Approve: ${teamDataResult.approve} คน\n❌ Reject: ${teamDataResult.reject} คน\n🅿️ Pending: ${teamDataResult.pending} คน\n⏳📄 รอเอกสาร: ${teamDataResult.waiting} คน\n-------------------`;
+            document.getElementById('teamLineText').value = msg; document.getElementById('teamResultArea').classList.remove('hidden'); document.getElementById('teamResultArea').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyToClipboard(id, statusId) {
+            const copyText = document.getElementById(id); copyText.select(); document.execCommand("copy");
+            const status = document.getElementById(statusId); status.classList.remove('hidden');
+            setTimeout(() => status.classList.add('hidden'), 2000);
+        }
+
+        function showMessage(text) {
+            document.getElementById('modalContent').innerHTML = `<div class='text-sm font-medium text-gray-700 leading-relaxed'>${text}</div>`;
+            document.getElementById('statusModal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('statusModal').classList.add('hidden'); }
+
+        window.onload = async () => {
+            await fetchTeamList();
+            const saved = localStorage.getItem('emp_info');
+            if (saved) {
+                const info = JSON.parse(saved);
+                document.getElementById('empId').value = info.empId || "";
+                document.getElementById('staffName').value = info.staff || "";
+                const teamSel = document.getElementById('teamName');
+                for(let i=0; i<teamSel.options.length; i++) if(teamSel.options[i].value == info.team) teamSel.selectedIndex = i;
+            }
+            addCustomerRow();
+        };
+    </script>
 </body>
 </html>
