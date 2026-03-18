@@ -36,7 +36,7 @@
 
     .container {
       width: 100%;
-      max-width: 600px; /* เน้นการใช้งานบนมือถือเป็นหลัก */
+      max-width: 600px;
     }
 
     header {
@@ -68,7 +68,6 @@
       font-size: 0.95rem;
     }
 
-    /* Section Styles */
     .section-title {
       font-size: 1.1rem;
       font-weight: 700;
@@ -85,7 +84,6 @@
       background: var(--border-color);
     }
 
-    /* Employee Menu - Large Cards */
     .employee-menu {
       display: flex;
       flex-direction: column;
@@ -152,7 +150,6 @@
       padding-left: 10px;
     }
 
-    /* Admin Menu - Compact Grid */
     .admin-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -174,6 +171,7 @@
 
     .admin-card:hover {
       background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
     .admin-icon {
@@ -256,6 +254,12 @@
 
     <div class="section-title">สำหรับผู้ดูแลระบบ (Admin)</div>
     <div class="admin-grid">
+      <!-- เมนูใหม่: BM Monitor -->
+      <a href="bm_monitor.html" class="admin-card">
+        <div class="admin-icon" style="color: #fb7185;">📺</div>
+        <span class="admin-label">BM<br>Monitor</span>
+      </a>
+      
       <a href="https://docs.google.com/forms/d/e/1FAIpQLScyEhOwu2a0pTJKixX58KqyirnMMjvf-UytFWLAMA-EHi73Fg/viewform?usp=dialog" class="admin-card">
         <div class="admin-icon">🗂️</div>
         <span class="admin-label">Input Summary<br>Data</span>
