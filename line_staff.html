@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบส่งยอดและรายงานรายทีม (Final Version)</title>
+    <title>ระบบส่งยอดและรายงานรายทีม (V2.8)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -13,7 +13,6 @@
         input[type=number]::-webkit-outer-spin-button { opacity: 1; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
-        .no-sales-active { @apply bg-red-50 border-red-200 ring-2 ring-red-500; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen pb-10">
@@ -31,7 +30,7 @@
                 <h1 class="text-xl font-bold text-blue-600">บันทึกข้อมูลการส่งยอด</h1>
             </header>
 
-            <div class="bg-white rounded-xl shadow-lg p-5 border border-gray-200" id="inputContainer">
+            <div class="bg-white rounded-xl shadow-lg p-5 border border-gray-200">
                 <div class="grid grid-cols-2 gap-3 mb-4">
                     <div>
                         <label class="block text-xs font-semibold text-gray-600 mb-1">วันที่ส่ง</label>
@@ -44,45 +43,73 @@
                             <option value="14">14.00</option>
                             <option value="16">16.00</option>
                             <option value="18">18.00</option>
-                            <option value="19">19.00</option>
+                            <option value="19.00">19.00</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3 mb-4 border-b pb-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1 text-blue-700 font-bold">รหัสพนักงาน</label>
-                        <input type="text" id="empId" placeholder="เช่น 111" class="w-full border border-blue-100 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1 text-blue-700 font-bold">ชื่อเล่น</label>
-                        <input type="text" id="staffName" placeholder="ระบุชื่อ" class="w-full border border-blue-100 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-                    </div>
-                </div>
-
-                <div class="mb-4 mt-4">
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">ทีมของคุณ</label>
-                    <select id="teamName" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none bg-white font-medium">
-                        <option value="">-- เลือกทีม --</option>
-                    </select>
-                </div>
-
-                <!-- ระบบ No Sales (Updated Labels) -->
-                <div class="flex flex-col gap-2 mb-6">
-                    <div class="flex justify-center">
-                        <button onclick="fetchMyLastData()" class="bg-orange-500 hover:bg-orange-600 text-white text-[11px] font-bold py-2.5 px-6 rounded-full shadow-md transition-all flex items-center gap-2 active:scale-95">
-                            <span>🔄 ดึงข้อมูลลูกค้ารอบก่อนหน้า</span>
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1 text-blue-700">รหัสพนักงาน</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="empId" placeholder="เช่น 6601" class="w-full border border-blue-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                        <button onclick="fetchLatestData()" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-md transition-all whitespace-nowrap flex items-center gap-1">
+                            🔄 ดึงข้อมูล
                         </button>
                     </div>
-                    <div class="flex items-center justify-center gap-2 mt-2 bg-red-50 py-2 px-4 rounded-lg border border-red-100">
-                        <input type="checkbox" id="noSalesCheckbox" onchange="toggleNoSales()" class="w-5 h-5 text-red-600 border-gray-300 rounded focus:ring-red-500">
-                        <label for="noSalesCheckbox" class="text-sm font-bold text-red-600 cursor-pointer">🔴 วันนี้ยังไม่ได้ยอด</label>
+                    <p class="text-[10px] text-gray-500 mt-1.5 font-medium leading-tight">
+                        💡 <span class="text-orange-600">ดึงข้อมูลรอบล่าสุดของวันที่เลือก:</span> กรอกรหัสแล้วกดปุ่มเพื่อโหลดรายชื่อลูกค้าเดิมมาส่งต่อได้ครับ
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1 text-blue-700 font-bold">เลือกสาขา</label>
+                        <select id="branchName" class="w-full border border-blue-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none bg-white">
+                            <option value="">-- กำลังโหลดสาขา --</option>
+                        </select>
                     </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1 text-blue-700">ชื่อเล่น</label>
+                        <input type="text" id="staffName" placeholder="ระบุชื่อ" class="w-full border border-blue-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">ทีมของคุณ</label>
+                    <select id="teamName" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none bg-white font-medium">
+                        <option value="">-- กำลังโหลดรายชื่อทีม --</option>
+                    </select>
                 </div>
 
                 <hr class="my-4 border-gray-100">
 
-                <div id="customerSection">
+                <!-- ยอดขายประกัน -->
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-5 shadow-sm">
+                    <h3 class="text-sm font-bold text-blue-800 mb-3 flex items-center">
+                        🛡️ ยอดขายประกัน
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-blue-600 mb-1 uppercase">จำนวนกรมธรรม์</label>
+                            <input type="number" id="insCount" value="0" min="0" class="w-full border border-blue-200 rounded-lg p-2 text-center font-bold text-blue-700 focus:ring-2 focus:ring-blue-400 bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-blue-600 mb-1 uppercase">เบี้ยประกันรวม</label>
+                            <input type="number" id="insPremium" value="0" min="0" class="w-full border border-blue-200 rounded-lg p-2 text-center font-bold text-blue-700 focus:ring-2 focus:ring-blue-400 bg-white">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Checkbox วันนี้ยังไม่ได้ลูกค้า -->
+                <div class="flex items-center justify-between mb-4 bg-gray-50 p-3 rounded-xl border border-gray-200 shadow-sm transition-all hover:bg-gray-100">
+                    <label for="noCustomer" class="flex items-center space-x-3 text-sm font-bold text-gray-700 cursor-pointer w-full">
+                        <input type="checkbox" id="noCustomer" onchange="toggleCustomerList()" class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 shadow-sm">
+                        <span class="select-none">🚫 วันนี้ยังไม่ได้ลูกค้า</span>
+                    </label>
+                </div>
+
+                <!-- รายการลูกค้า (จะซ่อนเมื่อติ๊กยังไม่ได้ลูกค้า) -->
+                <div id="customerSection" class="transition-all duration-300">
                     <div class="flex justify-between items-center mb-3">
                         <h2 class="font-bold text-gray-700 uppercase tracking-wide">รายการลูกค้า</h2>
                         <button onclick="addCustomerRow()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-full shadow-md transition-all active:scale-90">+ เพิ่มลูกค้า</button>
@@ -90,16 +117,12 @@
                     <div id="customerList" class="space-y-4"></div>
                 </div>
 
-                <div id="noSalesNotice" class="hidden p-4 bg-red-50 border border-red-200 rounded-xl text-center mb-4 animate-fadeIn">
-                    <p class="text-red-700 font-bold text-sm">⚠️ ระบบจะบันทึกสถานะ "วันนี้ยังไม่ได้ยอด" ลงในรอบนี้</p>
-                </div>
-
-                <div class="mt-8 space-y-4 text-center">
-                    <p class="text-[10px] text-gray-400 mb-2 italic font-medium">* ข้อมูลเดิมในรอบนี้จะถูกบันทึกทับโดยอัตโนมัติ</p>
-                    <button onclick="processData()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-95 transition-all text-lg">
-                        📊 คำนวณสรุป & สร้าง Text
+                <div class="mt-8 space-y-3">
+                    <button onclick="processData()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl shadow-lg active:scale-95 transition-all text-lg">
+                        📊 คำนวณสรุป & Line
                     </button>
-                    <button id="btnSubmit" onclick="sendToGoogleSheet()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-95 transition-all text-lg">
+                    <!-- ปุ่มบันทึก -->
+                    <button id="btnSubmit" onclick="sendToGoogleSheet()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md active:scale-95 transition-all hidden">
                         ☁️ บันทึกลง Google Sheet
                     </button>
                 </div>
@@ -108,7 +131,9 @@
             <div id="resultArea" class="mt-6 hidden animate-fadeIn">
                 <div class="relative">
                     <textarea id="lineText" readonly class="w-full h-80 p-4 text-sm bg-white border-2 border-green-200 rounded-xl focus:outline-none font-mono shadow-inner"></textarea>
-                    <button onclick="copyToClipboard('lineText', 'copyStatus')" class="absolute top-2 right-2 bg-green-50 text-green-600 border border-green-200 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">📋 คัดลอก</button>
+                    <button onclick="copyToClipboard('lineText', 'copyStatus')" class="absolute top-2 right-2 bg-green-50 text-green-600 border border-green-200 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">
+                        📋 คัดลอก
+                    </button>
                 </div>
                 <p id="copyStatus" class="text-green-600 text-center text-xs mt-2 hidden font-bold">✅ คัดลอกเรียบร้อย!</p>
             </div>
@@ -123,29 +148,34 @@
             <div class="bg-white rounded-xl shadow-lg p-5 border border-gray-200">
                 <div class="space-y-4">
                     <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-2 font-bold uppercase">ตัวกรองการดึงข้อมูล</label>
+                        
                         <div class="mb-3">
-                            <label class="block text-[10px] text-gray-400 font-bold mb-1 uppercase">1. วันที่</label>
+                            <label class="block text-[10px] text-gray-400 font-bold mb-1 uppercase">1. เลือกวันที่</label>
                             <input type="date" id="searchDate" class="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-purple-400 bg-gray-50">
                         </div>
-                        <div class="grid grid-cols-2 gap-2 mb-4">
+
+                        <div class="grid grid-cols-2 gap-2 mb-3">
                             <div>
                                 <label class="block text-[10px] text-gray-400 font-bold mb-1 uppercase">2. เลือกทีม</label>
                                 <select id="searchTeam" class="border border-gray-300 rounded-lg p-2 text-sm w-full outline-none focus:ring-2 focus:ring-purple-400 bg-white font-medium">
-                                    <option value="">-- ทีม --</option>
+                                    <option value="">-- เลือกทีม --</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-[10px] text-gray-400 font-bold mb-1 uppercase">3. เวลา</label>
+                                <label class="block text-[10px] text-gray-400 font-bold mb-1 uppercase">3. เลือกเวลา</label>
                                 <select id="searchTime" class="border border-gray-300 rounded-lg p-2 text-sm w-full outline-none focus:ring-2 focus:ring-purple-400 bg-white font-medium">
                                     <option value="12">12.00</option>
                                     <option value="14">14.00</option>
                                     <option value="16">16.00</option>
                                     <option value="18">18.00</option>
-                                    <option value="19">19.00</option>
+                                    <option value="19.00">19.00</option>
                                 </select>
                             </div>
                         </div>
-                        <button onclick="fetchTeamReport()" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-4 rounded-xl text-md font-bold shadow-lg transition-all active:scale-95">🔍 ค้นหายอดทีม</button>
+                        <button onclick="fetchTeamReport()" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-4 rounded-xl text-md font-bold shadow-lg transition-all active:scale-95">
+                            🔍 ค้นหาข้อมูลรายทีม
+                        </button>
                     </div>
                 </div>
 
@@ -155,28 +185,30 @@
                 </div>
 
                 <div id="reportContent" class="mt-6 hidden animate-fadeIn">
-                    <div class="bg-purple-50 p-4 rounded-xl border border-purple-100 shadow-inner text-center">
-                        <h4 class="font-bold text-purple-800 border-b border-purple-200 pb-2 mb-3">สรุปยอดทีม <span id="displayTeamName"></span></h4>
-                        <p class="text-[10px] text-purple-400 mb-2 font-bold italic">วันที่ <span id="displayDate"></span> รอบ <span id="displayTime"></span>.00</p>
-                        <div id="teamStats" class="space-y-1 text-sm text-gray-700 text-left"></div>
+                    <div class="bg-purple-50 p-4 rounded-xl border border-purple-100 shadow-inner">
+                        <h4 class="font-bold text-purple-800 text-center border-b border-purple-200 pb-2 mb-3">สรุปยอดทีม <span id="displayTeamName"></span></h4>
+                        <p class="text-[10px] text-purple-400 text-center mb-2 font-bold">วันที่ <span id="displayDate"></span> รอบ <span id="displayTime"></span>.00</p>
+                        <div id="teamStats" class="space-y-1 text-sm text-gray-700"></div>
                     </div>
-                    <button onclick="generateTeamLineReport()" class="w-full mt-4 bg-green-500 text-white py-3 rounded-xl font-bold shadow-md active:scale-95 transition-all text-sm">📋 สร้างข้อความสรุปทีมส่งกลุ่ม Line</button>
+                    <button onclick="generateTeamLineReport()" class="w-full mt-4 bg-green-500 text-white py-3 rounded-xl font-bold shadow-md active:scale-95 transition-all">
+                        📄 สร้างรายงานสำหรับ Line
+                    </button>
                 </div>
             </div>
             
             <div id="teamResultArea" class="mt-6 hidden animate-fadeIn">
                 <div class="relative">
-                    <textarea id="teamLineText" readonly class="w-full h-[450px] p-4 text-[13px] bg-gray-50 border-2 border-purple-200 rounded-xl font-mono shadow-inner"></textarea>
+                    <textarea id="teamLineText" readonly class="w-full h-[450px] p-4 text-[13px] bg-gray-50 border-2 border-purple-200 rounded-xl font-mono leading-relaxed shadow-inner"></textarea>
                     <button onclick="copyToClipboard('teamLineText', 'teamCopyStatus')" class="absolute top-2 right-2 bg-white border px-2 py-1.5 rounded-lg text-xs font-bold shadow-sm">คัดลอก</button>
                 </div>
-                <p id="teamCopyStatus" class="text-purple-600 text-center text-xs mt-2 hidden font-bold">✅ คัดลอกเรียบร้อย!</p>
+                <p id="teamCopyStatus" class="text-purple-600 text-center text-xs mt-2 hidden font-bold">✅ คัดลอกรายงานทีมเรียบร้อย!</p>
             </div>
         </div>
     </div>
 
-    <!-- Modal Notification -->
+    <!-- Modal -->
     <div id="statusModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-xs text-center shadow-2xl scale-110">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-xs text-center shadow-2xl scale-110 transition-all">
             <div id="modalContent"></div>
             <button onclick="closeModal()" class="mt-5 w-full bg-blue-600 text-white py-3 rounded-xl text-sm font-bold shadow-lg">ตกลง</button>
         </div>
@@ -191,7 +223,12 @@
         let customerCount = 0;
         let teamDataResult = null;
 
-        const statusEmojis = { "Approve": "✅", "Reject": "❌", "Pending": "🅿️", "รอเอกสาร": "🔖" };
+        const statusEmojis = {
+            "Approve": "✅",
+            "Reject": "❌",
+            "Pending": "🅿️",
+            "รอเอกสาร": "⏳📄"
+        };
 
         function switchTab(tab) {
             document.getElementById('section-input').classList.toggle('hidden', tab !== 'input');
@@ -200,13 +237,101 @@
             document.getElementById('tab-report').classList.toggle('tab-active', tab === 'report');
         }
 
+        function toggleCustomerList() {
+            const isNoCust = document.getElementById('noCustomer').checked;
+            const section = document.getElementById('customerSection');
+            if (isNoCust) {
+                section.style.display = 'none';
+            } else {
+                section.style.display = 'block';
+                // ถ้าติ๊กออกและยังไม่มีรายชื่อลูกค้าเลย ให้สร้าง 1 แถวว่าง
+                if (document.querySelectorAll('.customer-row').length === 0) {
+                    addCustomerRow();
+                }
+            }
+        }
+
         async function fetchTeamList() {
             if (!SCRIPT_URL) return;
             try {
                 const response = await fetch(`${SCRIPT_URL}?action=getTeams`);
                 const teams = await response.json();
-                setTeamOptions(teams);
-            } catch (e) { setTeamOptions(["บิวตี้", "พี่ตุ๊ก", "พี่โม"]); }
+                if (Array.isArray(teams)) setTeamOptions(teams);
+            } catch (e) {
+                setTeamOptions(["บิวตี้", "พี่ตุ๊ก", "พี่โม"]);
+            }
+        }
+
+        async function fetchBranchList() {
+            if (!SCRIPT_URL) return;
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getBranches`);
+                const branches = await response.json();
+                if (Array.isArray(branches)) setBranchOptions(branches);
+            } catch (e) {
+                setBranchOptions(["สาขา 1", "สาขา 2"]);
+            }
+        }
+
+        // --- ปรับปรุงการดึงข้อมูลล่าสุด โดยใช้รหัสพนักงาน + วันที่ ---
+        async function fetchLatestData() {
+            const empId = document.getElementById('empId').value.trim();
+            const docDate = document.getElementById('docDate').value; // วันที่ที่เลือกอยู่ปัจจุบัน
+
+            if (!empId) return showMessage("⚠️ กรุณากรอกรหัสพนักงานก่อนครับ");
+            if (!docDate) return showMessage("⚠️ กรุณาเลือกวันที่ก่อนครับ");
+            
+            const btn = document.querySelector('button[onclick="fetchLatestData()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "⏳...";
+            btn.disabled = true;
+
+            try {
+                // ส่งค่า empId และ date ไปยัง Apps Script
+                const url = `${SCRIPT_URL}?action=getLatestData&empId=${encodeURIComponent(empId)}&date=${encodeURIComponent(docDate)}&t=${Date.now()}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data && data.found) {
+                    if (data.staff) document.getElementById('staffName').value = data.staff;
+                    if (data.branch) document.getElementById('branchName').value = data.branch;
+                    if (data.team) document.getElementById('teamName').value = data.team;
+                    if (data.insCount !== undefined) document.getElementById('insCount').value = data.insCount;
+                    if (data.insPremium !== undefined) document.getElementById('insPremium').value = data.insPremium;
+                    
+                    // สำคัญ: ลบกล่องข้อมูลเดิมที่ว่างอยู่ออกทั้งหมด ก่อนจะเพิ่มข้อมูลที่ดึงมา
+                    document.getElementById('customerList').innerHTML = ''; 
+                    customerCount = 0;
+                    
+                    if (data.customers && data.customers.length > 0) {
+                        document.getElementById('noCustomer').checked = false;
+                        document.getElementById('customerSection').style.display = 'block';
+                        
+                        // สร้างกล่องตามจำนวนข้อมูลที่มีเป๊ะๆ
+                        data.customers.forEach(c => {
+                            addCustomerRow();
+                            const row = document.getElementById(`row-${customerCount}`);
+                            row.querySelector('.cust-name').value = c.name || "";
+                            if(c.type) row.querySelector('.cust-type').value = c.type;
+                            if(c.status) row.querySelector('.status').value = c.status;
+                            row.querySelector('.qty-cr').value = c.qCR || 0;
+                            row.querySelector('.qty-yc').value = c.qYC || 0;
+                        });
+                    } else {
+                        // ดึงมาแต่ยังไม่ได้ลูกค้า
+                        document.getElementById('noCustomer').checked = true;
+                        document.getElementById('customerSection').style.display = 'none';
+                    }
+                    showMessage("✅ ดึงข้อมูลล่าสุดของวันที่เลือกมาให้เรียบร้อยครับ");
+                } else {
+                    showMessage("⚠️ ไม่พบข้อมูลของรหัสนี้ใน<b>วันที่เลือก</b>ครับ<br><span class='text-xs text-gray-500 mt-1'>(หากเป็นการส่งยอดรอบแรกของวัน ให้เริ่มกรอกใหม่ได้เลย)</span>");
+                }
+            } catch (error) {
+                showMessage("❌ ไม่สามารถเชื่อมต่อระบบเพื่อดึงข้อมูลได้");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
         function setTeamOptions(teams) {
@@ -216,62 +341,61 @@
             const placeholder = '<option value="">-- เลือกทีม --</option>';
             teamSelect.innerHTML = placeholder + options;
             searchSelect.innerHTML = placeholder + options;
+
             const saved = localStorage.getItem('emp_info');
             if (saved) {
                 const info = JSON.parse(saved);
-                if (document.getElementById('teamName').querySelector(`option[value='${info.team}']`)) {
-                    document.getElementById('teamName').value = info.team;
+                if (teamSelect.querySelector(`option[value='${info.team}']`)) {
+                    teamSelect.value = info.team;
                 }
             }
         }
 
-        function toggleNoSales() {
-            const isNoSales = document.getElementById('noSalesCheckbox').checked;
-            const customerSection = document.getElementById('customerSection');
-            const noSalesNotice = document.getElementById('noSalesNotice');
-            if (isNoSales) {
-                customerSection.classList.add('hidden');
-                noSalesNotice.classList.remove('hidden');
-                document.getElementById('customerList').innerHTML = "";
-                customerCount = 0;
-            } else {
-                customerSection.classList.remove('hidden');
-                noSalesNotice.classList.add('hidden');
-                if (customerCount === 0) addCustomerRow();
+        function setBranchOptions(branches) {
+            const branchSelect = document.getElementById('branchName');
+            const options = branches.map(b => `<option value="${b}">${b}</option>`).join('');
+            const placeholder = '<option value="">-- เลือกสาขา --</option>';
+            branchSelect.innerHTML = placeholder + options;
+
+            const saved = localStorage.getItem('emp_info');
+            if (saved) {
+                const info = JSON.parse(saved);
+                if (info.branch && branchSelect.querySelector(`option[value='${info.branch}']`)) {
+                    branchSelect.value = info.branch;
+                }
             }
         }
 
-        function addCustomerRow(data = null) {
-            if (document.getElementById('noSalesCheckbox').checked) return;
+        function addCustomerRow() {
             customerCount++;
             const container = document.getElementById('customerList');
             const div = document.createElement('div');
             div.className = "customer-row border border-gray-200 p-4 rounded-xl bg-gray-50 relative shadow-sm animate-fadeIn";
             div.id = `row-${customerCount}`;
             div.innerHTML = `
-                <button onclick="removeRow(${customerCount})" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-md">✕</button>
+                <button onclick="removeRow(${customerCount})" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-md hover:bg-red-600 transition-colors">✕</button>
                 <div class="space-y-3">
-                    <input type="text" placeholder="ชื่อลูกค้า" class="cust-name border border-gray-300 rounded-lg p-2.5 text-sm w-full outline-none focus:ring-2 focus:ring-blue-400" value="${data?.name || ''}">
+                    <input type="text" placeholder="ชื่อลูกค้า" class="cust-name border border-gray-300 rounded-lg p-2.5 text-sm w-full outline-none focus:ring-2 focus:ring-blue-400">
                     <div class="grid grid-cols-2 gap-3">
-                        <select class="cust-type border border-gray-300 rounded-lg p-2 text-xs w-full bg-white font-medium">
-                            <option value="เก่า" ${data?.type === 'เก่า' ? 'selected' : ''}>เก่า</option>
-                            <option value="ใหม่" ${data?.type === 'ใหม่' || !data ? 'selected' : ''}>ใหม่</option>
+                        <select class="cust-type border border-gray-300 rounded-lg p-2 text-xs w-full bg-white font-medium focus:ring-2 focus:ring-blue-400 outline-none">
+                            <option value="เก่า">ลูกค้าเก่า</option>
+                            <option value="ใหม่" selected>ลูกค้าใหม่</option>
                         </select>
-                        <select class="status border border-gray-300 rounded-lg p-2 text-xs w-full bg-white font-bold">
-                            <option value="Approve" ${data?.status === 'Approve' ? 'selected' : ''}>Approve</option>
-                            <option value="Reject" ${data?.status === 'Reject' ? 'selected' : ''}>Reject</option>
-                            <option value="Pending" ${data?.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                            <option value="รอเอกสาร" ${data?.status === 'รอเอกสาร' ? 'selected' : ''}>รอเอกสาร</option>
+                        <select class="status border border-gray-300 rounded-lg p-2 text-xs w-full bg-white font-bold focus:ring-2 focus:ring-blue-400 outline-none">
+                            <option value="Approve">Approve</option>
+                            <option value="Reject">Reject</option>
+                            <option value="Pending">Pending</option>
+                            <option value="รอเอกสาร">รอเอกสาร</option>
                         </select>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 bg-white p-3 rounded-xl border border-dashed border-gray-200 shadow-inner text-[11px]">
+                    <div class="grid grid-cols-2 gap-3 bg-white p-3 rounded-xl border border-dashed border-gray-200 shadow-inner">
                         <div class="flex items-center justify-between">
-                            <span class="font-bold text-blue-700">CR:</span>
-                            <input type="number" min="0" class="qty-cr w-12 border border-blue-100 rounded p-1 text-center font-bold bg-blue-50" value="${data?.cr || 0}">
+                            <span class="text-xs font-bold text-blue-700">จำนวน CR:</span>
+                            <input type="number" min="0" class="qty-cr w-12 border border-blue-100 rounded p-1 text-center text-sm font-bold bg-blue-50 focus:ring-2 focus:ring-blue-400 outline-none" value="0">
                         </div>
                         <div class="flex items-center justify-between border-l border-gray-100 pl-3">
-                            <span class="font-bold text-orange-700">YC:</span>
-                            <input type="number" min="0" class="qty-yc w-12 border border-orange-100 rounded p-1 text-center font-bold bg-orange-50" value="${data?.yc || 0}">
+                            <span class="text-xs font-bold text-orange-700">จำนวน YC:</span>
+                            <input type="number" min="0" class="qty-yc w-12 border border-orange-100 rounded p-1 text-center text-sm font-bold bg-orange-50 focus:ring-2 focus:ring-orange-400 outline-none" value="0">
                         </div>
                     </div>
                 </div>
@@ -279,172 +403,343 @@
             container.appendChild(div);
         }
 
-        function removeRow(id) { document.getElementById(`row-${id}`).remove(); }
-
-        async function fetchMyLastData() {
-            const empId = document.getElementById('empId').value;
-            const date = document.getElementById('docDate').value;
-            if (!empId) return showMessage("❌ กรุณากรอกรหัสพนักงานก่อนครับ");
-            showMessage("🔄 กำลังดึงข้อมูลล่าสุดของคุณ...");
-            try {
-                const url = `${SCRIPT_URL}?action=getMyLastData&empId=${encodeURIComponent(empId)}&date=${encodeURIComponent(date)}&t=${Date.now()}`;
-                const response = await fetch(url);
-                const result = await response.json();
-                if (!result || result.length === 0) return showMessage("ไม่พบข้อมูลเดิมของคุณในวันนี้ครับ");
-                
-                document.getElementById('noSalesCheckbox').checked = false;
-                toggleNoSales();
-                
-                if (result.length === 1 && result[0].name === "ไม่มียอด") {
-                    document.getElementById('noSalesCheckbox').checked = true;
-                    toggleNoSales();
-                } else {
-                    document.getElementById('customerList').innerHTML = ""; customerCount = 0;
-                    result.forEach(item => addCustomerRow(item));
-                }
-                closeModal();
-            } catch (e) { showMessage("❌ เกิดข้อผิดพลาดในการดึงข้อมูลครับ"); }
+        function removeRow(id) { 
+            const row = document.getElementById(`row-${id}`);
+            if (row) row.remove(); 
         }
 
+        // --- ปรับปรุงการ Gen Pattern บุคคล ตามที่ลูกค้าระบุ ---
         function processData() {
             const dateStr = new Date(document.getElementById('docDate').value).toLocaleDateString('th-TH');
             const time = document.getElementById('docTime').value;
             const staff = document.getElementById('staffName').value;
             const empId = document.getElementById('empId').value;
             const team = document.getElementById('teamName').value;
-            const isNoSales = document.getElementById('noSalesCheckbox').checked;
+            const branch = document.getElementById('branchName').value;
+            const insCount = parseInt(document.getElementById('insCount').value) || 0;
+            const insPremium = parseFloat(document.getElementById('insPremium').value) || 0;
+            const isNoCust = document.getElementById('noCustomer').checked;
 
-            if (!empId || !staff || !team) return showMessage("❌ กรุณากรอกข้อมูลพนักงานให้ครบก่อนครับ");
+            if (!empId || !staff || !team || !branch) return showMessage("❌ กรุณากรอกข้อมูลพนักงานและเลือกสาขาให้ครบครับ");
 
-            let msg = `📅 รายงานยอด: ${dateStr} (รอบ ${time}.00)\n👥 ทีม: ${team}\n🆔 พนักงาน: [${empId}] ${staff}\n-------------------\n`;
+            const rows = document.querySelectorAll('.customer-row');
+            
+            // ตัวแปรสำหรับคำนวณสรุปรายบุคคล
+            let stats = { total: 0, cr: 0, yc: 0 };
+            let approveNew = 0;
+            let approveOld = 0;
+            let approveCR = 0;
+            let approveYC = 0;
+            let rejectCards = 0;
+            
+            let customerDetails = "";
 
-            if (isNoSales) {
-                msg += `🔴 วันนี้ยังไม่ได้ยอดครับ\n`;
+            if (isNoCust) {
+                customerDetails = "🚫 วันนี้ยังไม่ได้ลูกค้า\n";
             } else {
-                const rows = document.querySelectorAll('.customer-row');
-                if (rows.length === 0) return showMessage("⚠️ กรุณาเพิ่มลูกค้าหรือเลือก 'วันนี้ยังไม่ได้ยอด' ครับ");
-                
-                let stats = { old: 0, new: 0, cr: 0, yc: 0, total: rows.length, approve: 0, reject: 0, pending: 0, waiting: 0 };
-                let customerDetails = "";
-                
+                stats.total = rows.length;
                 rows.forEach((row, i) => {
                     const name = row.querySelector('.cust-name').value || "ไม่ระบุชื่อ";
                     const type = row.querySelector('.cust-type').value;
                     const statusValue = row.querySelector('.status').value;
                     const qCR = parseInt(row.querySelector('.qty-cr').value) || 0;
                     const qYC = parseInt(row.querySelector('.qty-yc').value) || 0;
-                    if (type === "เก่า") stats.old++; else stats.new++;
-                    stats.cr += qCR; stats.yc += qYC;
-                    if (statusValue === "Approve") stats.approve++; else if (statusValue === "Reject") stats.reject++; else if (statusValue === "Pending") stats.pending++; else stats.waiting++;
-                    let cardInfo = []; if (qCR > 0) cardInfo.push(`CR ${qCR}`); if (qYC > 0) cardInfo.push(`YC ${qYC}`);
-                    customerDetails += `${i+1}. ${name} (${type})\n   📝 [${cardInfo.join(' + ') || 'ไม่มีบัตร'}] -> ${statusEmojis[statusValue]} ${statusValue}\n`;
-                });
+                    
+                    stats.cr += qCR; 
+                    stats.yc += qYC;
+                    
+                    if (statusValue === "Approve") {
+                        if (type === "ใหม่") approveNew++;
+                        if (type === "เก่า") approveOld++;
+                        approveCR += qCR;
+                        approveYC += qYC;
+                    } else if (statusValue === "Reject") {
+                        rejectCards += (qCR + qYC);
+                    }
 
-                msg += customerDetails;
-                msg += `-------------------\n📊 สรุปรวมรอบนี้:\nจำนวนลูกค้า ${stats.total} คน\nเก่า ${stats.old} คน ใหม่ ${stats.new} คน\nCR ${stats.cr} ใบ YC ${stats.yc} ใบ รวม ${stats.cr + stats.yc} ใบ\n✅ Approve: ${stats.approve} คน\n❌ Reject: ${stats.reject} คน\n🅿️ Pending: ${stats.pending} คน\n🔖 รอเอกสาร: ${stats.waiting} คน`;
+                    let cardInfo = [];
+                    if (qCR > 0) cardInfo.push(`CR ${qCR}`);
+                    if (qYC > 0) cardInfo.push(`YC ${qYC}`);
+                    let cardStr = cardInfo.length > 0 ? `[${cardInfo.join('+')}]` : `[ไม่มีบัตร]`;
+
+                    customerDetails += `${i+1}. ${name} (${type})\n${cardStr} ${statusEmojis[statusValue]} ${statusValue}\n`;
+                });
             }
+
+            // จัดรูปแบบข้อความตาม Pattern รายบุคคล
+            let msg = `🚩 รายงานการส่งยอด: ${team}\n📅 ข้อมูลวันที่: ${dateStr} รอบ ${time}.00\n—————————\n\n`;
+            msg += `🆔 พนักงาน: ${staff} [${empId}]\n`;
+            msg += customerDetails;
+            msg += `🛡️ ประกัน: ${insCount} กรมฯ (${parseFloat(insPremium).toLocaleString()}.-)\n\n`;
+            msg += `—————————\nสรุปผลงานรายบุคคล\n`;
+            
+            if (!isNoCust) {
+                msg += `จำนวนลูกค้า ${stats.total} คน\n`;
+                msg += `CR ${stats.cr} ใบ YC ${stats.yc} ใบ\n`;
+                msg += `✅ Approve:\n`;
+                msg += `ลูกค้าใหม่ ${approveNew} (คน) / ลูกค้าเก่า ${approveOld} (คน)\n`;
+                msg += `✅ CR ${approveCR} (ใบ) / YC ${approveYC} (ใบ)\n`;
+                msg += `❌ Reject: ${rejectCards} (ใบ)\n`;
+            } else {
+                msg += `จำนวนลูกค้า 0 คน\n`;
+                msg += `CR 0 ใบ YC 0 ใบ\n`;
+                msg += `✅ Approve:\n`;
+                msg += `ลูกค้าใหม่ 0 (คน) / ลูกค้าเก่า 0 (คน)\n`;
+                msg += `✅ CR 0 (ใบ) / YC 0 (ใบ)\n`;
+                msg += `❌ Reject: 0 (ใบ)\n`;
+            }
+            
+            msg += `🛡️ ยอดขายประกัน: ${insCount} กรมฯ\n`;
+            msg += `💰 เบี้ยประกันรวม: ${parseFloat(insPremium).toLocaleString()} บาท\n-------------------`;
 
             document.getElementById('lineText').value = msg;
             document.getElementById('resultArea').classList.remove('hidden');
-            document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
-            localStorage.setItem('emp_info', JSON.stringify({ empId, staff, team }));
+            document.getElementById('btnSubmit').classList.remove('hidden');
+
+            localStorage.setItem('emp_info', JSON.stringify({ empId, staff, team, branch }));
         }
 
         async function sendToGoogleSheet() {
-            const empId = document.getElementById('empId').value;
-            const staff = document.getElementById('staffName').value;
-            const team = document.getElementById('teamName').value;
-            const isNoSales = document.getElementById('noSalesCheckbox').checked;
+            const btn = document.getElementById('btnSubmit');
+            const branch = document.getElementById('branchName').value;
+            const insCount = parseInt(document.getElementById('insCount').value) || 0;
+            const insPremium = parseFloat(document.getElementById('insPremium').value) || 0;
+            const isNoCust = document.getElementById('noCustomer').checked;
             
-            if (!empId || !staff || !team) return showMessage("❌ กรุณากรอกข้อมูลพนักงานให้ครบก่อนครับ");
+            btn.disabled = true; btn.innerText = "กำลังบันทึก...";
+            const payload = [];
             
-            const btn = document.getElementById('btnSubmit'); btn.disabled = true; btn.innerText = "กำลังบันทึก...";
-            
-            let payload = [];
-            if (isNoSales) {
-                payload.push({ action: "save", date: document.getElementById('docDate').value, time: document.getElementById('docTime').value, empId: empId, staff: staff, team: team, name: "ไม่มียอด", type: "-", qCR: 0, qYC: 0, status: "N/A" });
-            } else {
-                const rows = document.querySelectorAll('.customer-row');
+            const rows = document.querySelectorAll('.customer-row');
+            if (rows.length === 0 && insCount === 0 && !isNoCust) {
+                 btn.disabled = false; btn.innerText = "บันทึกลง Google Sheet";
+                 return showMessage("⚠️ ไม่มีข้อมูลที่จะบันทึกครับ");
+            }
+
+            if (!isNoCust) {
                 rows.forEach(row => {
-                    payload.push({ action: "save", date: document.getElementById('docDate').value, time: document.getElementById('docTime').value, empId: empId, staff: staff, team: team, name: row.querySelector('.cust-name').value, type: row.querySelector('.cust-type').value, qCR: parseInt(row.querySelector('.qty-cr').value) || 0, qYC: parseInt(row.querySelector('.qty-yc').value) || 0, status: row.querySelector('.status').value });
+                    payload.push({ 
+                        action: "save", 
+                        date: document.getElementById('docDate').value, 
+                        time: document.getElementById('docTime').value, 
+                        branch: branch,
+                        empId: document.getElementById('empId').value, 
+                        staff: document.getElementById('staffName').value, 
+                        team: document.getElementById('teamName').value, 
+                        name: row.querySelector('.cust-name').value, 
+                        type: row.querySelector('.cust-type').value, 
+                        qCR: parseInt(row.querySelector('.qty-cr').value) || 0, 
+                        qYC: parseInt(row.querySelector('.qty-yc').value) || 0, 
+                        status: row.querySelector('.status').value,
+                        insCount: insCount,
+                        insPremium: insPremium
+                    });
+                });
+            }
+
+            // กรณีไม่มีลูกค้า (กดติ๊กช่อง หรือ ไม่มีรายชื่อ) ให้ส่งข้อมูลไปเพื่ออัปเดตสถานะยอดประกัน
+            if (isNoCust || rows.length === 0) {
+                payload.push({ 
+                    action: "save", 
+                    date: document.getElementById('docDate').value, 
+                    time: document.getElementById('docTime').value, 
+                    branch: branch,
+                    empId: document.getElementById('empId').value, 
+                    staff: document.getElementById('staffName').value, 
+                    team: document.getElementById('teamName').value, 
+                    name: "ยังไม่ได้ลูกค้า", type: "-", qCR: 0, qYC: 0, status: "-",
+                    insCount: insCount,
+                    insPremium: insPremium
                 });
             }
 
             try {
                 await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                showMessage("✅ บันทึกข้อมูลสำเร็จ!<br>ตอนนี้คุณสามารถคัดลอกข้อความไปส่ง Line ได้เลยครับ");
-            } catch (e) { showMessage("❌ บันทึกไม่สำเร็จ: " + e.message); }
-            finally { btn.disabled = false; btn.innerText = "☁️ บันทึกลง Google Sheet"; }
+                showMessage("✅ บันทึกสำเร็จ!");
+            } catch (e) {
+                showMessage("❌ ผิดพลาด: " + e.message);
+            } finally {
+                btn.disabled = false; btn.innerText = "บันทึกลง Google Sheet";
+            }
         }
 
         async function fetchTeamReport() {
             const team = document.getElementById('searchTeam').value;
             const time = document.getElementById('searchTime').value;
             const date = document.getElementById('searchDate').value;
-            if (!team || !date) return showMessage("⚠️ กรุณาเลือกวันที่และทีมครับ");
-            const loading = document.getElementById('reportLoading'); const content = document.getElementById('reportContent');
-            loading.classList.remove('hidden'); content.classList.add('hidden'); document.getElementById('teamResultArea').classList.add('hidden');
+            if (!team || !date) return showMessage("⚠️ กรุณาเลือกวันที่และทีมที่ต้องการสรุปครับ");
+            
+            const loading = document.getElementById('reportLoading');
+            const content = document.getElementById('reportContent');
+            loading.classList.remove('hidden'); content.classList.add('hidden');
+            document.getElementById('teamResultArea').classList.add('hidden');
+            
             try {
                 const url = `${SCRIPT_URL}?action=getTeamReport&team=${encodeURIComponent(team)}&time=${encodeURIComponent(time)}&date=${encodeURIComponent(date)}&t=${Date.now()}`;
-                const response = await fetch(url); const result = await response.json(); 
+                const response = await fetch(url);
+                const result = await response.json(); 
+
                 if (!result || !result.details || result.details.length === 0) {
                     loading.classList.add('hidden');
-                    return showMessage(`ไม่พบข้อมูลของทีม ${team}<br>วันที่ ${new Date(date).toLocaleDateString('th-TH')} รอบ ${time}.00 ครับ`);
+                    const displayDateStr = new Date(date).toLocaleDateString('th-TH');
+                    return showMessage("ไม่พบข้อมูลของทีม " + team + "<br>ประจำวันที่ " + displayDateStr + " รอบ " + time + ".00 ครับ");
                 }
-                teamDataResult = result; teamDataResult.selectedTime = time; teamDataResult.selectedDate = new Date(date).toLocaleDateString('th-TH');
-                document.getElementById('displayTeamName').innerText = team; document.getElementById('displayDate').innerText = teamDataResult.selectedDate; document.getElementById('displayTime').innerText = time;
+
+                let teamInsCount = 0;
+                let teamInsPremium = 0;
+                const countedStaff = {};
+
+                result.details.forEach(d => {
+                    if (!countedStaff[d.empId]) {
+                        countedStaff[d.empId] = true;
+                        teamInsCount += (parseInt(d.insCount) || 0);
+                        teamInsPremium += (parseFloat(d.insPremium) || 0);
+                    }
+                });
+
+                teamDataResult = result;
+                teamDataResult.selectedTime = time;
+                teamDataResult.selectedDate = new Date(date).toLocaleDateString('th-TH');
+                teamDataResult.teamInsCount = teamInsCount;
+                teamDataResult.teamInsPremium = teamInsPremium;
+                
+                document.getElementById('displayTeamName').innerText = team;
+                document.getElementById('displayDate').innerText = teamDataResult.selectedDate;
+                document.getElementById('displayTime').innerText = time;
                 
                 const statsDiv = document.getElementById('teamStats');
-                statsDiv.innerHTML = `<p>👨‍💼 พนักงานส่งงาน: ${teamDataResult.staffCount} คน</p><p class='font-bold text-gray-800 mt-2 text-md'>จำนวนลูกค้า ${teamDataResult.total} คน</p><p>เก่า ${teamDataResult.old} คน ใหม่ ${teamDataResult.new} คน</p><p class='font-semibold text-blue-800 uppercase'>CR ${teamDataResult.cr} ใบ YC ${teamDataResult.yc} ใบ รวม ${teamDataResult.cr + teamDataResult.yc} ใบ</p><div class='mt-3 p-3 bg-white rounded-lg border border-purple-200 text-xs shadow-sm'><p class='text-green-600 font-bold mb-1'>✅ Approve: ${teamDataResult.approve} คน</p><p class='text-red-600 font-bold mb-1'>❌ Reject: ${teamDataResult.reject} คน</p><p class='text-yellow-600 font-bold mb-1'>🅿️ Pending: ${teamDataResult.pending} คน</p><p class='text-gray-600 font-bold'>🔖 รอเอกสาร: ${teamDataResult.waiting} คน</p></div>`;
+                statsDiv.innerHTML = `
+                    <p>👨‍💼 พนักงานส่งงาน: ${teamDataResult.staffCount} คน</p>
+                    <p class='font-bold text-gray-800 mt-2'>จำนวนลูกค้า ${teamDataResult.total} คน</p>
+                    <p>เก่า ${teamDataResult.old} คน ใหม่ ${teamDataResult.new} คน</p>
+                    <p class='font-semibold text-blue-800 uppercase'>CR ${teamDataResult.cr} ใบ YC ${teamDataResult.yc} ใบ รวม ${teamDataResult.cr + teamDataResult.yc} ใบ</p>
+                    <div class='mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg text-blue-800'>
+                        <p class='font-bold'>🛡️ ยอดประกันทีม: ${teamInsCount} กรมฯ</p>
+                        <p class='font-bold'>💰 เบี้ยรวมทีม: ${teamInsPremium.toLocaleString()} บาท</p>
+                    </div>
+                    <div class='mt-3 p-3 bg-white rounded-lg border border-purple-200 text-xs shadow-sm'>
+                        <p class='text-green-600 font-bold mb-1'>✅ Approve: ${teamDataResult.approve} คน</p>
+                        <p class='text-red-600 font-bold mb-1'>❌ Reject: ${teamDataResult.reject} คน</p>
+                        <p class='text-yellow-600 font-bold mb-1'>🅿️ Pending: ${teamDataResult.pending} คน</p>
+                        <p class='text-gray-600 font-bold'>⏳📄 รอเอกสาร: ${teamDataResult.waiting} คน</p>
+                    </div>
+                `;
                 content.classList.remove('hidden');
-            } catch (e) { showMessage("❌ เกิดข้อผิดพลาดในการดึงข้อมูลครับ"); }
+            } catch (e) { showMessage("❌ เกิดข้อผิดพลาดในการดึงข้อมูลจาก Server ครับ"); }
             finally { loading.classList.add('hidden'); }
         }
 
+        // --- ปรับปรุงการ Gen Pattern ทีม ตามที่ลูกค้าระบุ ---
         function generateTeamLineReport() {
             if (!teamDataResult) return;
             let msg = `🚩 รายงานสรุปภาพรวมทีม: ${document.getElementById('searchTeam').value}\n📅 ข้อมูลวันที่: ${teamDataResult.selectedDate} รอบ ${teamDataResult.selectedTime}.00\n—————————\n\n`;
+            
             const grouped = {};
-            teamDataResult.details.forEach(d => { const key = `${d.empId}|${d.staff}`; if (!grouped[key]) grouped[key] = []; grouped[key].push(d); });
-            for (const key in grouped) {
-                const [id, name] = key.split('|'); msg += `🆔 พนักงาน: [${id}] ${name}\n`;
-                const records = grouped[key];
-                if (records.length === 1 && records[0].name === "ไม่มียอด") {
-                    msg += `   🔴 วันนี้ยังไม่ได้ยอด\n`;
-                } else {
-                    records.forEach((cust, idx) => {
-                        let cardInfo = []; if (cust.cr > 0) cardInfo.push(`CR ${cust.cr}`); if (cust.yc > 0) cardInfo.push(`YC ${cust.yc}`);
-                        msg += `${idx + 1}. ${cust.name} (${cust.type})\n   📝 [${cardInfo.join(' + ') || 'ไม่มีบัตร'}] -> ${statusEmojis[cust.status] || ''} ${cust.status}\n`;
-                    });
+            
+            // ตัวแปรสำหรับคำนวณยอด Approve/Reject สรุปทีม
+            let teamApproveNew = 0;
+            let teamApproveOld = 0;
+            let teamApproveCR = 0;
+            let teamApproveYC = 0;
+            let teamRejectCards = 0; // สมมติว่านับจำนวนบัตรที่ Reject (ไม่ใช่คน)
+
+            teamDataResult.details.forEach(d => {
+                const key = `${d.empId}|${d.staff}|${d.branch || 'ไม่ระบุ'}|${d.insCount || 0}|${d.insPremium || 0}`;
+                if (!grouped[key]) grouped[key] = [];
+                grouped[key].push(d);
+
+                // นับยอดเพิ่มเติมสำหรับการสรุป
+                if (d.name !== "-" && d.name !== "ยังไม่ได้ลูกค้า") {
+                    let crVal = parseInt(d.cr) || 0;
+                    let ycVal = parseInt(d.yc) || 0;
+                    
+                    if (d.status === "Approve") {
+                        if (d.type === "ใหม่") teamApproveNew++;
+                        if (d.type === "เก่า") teamApproveOld++;
+                        teamApproveCR += crVal;
+                        teamApproveYC += ycVal;
+                    } else if (d.status === "Reject") {
+                        // นับรวมบัตรที่ Reject
+                        teamRejectCards += (crVal + ycVal);
+                    }
                 }
-                msg += `\n`;
+            });
+
+            for (const key in grouped) {
+                const [id, name, branch, insC, insP] = key.split('|');
+                
+                // แสดงรหัสพนักงานหลังชื่อ
+                msg += `🆔 พนักงาน: ${name} [${id}]\n`;
+                
+                let hasRealCustomer = false;
+                let custIndex = 1;
+                grouped[key].forEach((cust) => {
+                    if (cust.name === "-" || cust.name === "ยังไม่ได้ลูกค้า") return;
+                    hasRealCustomer = true;
+                    let cardInfo = [];
+                    if (cust.cr > 0) cardInfo.push(`CR ${cust.cr}`);
+                    if (cust.yc > 0) cardInfo.push(`YC ${cust.yc}`);
+                    let cardStr = cardInfo.length > 0 ? `[${cardInfo.join('+')}]` : `[ไม่มีบัตร]`;
+                    
+                    // รูปแบบ: 1. ชื่อ (ใหม่/เก่า)
+                    msg += `${custIndex}. ${cust.name} (${cust.type})\n`;
+                    // รูปแบบ: [CR 1+YC 1] ✅ Approve
+                    msg += `${cardStr} ${statusEmojis[cust.status]} ${cust.status}\n`;
+                    custIndex++;
+                });
+                
+                if (!hasRealCustomer) {
+                    msg += `🚫 ยังไม่ได้ลูกค้า\n`;
+                }
+                
+                msg += `🛡️ ประกัน: ${insC} กรมฯ (${parseFloat(insP).toLocaleString()}.-)\n\n`;
             }
-            msg += `—————————\nสรุปผลงานรายทีม\nจำนวนลูกค้า ${teamDataResult.total} คน\nเก่า ${teamDataResult.old} คน ใหม่ ${teamDataResult.new} คน\nCR ${teamDataResult.cr} ใบ YC ${teamDataResult.yc} ใบ รวม ${teamDataResult.cr + teamDataResult.yc} ใบ\n✅ Approve: ${teamDataResult.approve} คน\n❌ Reject: ${teamDataResult.reject} คน\n🅿️ Pending: ${teamDataResult.pending} คน\n🔖 รอเอกสาร: ${teamDataResult.waiting} คน\n-------------------`;
-            document.getElementById('teamLineText').value = msg; document.getElementById('teamResultArea').classList.remove('hidden'); document.getElementById('teamResultArea').scrollIntoView({ behavior: 'smooth' });
+
+            // รูปแบบสรุปผลงานรายทีมด้านล่างสุด
+            msg += `—————————\nสรุปผลงานรายทีม\n`;
+            msg += `จำนวนลูกค้า ${teamDataResult.total} คน\n`;
+            msg += `CR ${teamDataResult.cr} ใบ YC ${teamDataResult.yc} ใบ\n`;
+            msg += `✅ Approve:\n`;
+            msg += `ลูกค้าใหม่ ${teamApproveNew} (คน) / ลูกค้าเก่า ${teamApproveOld} (คน)\n`;
+            msg += `✅ CR ${teamApproveCR} (ใบ) / YC ${teamApproveYC} (ใบ)\n`;
+            msg += `❌ Reject: ${teamRejectCards} (ใบ)\n`;
+            msg += `🛡️ ยอดประกันทีม: ${teamDataResult.teamInsCount} กรมฯ\n`;
+            msg += `💰 เบี้ยรวมทีม: ${teamDataResult.teamInsPremium.toLocaleString()} บาท\n-------------------`;
+            
+            document.getElementById('teamLineText').value = msg;
+            document.getElementById('teamResultArea').classList.remove('hidden');
+            document.getElementById('teamResultArea').scrollIntoView({ behavior: 'smooth' });
         }
 
         function copyToClipboard(id, statusId) {
-            const copyText = document.getElementById(id); copyText.select(); document.execCommand("copy");
-            const status = document.getElementById(statusId); status.classList.remove('hidden');
+            const copyText = document.getElementById(id);
+            copyText.select();
+            document.execCommand("copy");
+            const status = document.getElementById(statusId);
+            status.classList.remove('hidden');
             setTimeout(() => status.classList.add('hidden'), 2000);
         }
 
         function showMessage(text) {
-            document.getElementById('modalContent').innerHTML = `<div class='text-sm font-medium text-gray-700 leading-relaxed'>${text}</div>`;
+            document.getElementById('modalContent').innerHTML = `<div class='text-sm font-medium'>${text}</div>`;
             document.getElementById('statusModal').classList.remove('hidden');
         }
 
         function closeModal() { document.getElementById('statusModal').classList.add('hidden'); }
 
         window.onload = async () => {
-            await fetchTeamList();
+            await Promise.all([fetchTeamList(), fetchBranchList()]);
+            
             const saved = localStorage.getItem('emp_info');
             if (saved) {
                 const info = JSON.parse(saved);
                 document.getElementById('empId').value = info.empId || "";
                 document.getElementById('staffName').value = info.staff || "";
+                
                 const teamSel = document.getElementById('teamName');
-                for(let i=0; i<teamSel.options.length; i++) if(teamSel.options[i].value == info.team) teamSel.selectedIndex = i;
+                if (info.team) teamSel.value = info.team;
+                
+                const branchSel = document.getElementById('branchName');
+                if (info.branch) branchSel.value = info.branch;
             }
             addCustomerRow();
         };
