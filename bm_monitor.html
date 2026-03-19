@@ -96,7 +96,7 @@
                     </div>
                 </div>
                 
-                <button onclick="fetchBranchData()" class="w-full ios-button-primary text-white font-bold py-4 shadow-xl shadow-blue-100 flex items-center justify-center gap-3 text-lg text-white">
+                <button id="btnFetch" onclick="fetchBranchData()" class="w-full ios-button-primary text-white font-bold py-4 shadow-xl shadow-blue-100 flex items-center justify-center gap-3 text-lg text-white">
                     <i data-lucide="refresh-cw" class="w-6 h-6"></i> ประมวลผลข้อมูลล่าสุด
                 </button>
 
@@ -222,7 +222,7 @@
         <!-- Empty State -->
         <div id="captureEmpty" class="py-56 text-center text-slate-300 uppercase font-bold tracking-widest">
             <i data-lucide="bar-chart-3" class="w-16 h-16 mx-auto mb-6 opacity-20 text-slate-500"></i>
-            <h3 class="text-2xl text-slate-400">กดปุ่มเพื่อเริ่มต้นประมวลผลข้อมูล</h3>
+            <h3 class="text-2xl text-slate-400" id="emptyMessage">กดปุ่มเพื่อเริ่มต้นประมวลผลข้อมูล</h3>
         </div>
     </div>
 
@@ -235,6 +235,7 @@
     </div>
 
     <script>
+        // สำคัญ! ถ้านำ App Script ที่ Deploy ใหม่แล้ว ให้เอา URL มาเปลี่ยนตรงนี้ด้วยนะครับ
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw4DUHHwmiro5EP-iydO9mqYf_2tw9gkTJb8AcPqHlUET6tiplnch8cpEUNmTFMW_ILyA/exec"; 
 
         document.getElementById('searchDate').valueAsDate = new Date();
@@ -243,19 +244,40 @@
         async function fetchBranchData() {
             const date = document.getElementById('searchDate').value;
             const branch = document.getElementById('searchBranch').value;
+            const btn = document.getElementById('btnFetch');
+            
             if (!date) return alert("กรุณาระบุวันที่ครับ");
+            
             document.getElementById('captureEmpty').classList.add('hidden');
             document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('exportButtons').classList.add('hidden');
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> กำลังประมวลผล...`;
+            btn.disabled = true;
+            lucide.createIcons();
+
             try {
-                const response = await fetch(`${SCRIPT_URL}?action=getBranchReportLatest&date=${encodeURIComponent(date)}&branch=${encodeURIComponent(branch)}&t=${Date.now()}`);
+                const response = await fetch(`${SCRIPT_URL}?action=getBranchReportLatest&date=${encodeURIComponent(date)}&branch=${encodeURIComponent(branch)}`);
                 const data = await response.json();
+                
                 if (!data || data.staffCount === 0) {
                     document.getElementById('captureEmpty').classList.remove('hidden');
-                    return alert("ไม่พบข้อมูลพนักงานที่ส่งยอดครับ");
+                    document.getElementById('emptyMessage').innerText = "ไม่พบข้อมูลพนักงานที่ส่งยอดในวันนี้ครับ";
+                    return;
                 }
+                
                 renderDashboard(data, date);
                 document.getElementById('exportButtons').classList.remove('hidden');
-            } catch (e) { alert("เกิดข้อผิดพลาดในการดึงข้อมูลครับ"); }
+            } catch (e) { 
+                console.error(e);
+                alert("เกิดข้อผิดพลาดในการดึงข้อมูลจาก Server ครับ"); 
+                document.getElementById('captureEmpty').classList.remove('hidden');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                lucide.createIcons();
+            }
         }
 
         function renderDashboard(data, date) {
@@ -304,7 +326,6 @@
             sortedStaff.forEach(staff => {
                 const row = document.createElement('tr');
                 row.className = "hover:bg-blue-50/20 transition-all";
-                // ปรับขนาดและสี อนุมัติใหม่ ให้เด่นสีเขียว และช่องอื่นยึดตามช่องอนุมัติเก่า ตามคำขอครับบาส
                 row.innerHTML = `
                     <td class="px-10 py-6 text-left">
                         <p class="font-bold text-slate-900 text-xl tracking-tight leading-none">${staff.staff}</p>
