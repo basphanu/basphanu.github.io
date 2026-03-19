@@ -450,16 +450,16 @@
                             </div>
                         </div>
                         <div class="grid grid-cols-3 gap-2 border-t border-white/20 pt-3">
-                            <div class="bg-white/10 rounded-lg py-1.5 text-center">
-                                <span class="text-orange-100 text-[9px] uppercase block mb-0.5">รอผล</span>
+                            <div class="bg-amber-500 rounded-lg py-1.5 text-center border border-amber-400">
+                                <span class="text-amber-100 text-[9px] uppercase block mb-0.5">รอผล</span>
                                 <span class="text-[14px] font-bold text-white">${staff.pending || 0}</span>
                             </div>
-                            <div class="bg-white/10 rounded-lg py-1.5 text-center">
-                                <span class="text-orange-100 text-[9px] uppercase block mb-0.5">รอเอกสาร</span>
+                            <div class="bg-cyan-500 rounded-lg py-1.5 text-center border border-cyan-400">
+                                <span class="text-cyan-100 text-[9px] uppercase block mb-0.5">รอเอกสาร</span>
                                 <span class="text-[14px] font-bold text-white">${staff.waiting || 0}</span>
                             </div>
-                            <div class="bg-red-500/80 rounded-lg py-1.5 text-center border border-red-400/50">
-                                <span class="text-red-100 text-[9px] uppercase block mb-0.5">รีเจ็ค</span>
+                            <div class="bg-rose-500 rounded-lg py-1.5 text-center border border-rose-400">
+                                <span class="text-rose-100 text-[9px] uppercase block mb-0.5">รีเจ็ค</span>
                                 <span class="text-[14px] font-bold text-white">${staff.reject || 0}</span>
                             </div>
                         </div>`;
@@ -497,10 +497,14 @@
                         const aCard = el.querySelector('.alert-card-orange');
                         if(aCard) aCard.style.backgroundColor = "#FF9500";
                         
-                        // บังคับตัวหนังสือสีขาว 100% ในพื้นที่ทึบ
+                        // บังคับตัวหนังสือสีขาว 100% ในพื้นที่ทึบ (ยกเว้นข้อความสีอื่นๆ)
                         const whiteTexts = el.querySelectorAll('.performer-card-solid *, .alert-card-orange *, .staff-tag-orange span, .staff-tag-orange i');
                         whiteTexts.forEach(t => {
-                            if(!t.classList.contains('text-yellow-300') && !t.classList.contains('text-orange-600') && !t.classList.contains('text-red-100')) {
+                            if(!t.classList.contains('text-yellow-300') && 
+                               !t.classList.contains('text-orange-600') && 
+                               !t.classList.contains('text-rose-100') &&
+                               !t.classList.contains('text-amber-100') &&
+                               !t.classList.contains('text-cyan-100')) {
                                 t.style.color = "#ffffff";
                                 t.style.opacity = "1";
                             }
