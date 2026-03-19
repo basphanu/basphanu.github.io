@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="th">
+<!-- Version: V2.0 -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Branch Summary - Solid iOS Minimal</title>
+    <title>Branch Summary - Solid iOS Minimal (V2.0)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -80,7 +81,7 @@
         <!-- Control Panel -->
         <div class="ios-card p-8 mb-10 border-t-4 border-blue-500">
             <h2 class="text-slate-900 text-lg font-bold mb-6 flex items-center gap-2">
-                <i data-lucide="layout-dashboard" class="w-5 h-5 text-blue-600"></i> แผงจัดการรายงานสาขา
+                <i data-lucide="layout-dashboard" class="w-5 h-5 text-blue-600"></i> แผงจัดการรายงาน
             </h2>
             <div class="space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -89,9 +90,9 @@
                         <input type="date" id="searchDate" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-base outline-none focus:ring-2 focus:ring-blue-500 font-medium">
                     </div>
                     <div class="space-y-2">
-                        <label class="text-[11px] font-bold text-slate-500 px-1 uppercase">สาขา/ทีม</label>
+                        <label class="text-[11px] font-bold text-slate-500 px-1 uppercase">กรองข้อมูล (สาขา / ทีม)</label>
                         <select id="searchBranch" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-base outline-none focus:ring-2 focus:ring-blue-500 appearance-none font-medium">
-                            <option value="All">สรุปผลงานพนักงานทุกคน</option>
+                            <option value="All">กำลังโหลดข้อมูลสาขาและทีม...</option>
                         </select>
                     </div>
                 </div>
@@ -102,13 +103,13 @@
 
                 <div id="exportButtons" class="hidden grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
                     <button onclick="exportPart('part1')" class="ios-button-export text-white py-4 shadow-md flex items-center justify-center gap-2">
-                        🏆 (1) สรุปยอดทีม
-                    </button>
-                    <button onclick="exportPart('part2')" class="ios-button-export text-white py-4 shadow-md flex items-center justify-center gap-2 bg-slate-700">
-                        📊 (2) ตารางรายคน
+                        <i data-lucide="pie-chart" class="w-4 h-4"></i> (1) สรุปยอดทีม
                     </button>
                     <button onclick="exportPart('part3')" class="ios-button-export text-white py-4 shadow-md flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600">
-                        🔍 (3) บอร์ดติดตาม
+                        <i data-lucide="target" class="w-4 h-4"></i> (2) สรุปบอร์ดติดตาม
+                    </button>
+                    <button onclick="exportPart('part2')" class="ios-button-export text-white py-4 shadow-md flex items-center justify-center gap-2 bg-slate-700">
+                        <i data-lucide="users" class="w-4 h-4"></i> (3) สรุปตารางรายคน
                     </button>
                 </div>
             </div>
@@ -121,8 +122,11 @@
             <div id="part1" class="space-y-12">
                 <div class="flex justify-between items-end border-b-2 border-slate-300 pb-8">
                     <div>
-                        <h1 class="text-4xl font-bold text-slate-900 uppercase">Branch Summary</h1>
-                        <p class="text-slate-600 text-xl font-medium mt-1">ประจำวันที่ <span class="dispDate text-blue-600 font-bold">-</span></p>
+                        <h1 class="text-4xl font-bold text-slate-900 uppercase">Performance Summary</h1>
+                        <p class="text-slate-600 text-xl font-medium mt-2">
+                            ประจำวันที่ <span class="dispDate text-blue-600 font-bold">-</span>
+                            <span class="text-sm ml-3 px-3 py-1 bg-slate-200 rounded-full font-bold text-slate-500"><i data-lucide="clock" class="w-3 h-3 inline-block mr-1 mb-0.5"></i>อัปเดต <span class="reportTime">-</span></span>
+                        </p>
                     </div>
                     <div class="bg-blue-600 px-6 py-2 rounded-full"><span class="text-xs font-bold text-white uppercase tracking-widest">TEAM RANKING</span></div>
                 </div>
@@ -139,7 +143,7 @@
                         <p class="text-[10px] text-slate-400 mt-2 uppercase">อนุมัติเก่า: <span class="statApprOld">0</span></p>
                     </div>
                     <div class="ios-card p-6 border-b-4 border-orange-500 text-center">
-                        <p class="text-[11px] font-bold text-slate-500 uppercase mb-1">บัตร (CR/YC)</p>
+                        <p class="text-[11px] font-bold text-slate-500 uppercase mb-1">ยอดบัตร (ใบ)</p>
                         <h3 class="text-4xl font-bold text-orange-500 statTotalCards">0</h3>
                         <p class="text-[10px] text-slate-400 mt-2 uppercase">C:<span class="statCR">0</span> Y:<span class="statYC">0</span></p>
                     </div>
@@ -154,7 +158,7 @@
                 <div class="performer-card-solid p-12 shadow-xl relative">
                     <div class="flex flex-col md:flex-row justify-between items-center gap-10">
                         <div class="text-center md:text-left">
-                            <div class="bg-yellow-400 w-20 h-20 flex items-center justify-center rounded-3xl shadow-lg mb-6 text-4xl text-black">🏆</div>
+                            <div class="bg-yellow-400 w-20 h-20 flex items-center justify-center rounded-3xl shadow-lg mb-6 text-black"><i data-lucide="award" class="w-10 h-10"></i></div>
                             <h2 class="text-4xl font-bold uppercase tracking-tight text-white">พนักงานดีเด่น</h2>
                             <p class="text-blue-100 text-2xl font-light opacity-90">ยอดลูกค้าใหม่ อนุมัติสูงสุดประจำวัน</p>
                         </div>
@@ -165,12 +169,40 @@
                 <div id="teamGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8"></div>
             </div>
 
-            <!-- Part 2: Table -->
+            <!-- Part 3: Alert Board (Moved to order #2) -->
+            <div id="part3" class="space-y-10 pt-10">
+                <div class="flex justify-between items-end border-b-2 border-slate-300 pb-8 text-black">
+                    <div>
+                        <h1 class="text-4xl font-bold uppercase tracking-tight">Tracking Board</h1>
+                        <p class="text-slate-600 text-xl font-medium mt-2">
+                            ประจำวันที่ <span class="dispDate text-blue-600 font-bold">-</span>
+                            <span class="text-sm ml-3 px-3 py-1 bg-slate-200 rounded-full font-bold text-slate-500"><i data-lucide="clock" class="w-3 h-3 inline-block mr-1 mb-0.5"></i>อัปเดต <span class="reportTime">-</span></span>
+                        </p>
+                    </div>
+                    <div class="bg-orange-600 px-6 py-2 rounded-full shadow-lg"><span class="text-xs font-bold text-white uppercase tracking-widest">Monitoring</span></div>
+                </div>
+                <div class="alert-card-orange p-12 shadow-2xl border-4 border-white">
+                    <div class="flex items-center gap-8 mb-12">
+                        <div class="bg-white w-20 h-20 flex items-center justify-center rounded-3xl shadow-md text-orange-600"><i data-lucide="alert-circle" class="w-10 h-10"></i></div>
+                        <div>
+                            <h2 class="text-4xl font-bold uppercase tracking-tight text-white leading-none">พนักงานที่ยังไม่มียอด</h2>
+                            <p class="text-orange-50 text-xl font-medium mt-3 opacity-95 uppercase tracking-wide">อนุมัติลูกค้าใหม่ประจำวัน</p>
+                        </div>
+                    </div>
+                    <div id="zeroApprList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+                    <div id="noAlertMsg" class="hidden text-orange-100 text-2xl font-bold italic py-8 text-center w-full uppercase tracking-widest border-2 border-dashed border-orange-200 rounded-3xl">Great Performance! All staff have new approvals today.</div>
+                </div>
+            </div>
+
+            <!-- Part 2: Table (Moved to order #3) -->
             <div id="part2" class="space-y-10 pt-10">
                 <div class="flex justify-between items-end border-b-2 border-slate-300 pb-8 text-black">
                     <div>
                         <h1 class="text-4xl font-bold uppercase tracking-tight">Performance Table</h1>
-                        <p class="text-slate-600 text-xl font-medium mt-1">ประจำวันที่ <span class="dispDate text-blue-600 font-bold">-</span></p>
+                        <p class="text-slate-600 text-xl font-medium mt-2">
+                            ประจำวันที่ <span class="dispDate text-blue-600 font-bold">-</span>
+                            <span class="text-sm ml-3 px-3 py-1 bg-slate-200 rounded-full font-bold text-slate-500"><i data-lucide="clock" class="w-3 h-3 inline-block mr-1 mb-0.5"></i>อัปเดต <span class="reportTime">-</span></span>
+                        </p>
                     </div>
                     <div class="bg-slate-700 px-6 py-2 rounded-full"><span class="text-xs font-bold text-white uppercase tracking-widest">Detail List</span></div>
                 </div>
@@ -183,7 +215,7 @@
                                     <th class="text-center bg-green-50 text-green-700">อนุมัติใหม่</th>
                                     <th class="text-center text-slate-800">อนุมัติเก่า</th>
                                     <th class="text-center text-slate-800">สมัครรวม</th>
-                                    <th class="text-center text-slate-800 font-bold">CR / YC</th>
+                                    <th class="text-center text-slate-800 font-bold">ยอดสมัครบัตรรวมวันนี้ (ใบ)</th>
                                 </tr>
                             </thead>
                             <tbody id="staffTableBody" class="text-slate-900 font-semibold"></tbody>
@@ -192,30 +224,8 @@
                 </div>
             </div>
 
-            <!-- Part 3: Alert Board -->
-            <div id="part3" class="space-y-10 pt-10">
-                <div class="flex justify-between items-end border-b-2 border-slate-300 pb-8 text-black">
-                    <div>
-                        <h1 class="text-4xl font-bold uppercase tracking-tight">Tracking Board</h1>
-                        <p class="text-slate-600 text-xl font-medium mt-1">ประจำวันที่ <span class="dispDate text-blue-600 font-bold">-</span></p>
-                    </div>
-                    <div class="bg-orange-600 px-6 py-2 rounded-full shadow-lg"><span class="text-xs font-bold text-white uppercase tracking-widest">Monitoring</span></div>
-                </div>
-                <div class="alert-card-orange p-12 shadow-2xl border-4 border-white">
-                    <div class="flex items-center gap-8 mb-12">
-                        <div class="bg-white w-20 h-20 flex items-center justify-center rounded-3xl text-4xl shadow-md text-orange-600">🔍</div>
-                        <div>
-                            <h2 class="text-4xl font-bold uppercase tracking-tight text-white leading-none">พนักงานที่ยังไม่มียอด</h2>
-                            <p class="text-orange-50 text-xl font-medium mt-3 opacity-95 uppercase tracking-wide">อนุมัติลูกค้าใหม่ประจำวัน</p>
-                        </div>
-                    </div>
-                    <div id="zeroApprList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
-                    <div id="noAlertMsg" class="hidden text-orange-100 text-2xl font-bold italic py-8 text-center w-full uppercase tracking-widest border-2 border-dashed border-orange-200 rounded-3xl">Great Performance! All staff have new approvals today.</div>
-                </div>
-            </div>
-
             <div class="text-center pt-16 border-t border-slate-200 opacity-20">
-                <p class="text-sm font-bold uppercase tracking-[0.6em] text-slate-900">Branch Performance Analytics 2026</p>
+                <p class="text-sm font-bold uppercase tracking-[0.6em] text-slate-900">Branch Performance Analytics 2026 &bull; V2.0</p>
             </div>
         </div>
 
@@ -230,16 +240,47 @@
     <div id="statusModal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-6 z-[100] backdrop-blur-md">
         <div class="ios-card p-12 w-full max-w-sm text-center border-none shadow-2xl scale-105">
             <div id="modalContent" class="text-slate-900 text-xl font-bold mb-10 leading-relaxed"></div>
-            <button onclick="document.getElementById('statusModal').classList.add('hidden')" class="w-full ios-button-primary text-white py-4 font-bold shadow-lg shadow-blue-500/30">ตกลงครับ</button>
+            <button onclick="document.getElementById('statusModal').classList.add('hidden')" class="w-full ios-button-primary text-white py-4 font-bold shadow-lg shadow-blue-500/30">ตกลง</button>
         </div>
     </div>
 
     <script>
-        // สำคัญ! ถ้านำ App Script ที่ Deploy ใหม่แล้ว ให้เอา URL มาเปลี่ยนตรงนี้ด้วยนะครับ
+        // เปลี่ยนเป็น URL ของ App Script คุณ
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw4DUHHwmiro5EP-iydO9mqYf_2tw9gkTJb8AcPqHlUET6tiplnch8cpEUNmTFMW_ILyA/exec"; 
 
-        document.getElementById('searchDate').valueAsDate = new Date();
-        lucide.createIcons();
+        window.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('searchDate').valueAsDate = new Date();
+            lucide.createIcons();
+            
+            // ดึงข้อมูลรายชื่อสาขา และทีมอัตโนมัติเมื่อเปิดหน้าเว็บ
+            try {
+                const searchBranch = document.getElementById('searchBranch');
+                const [branchRes, teamRes] = await Promise.all([
+                    fetch(`${SCRIPT_URL}?action=getBranches`),
+                    fetch(`${SCRIPT_URL}?action=getTeams`)
+                ]);
+                const branches = await branchRes.json();
+                const teams = await teamRes.json();
+
+                let html = '<option value="All">สรุปผลงานภาพรวมทั้งหมด</option>';
+                
+                if(branches && branches.length > 0) {
+                    html += '<optgroup label="📂 เลือกดูตามสาขา">';
+                    [...new Set(branches)].forEach(b => { html += `<option value="${b}">สาขา ${b}</option>`; });
+                    html += '</optgroup>';
+                }
+
+                if(teams && teams.length > 0) {
+                    html += '<optgroup label="👥 เลือกดูตามทีม">';
+                    [...new Set(teams)].forEach(t => { html += `<option value="${t}">ทีม ${t}</option>`; });
+                    html += '</optgroup>';
+                }
+                searchBranch.innerHTML = html;
+            } catch (e) {
+                console.error("Failed to load filters", e);
+                document.getElementById('searchBranch').innerHTML = '<option value="All">สรุปผลงานภาพรวมทั้งหมด</option>';
+            }
+        });
 
         async function fetchBranchData() {
             const date = document.getElementById('searchDate').value;
@@ -281,8 +322,14 @@
         }
 
         function renderDashboard(data, date) {
+            // อัปเดตวันที่
             const thaiDate = new Date(date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
             document.querySelectorAll('.dispDate').forEach(el => el.innerText = thaiDate);
+
+            // อัปเดตเวลาพิมพ์รีพอร์ท
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
+            document.querySelectorAll('.reportTime').forEach(el => el.innerText = timeStr);
 
             const b = data.branchStats;
             document.querySelectorAll('.statNew').forEach(el => el.innerText = b.new);
@@ -295,6 +342,7 @@
             document.querySelectorAll('.statYC').forEach(el => el.innerText = b.yc);
             document.querySelectorAll('.statTotalCust').forEach(el => el.innerText = b.total);
 
+            // Best Performer List
             const topList = document.getElementById('topStaffList');
             topList.innerHTML = "";
             const maxNewAppr = Math.max(...data.staffDetails.map(s => s.apprNew || 0));
@@ -309,6 +357,7 @@
                 });
             } else { topList.innerHTML = `<p class="text-white opacity-40 text-xl font-bold uppercase tracking-[0.2em]">- NO DATA -</p>`; }
 
+            // Team Grid
             const teamGrid = document.getElementById('teamGrid');
             teamGrid.innerHTML = "";
             const sortedTeams = Object.entries(data.teamStats).sort((a, b) => (b[1].apprNew || 0) - (a[1].apprNew || 0));
@@ -316,14 +365,16 @@
                 const card = document.createElement('div');
                 const isBest = index === 0 && (s.apprNew || 0) > 0;
                 card.className = `ios-card p-6 transition-all relative ${isBest ? 'ring-[4px] ring-yellow-400 border-none' : ''}`;
-                card.innerHTML = `${isBest ? '<div class="absolute -top-5 -right-1 badge-best px-6 py-2 rounded-full font-bold text-[14px] bg-[#FFD60A] text-black border-2 border-white shadow-md z-20">ทีมผลงานดีเด่น</div>' : ''}<div class="flex justify-between items-start mb-6 text-slate-800"><h4 class="font-bold text-2xl leading-tight pr-4">${teamName}</h4><span class="text-[11px] bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-bold whitespace-nowrap">${s.staffs.length} คน</span></div><div class="space-y-4 text-slate-900"><div class="flex justify-between items-end text-[16px] font-bold border-b border-slate-100 pb-3 text-slate-500"><span class="uppercase tracking-tight">อนุมัติใหม่</span><span class="text-green-600 text-3xl font-bold leading-none">${s.apprNew}</span></div><div class="grid grid-cols-2 gap-3 text-[13px] font-bold"><div class="bg-slate-50 p-3 rounded-xl text-slate-700 text-center border border-slate-100">เก่า: ${s.apprOld}</div><div class="bg-slate-50 p-3 rounded-xl text-slate-700 text-center border border-slate-100">สมัคร: ${s.new}</div></div></div>`;
+                card.innerHTML = `${isBest ? '<div class="absolute -top-5 -right-1 badge-best px-6 py-2 rounded-full font-bold text-[14px] bg-[#FFD60A] text-black border-2 border-white shadow-md z-20"><i data-lucide="star" class="w-4 h-4 inline-block mr-1 mb-0.5"></i>ทีมผลงานดีเด่น</div>' : ''}<div class="flex justify-between items-start mb-6 text-slate-800"><h4 class="font-bold text-2xl leading-tight pr-4">${teamName}</h4><span class="text-[11px] bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-bold whitespace-nowrap">${s.staffs.length} คน</span></div><div class="space-y-4 text-slate-900"><div class="flex justify-between items-end text-[16px] font-bold border-b border-slate-100 pb-3 text-slate-500"><span class="uppercase tracking-tight">อนุมัติใหม่</span><span class="text-green-600 text-3xl font-bold leading-none">${s.apprNew}</span></div><div class="grid grid-cols-2 gap-3 text-[13px] font-bold"><div class="bg-slate-50 p-3 rounded-xl text-slate-700 text-center border border-slate-100">เก่า: ${s.apprOld}</div><div class="bg-slate-50 p-3 rounded-xl text-slate-700 text-center border border-slate-100">สมัคร: ${s.new}</div></div></div>`;
                 teamGrid.appendChild(card);
             });
 
+            // Staff Table
             const tableBody = document.getElementById('staffTableBody');
             tableBody.innerHTML = "";
             const sortedStaff = [...data.staffDetails].sort((a, b) => (b.apprNew || 0) - (a.apprNew || 0));
             sortedStaff.forEach(staff => {
+                const totalCards = (staff.crCount || 0) + (staff.ycCount || 0); // รวมบัตรรวม
                 const row = document.createElement('tr');
                 row.className = "hover:bg-blue-50/20 transition-all";
                 row.innerHTML = `
@@ -336,11 +387,12 @@
                     </td>
                     <td class="px-8 py-6 text-center text-2xl text-slate-700 font-semibold">${staff.apprOld || 0}</td>
                     <td class="px-8 py-6 text-center text-2xl text-slate-700 font-semibold">${staff.custCount}</td>
-                    <td class="px-8 py-6 text-center text-slate-700 font-mono font-bold text-2xl">${staff.crCount} / ${staff.ycCount}</td>
+                    <td class="px-8 py-6 text-center text-slate-700 font-mono font-bold text-3xl">${totalCards}</td>
                 `;
                 tableBody.appendChild(row);
             });
 
+            // Zero Approval Board
             const zeroList = document.getElementById('zeroApprList');
             zeroList.innerHTML = "";
             const lazyStaff = data.staffDetails.filter(s => (s.apprNew || 0) === 0);
@@ -349,13 +401,13 @@
                 lazyStaff.forEach(staff => {
                     const div = document.createElement('div');
                     div.className = "staff-tag-orange flex items-center gap-4 animate-fadeIn shadow-lg border-2 border-white/50";
-                    div.innerHTML = `<div class="w-3 h-3 bg-yellow-400 rounded-full shadow-inner"></div><div class="flex flex-col"><span class="font-bold text-[18px] uppercase tracking-tight text-white leading-none">${staff.staff}</span><span class="text-[11px] text-orange-900/60 font-bold uppercase mt-1">ทีม ${staff.team}</span></div>`;
+                    div.innerHTML = `<i data-lucide="user-minus" class="w-6 h-6 text-orange-100"></i><div class="flex flex-col"><span class="font-bold text-[18px] uppercase tracking-tight text-white leading-none">${staff.staff}</span><span class="text-[11px] text-orange-900/60 font-bold uppercase mt-1">ทีม ${staff.team}</span></div>`;
                     zeroList.appendChild(div);
                 });
             } else { document.getElementById('noAlertMsg').classList.remove('hidden'); }
 
             document.getElementById('dashboard').classList.remove('hidden');
-            lucide.createIcons();
+            lucide.createIcons(); // โหลดไอคอนใหม่
         }
 
         async function exportPart(elementId) {
@@ -385,7 +437,7 @@
                         if(aCard) aCard.style.backgroundColor = "#FF9500";
                         
                         // บังคับตัวหนังสือสีขาว 100% ในพื้นที่ทึบ
-                        const whiteTexts = el.querySelectorAll('.performer-card-solid *, .alert-card-orange *, .staff-tag-orange span');
+                        const whiteTexts = el.querySelectorAll('.performer-card-solid *, .alert-card-orange *, .staff-tag-orange span, .staff-tag-orange i');
                         whiteTexts.forEach(t => {
                             if(!t.classList.contains('text-yellow-300')) {
                                 t.style.color = "#ffffff";
