@@ -45,6 +45,7 @@
     .badge { padding: 8px 10px; border-radius: 999px; background: #edf3f7; color: var(--navy); font-size: 11px; font-weight: 800; white-space: nowrap; }
     .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .filters-top { grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); align-items: end; }
+    .filters-bottom { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     #workDate, #roundTime { width: 100%; min-width: 0; }
     .team-card, .employee-card { position: relative; padding-top: 18px; }
     .top-badge.lifted { top: 6px !important; right: 12px; }
@@ -176,7 +177,7 @@
             </select>
           </div>
         </div>
-        <div class="grid-2" style="margin-top:10px;">
+        <div class="grid-2 filters-bottom" style="margin-top:10px;">
           <div class="field">
             <label>สาขา</label>
             <select id="branchSelect">
@@ -199,19 +200,9 @@
           <small style="color:rgba(255,255,255,.76);">KPI หลักของสาขาในวันนี้</small>
         </div>
         <div class="metric">
-          <span>พนักงานที่มาทำงานวันนี้</span>
-          <strong style="font-size:26px;" id="overviewWorking">0 / 0 คน</strong>
-          <small id="overviewWorkingPct">คิดเป็น 0% ของพนักงานทั้งหมดในสาขา</small>
-        </div>
-        <div class="metric">
-          <span>พนักงานที่ยังไม่ได้ลูกค้า</span>
-          <strong id="overviewNoCustomer">0 คน</strong>
-          <small><span class="chip red" style="margin-top:6px; display:inline-flex;">เตือนเร่งด่วน</span></small>
-        </div>
-        <div class="metric">
-          <span>ยังไม่มียอดอนุมัติลูกค้าใหม่</span>
-          <strong id="overviewNoApprove">0 คน</strong>
-          <small><span class="chip gold" style="margin-top:6px; display:inline-flex;">เตือนติดตาม</span></small>
+          <span>จำนวนลูกค้าทั้งหมดที่สมัครในวันนี้</span>
+          <strong style="font-size:26px;" id="overviewSubmittedCustomers">0 คน</strong>
+          <small>รวมลูกค้าที่ยื่นสมัครทั้งหมดของสาขาในวันนั้น</small>
         </div>
         <div class="metric">
           <span>เบี้ยรวมประกัน</span>
@@ -219,7 +210,7 @@
           <small>อัปเดตแบบ realtime</small>
         </div>
         <div class="metric">
-          <span>สถานะลูกค้ารวมวันนี้</span>
+          <span>สถานะลูกค้าวันนี้</span>
           <strong id="overviewStatusLine">❌ 0 • 🅿️ 0 • 📝 0</strong>
           <small>Reject / Pending / รอเอกสาร</small>
         </div>
@@ -531,12 +522,10 @@
       document.getElementById('heroWorking').textContent = formatNumber(o.working_employees || 0);
       document.getElementById('heroPremium').textContent = formatShortCurrency(o.insurance_premium_total || 0);
       document.getElementById('overviewApprovedMain').textContent = `${formatNumber(o.approved_new_total || 0)} คน`;
-      document.getElementById('overviewWorking').textContent = `${formatNumber(o.working_employees || 0)} / ${formatNumber(o.total_employees || 0)} คน`;
-      document.getElementById('overviewWorkingPct').textContent = `คิดเป็น ${formatNumber(o.working_pct || 0)}% ของพนักงานทั้งหมดในสาขา`;
-      document.getElementById('overviewNoCustomer').textContent = `${formatNumber(o.no_customer_count || 0)} คน`;
-      document.getElementById('overviewNoApprove').textContent = `${formatNumber(o.no_approved_new_count || 0)} คน`;
+      const peopleForStatus = filterBySelections(dashboardState.people || []);
+      const submittedCustomers = peopleForStatus.reduce((sum, p) => sum + Number(p.customer_count || 0), 0);
+      document.getElementById('overviewSubmittedCustomers').textContent = `${formatNumber(submittedCustomers)} คน`;
       document.getElementById('overviewPremium').textContent = formatNumber(o.insurance_premium_total || 0);
-      const peopleForStatus = dashboardState.people || [];
       const rejectTotal = peopleForStatus.reduce((sum, p) => sum + Number(p.reject_count || 0), 0);
       const pendingTotal = peopleForStatus.reduce((sum, p) => sum + Number(p.pending_count || 0), 0);
       const docTotal = peopleForStatus.reduce((sum, p) => sum + Number(p.doc_count || 0), 0);
