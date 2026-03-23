@@ -165,7 +165,7 @@
             <label>วันที่</label>
             <input type="date" id="workDate" />
           </div>
-          <div class="field">
+          <div class="field" style="min-width:0;">
             <label>ช่วงเวลา</label>
             <select id="roundTime">
               <option value="">Realtime ตอนนี้</option>
@@ -233,6 +233,17 @@
             <div class="top-badge">🏆 Best Performer</div>
           </div>
           <div class="top-grid" id="bestPeople"></div>
+        </div>
+
+        <div class="top-highlight" style="margin-top:12px;">
+          <div class="section-head" style="margin-bottom:10px;">
+            <div>
+              <h2 style="font-size:15px; margin-bottom:4px;">ผลงานประกันดีเด่น</h2>
+              <p>แสดง 3 อันดับจากเบี้ยรวมประกันสูงสุดของวัน</p>
+            </div>
+            <div class="top-badge">🛡️ Top Insurance</div>
+          </div>
+          <div class="top-grid" id="bestInsurance"></div>
         </div>
 
         <div class="top-highlight" style="margin-top:12px;">
@@ -353,7 +364,7 @@
     function getSelectedBranch() { return document.getElementById('branchSelect').value || ''; }
     function getSelectedTeam() { return document.getElementById('teamSelect').value || ''; }
     function normalizeText(value) {
-      return String(value || '').replace(/\s+/g, ' ').trim();
+      return String(value || '').replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/\s+/g, ' ').trim();
     }
     function getCanonicalBranchByTeam(teamName) {
       const target = normalizeText(teamName);
@@ -518,6 +529,11 @@
       document.getElementById('overviewPremium').textContent = formatNumber(o.insurance_premium_total || 0);
 
       document.getElementById('bestPeople').innerHTML = renderTopRows(dashboardState.top_people || [], 'person');
+      const insuranceTop = [...(dashboardState.people || [])]
+        .filter(p => Number(p.insurance_premium || 0) > 0)
+        .sort((a, b) => Number(b.insurance_premium || 0) - Number(a.insurance_premium || 0))
+        .slice(0, 3);
+      document.getElementById('bestInsurance').innerHTML = renderInsuranceRows(insuranceTop);
       document.getElementById('bestTeams').innerHTML = renderTopRows(dashboardState.top_teams || [], 'team');
       document.getElementById('feedList').innerHTML = renderFeed(dashboardState.feed || []);
     }
@@ -541,6 +557,23 @@
       `).join('');
     }
 
+    function renderInsuranceRows(items) {
+      if (!items.length) return '<div class="empty-mini">ยังไม่มีข้อมูล</div>';
+      return items.map(item => `
+        <div class="top-row">
+          <div class="top-icon">🛡️</div>
+          <div>
+            <h3>${escapeHtml(item.display_name)}</h3>
+            <p>ทีม ${escapeHtml(item.team_name || '-')} • ลูกค้าใหม่อนุมัติ ${formatNumber(item.approved_new_count || 0)} คน</p>
+          </div>
+          <div class="value">
+            <strong>${formatNumber(item.insurance_premium || 0)}</strong>
+            <span>เบี้ยรวม</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
     function renderFeed(items) {
       if (!items.length) return '<div class="empty-mini">ยังไม่มีความเคลื่อนไหวล่าสุด</div>';
       return items.map(item => `
@@ -553,7 +586,8 @@
     }
 
     function renderTeams() {
-      const teams = filterBySelections(dashboardState.teams || []);
+      const teams = [...filterBySelections(dashboardState.teams || [])]
+        .sort((a, b) => Number(b.approved_new_count || 0) - Number(a.approved_new_count || 0) || String(a.team_name || '').localeCompare(String(b.team_name || ''), 'th'));
       const teamList = document.getElementById('teamList');
       const chart = document.getElementById('teamChart');
       if (!teams.length) {
@@ -561,21 +595,25 @@
         chart.innerHTML = '';
         return;
       }
-      teamList.innerHTML = teams.map((t, i) => `
+      teamList.innerHTML = teams.map((t, i) => {
+        const working = Number(t.working_employees || 0);
+        const approvedEmployees = Number(t.approved_employee_count || 0);
+        const ratioPct = working > 0 ? Math.round((approvedEmployees / working) * 100) : 0;
+        return `
         <div class="team-card" style="margin-top:${i ? 10 : 0}px;">
-          <div class="top-badge lifted" style="position:absolute; top:6px; right:12px;">อนุมัติใหม่ ${formatNumber(t.approved_new_count || 0)}</div>
+          <div class="top-badge lifted" style="position:absolute; top:6px; right:12px; background:linear-gradient(135deg, #15803d, #1f9d55);">อนุมัติใหม่ ${formatNumber(t.approved_new_count || 0)}</div>
           <h3>${escapeHtml(t.team_name)}</h3>
-          <p>พนักงานส่งยอด ${formatNumber(t.working_employees || 0)} คน • เบี้ยรวม ${formatNumber(t.insurance_premium_total || 0)} บาท</p>
+          <p>พนักงานส่งยอด ${formatNumber(working)} คน • เบี้ยรวม ${formatNumber(t.insurance_premium_total || 0)} บาท</p>
           <div class="status-row">
-            <span class="chip green">อัปเดตแล้ว ${formatNumber(t.working_employees || 0)}</span>
-            <span class="chip red" style="background:#1A3263; color:#fff;">ยังไม่ได้ลูกค้า ${formatNumber(t.no_customer_count || 0)}</span>
-            <span class="chip blue" style="background:#a16207; color:#fff;">ยังไม่อนุมัติ ${formatNumber(t.no_approved_new_count || 0)}</span>
+            <span class="chip green" style="background:#edf8ef; color:#15803d;">ลูกค้ายื่นสมัคร= ${formatNumber(t.customer_count || 0)}</span>
+            <span class="chip red" style="background:#b42318; color:#fff;">staff ไม่มีลูกค้า ${formatNumber(t.no_customer_count || 0)}</span>
+            <span class="chip blue" style="background:#c96d12; color:#fff;">staff ไม่มียอดอนุมัติ ${formatNumber(t.no_approved_new_count || 0)}</span>
             ${(t.approved_new_count || 0) === 0 ? '<span class="chip gold">⚠️ ยังไม่มียอดใหม่</span>' : ''}
           </div>
-          <div class="progress-shell"><div class="progress-bar" style="width:${Math.max(0, Math.min(100, t.approved_employee_pct || 0))}%"></div></div>
-          <div class="kpi-line"><span>พนักงานที่มียอดอนุมัติลูกค้าใหม่ / จำนวนพนักงานทั้งหมด</span><strong>${formatNumber(t.approved_employee_count || 0)} / ${formatNumber(t.total_employees || 0)} คน</strong></div>
-        </div>
-      `).join('');
+          <div class="progress-shell"><div class="progress-bar" style="width:${Math.max(0, Math.min(100, ratioPct))}%; background:linear-gradient(90deg, #FFC570 0%, #1A3263 100%);"></div></div>
+          <div class="kpi-line"><span>พนักงานที่มียอดอนุมัติบัตร / พนักงานที่ทำงานในทีมวันนั้น</span><strong>${formatNumber(approvedEmployees)} / ${formatNumber(working)} คน</strong></div>
+        </div>`;
+      }).join('');
 
       const max = Math.max(...teams.map(t => Number(t.approved_new_count || 0)), 0) || 1;
       chart.innerHTML = teams.map(t => {
@@ -609,19 +647,26 @@
         root.innerHTML = '<div class="empty-mini">ไม่พบข้อมูลตามเงื่อนไข</div>';
         return;
       }
-      root.innerHTML = items.map((p, i) => `
+      root.innerHTML = items.map((p, i) => {
+        const badgeStyle = p.customer_count === 0
+          ? 'background:linear-gradient(135deg, #b42318, #d96a5f);'
+          : p.approved_new_count === 0
+            ? 'background:linear-gradient(135deg, #c96d12, #e69c3f);'
+            : 'background:linear-gradient(135deg, #15803d, #1f9d55);';
+        return `
         <div class="employee-card" style="margin-top:${i ? 10 : 0}px;">
-          <div class="top-badge lifted" style="position:absolute; top:6px; right:12px; ${p.approved_new_count === 0 ? 'background:linear-gradient(135deg, #1A3263, #547792);' : ''}">อนุมัติใหม่ ${formatNumber(p.approved_new_count || 0)}</div>
+          <div class="top-badge lifted" style="position:absolute; top:6px; right:12px; ${badgeStyle}">อนุมัติใหม่ ${formatNumber(p.approved_new_count || 0)}</div>
           <h3>${escapeHtml(p.display_name)}</h3>
-          <p>ทีม ${escapeHtml(p.team_name || '-')} • อัปเดตล่าสุด ${escapeHtml(p.latest_saved_text || '-')} • เบี้ย ${formatNumber(p.insurance_premium || 0)} บาท</p>
+          <p>ทีม ${escapeHtml(p.team_name || '-')} • อัปเดตล่าสุด ${escapeHtml(p.latest_saved_text || '-')}</p>
           <div class="status-row">
-            ${p.customer_count === 0 ? '<span class="chip red" style="background:#1A3263; color:#fff;">ยังไม่ได้ลูกค้า</span>' : `<span class="chip green">👥 ลูกค้า ${formatNumber(p.customer_count)}</span>`}
+            ${p.customer_count === 0 ? '<span class="chip red" style="background:#b42318; color:#fff;">ยังไม่ได้ลูกค้า</span>' : `<span class="chip green">👥 ลูกค้า ${formatNumber(p.customer_count)}</span>`}
+            <span class="chip green" style="background:#eef8f0; color:#15803d;">🛡️ ${formatNumber(p.insurance_premium || 0)}</span>
             <span class="chip blue">🅿️ ${formatNumber(p.pending_count || 0)}</span>
             <span class="chip red">❌ ${formatNumber(p.reject_count || 0)}</span>
             <span class="chip gold">📝 ${formatNumber(p.doc_count || 0)}</span>
           </div>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
     }
 
     function renderFollowup() {
