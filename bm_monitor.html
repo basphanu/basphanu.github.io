@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Dashboard Realtime</title>
+  <style>
+    :root {
+      --bg: #f6f1ea;
+      --card: rgba(255,255,255,.92);
+      --text: #1A3263;
+      --muted: #547792;
+      --line: #d8c7af;
+      --navy: #1A3263;
+      --sea: #547792;
+      --gold: #FFC570;
+      --beige: #EFD2B0;
+      --green: #15803d;
+      --red: #b42318;
+      --amber: #a16207;
+      --shadow: 0 14px 30px rgba(26, 50, 99, .10);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top, #FFC570 0%, #EFD2B0 32%, #f6f1ea 78%);
+    }
+    .app { max-width: 470px; margin: 0 auto; min-height: 100vh; padding: 16px 14px 28px; }
+    .topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .brand h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -.03em; }
+    .brand p { margin: 5px 0 0; font-size: 12px; color: var(--muted); line-height: 1.45; }
+    .live-pill { padding: 10px 12px; border-radius: 999px; background: rgba(255,255,255,.75); border: 1px solid rgba(26,50,99,.08); box-shadow: var(--shadow); font-size: 12px; font-weight: 800; color: var(--navy); white-space: nowrap; }
+    .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 6px; border-radius: 18px; background: rgba(239,210,176,.52); border: 1px solid rgba(26,50,99,.08); box-shadow: var(--shadow); margin-bottom: 14px; position: sticky; top: 10px; z-index: 10; backdrop-filter: blur(10px); }
+    .tab { border: 0; border-radius: 14px; padding: 11px 8px; font-size: 12px; font-weight: 800; color: var(--muted); background: transparent; cursor: pointer; }
+    .tab.active { background: linear-gradient(135deg, var(--navy), var(--sea)); color: #fff; box-shadow: 0 10px 20px rgba(26,50,99,.18); }
+    .screen { display: none; gap: 14px; flex-direction: column; }
+    .screen.active { display: flex; }
+    .card { background: var(--card); border: 1px solid rgba(255,255,255,.78); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; backdrop-filter: blur(10px); }
+    .section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+    .section-head h2 { margin: 0 0 4px; font-size: 17px; font-weight: 800; }
+    .section-head p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.45; }
+    .section-head p:empty,.brand p:empty,.hero p:empty{display:none;}
+    .badge { padding: 8px 10px; border-radius: 999px; background: #edf3f7; color: var(--navy); font-size: 11px; font-weight: 800; white-space: nowrap; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field label { font-size: 12px; font-weight: 800; color: var(--navy); }
+    .field input, .field select { width: 100%; padding: 13px 14px; border-radius: 14px; border: 1px solid var(--line); background: #fffdf9; color: var(--text); font-size: 15px; outline: none; }
+    .btn { border: 0; border-radius: 16px; padding: 14px 16px; font-size: 15px; font-weight: 800; letter-spacing: 0.01em; cursor: pointer; background: linear-gradient(135deg, var(--navy), var(--sea)); color: #fff; box-shadow: 0 12px 24px rgba(26, 50, 99, .24); }
+    .hero { background: linear-gradient(135deg, #0f6b3f, #15803d); color: #fff; overflow: hidden; position: relative; }
+    .hero::after { content: ""; position: absolute; width: 190px; height: 190px; border-radius: 50%; right: -60px; top: -70px; background: rgba(255,255,255,.08); }
+    .hero h2 { margin: 0 0 4px; font-size: 20px; }
+    .hero p { margin: 0; font-size: 12px; line-height: 1.5; color: rgba(255,255,255,.84); }
+    .hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+    .hero-stat { background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.10); border-radius: 16px; padding: 12px; }
+    .hero-stat span { display: block; font-size: 11px; color: rgba(255,255,255,.75); margin-bottom: 5px; }
+    .hero-stat strong { font-size: 20px; letter-spacing: -.03em; }
+    .metric { background: #fffaf3; border: 1px solid var(--line); border-radius: 18px; padding: 13px; }
+    .metric span { display: block; font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+    .metric strong { font-size: 18px; letter-spacing: -.02em; }
+    .metric small { display: block; margin-top: 5px; font-size: 11px; color: var(--muted); }
+    .feed-item, .team-card, .employee-card, .top-highlight, .warn-person, .top-row, .empty-note {
+      border: 1px solid var(--line); background: #fffdf9; border-radius: 18px; padding: 14px;
+    }
+    .top-highlight { background: linear-gradient(135deg, rgba(255,197,112,.22), rgba(239,210,176,.55)); border: 1px solid rgba(255,197,112,.62); box-shadow: 0 14px 28px rgba(166,106,23,.12); }
+    .top-highlight h3 { margin: 0 0 4px; font-size: 15px; color: var(--navy); }
+    .top-highlight p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .top-grid { display: grid; gap: 10px; margin-top: 12px; }
+    .top-row { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 12px; border-radius: 16px; background: rgba(255,255,255,.72); border: 1px solid rgba(255,255,255,.7); }
+    .top-icon { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; font-size: 20px; background: linear-gradient(135deg, #FFC570, #EFD2B0); color: var(--navy); }
+    .top-badge { display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 999px; background: linear-gradient(135deg, #1A3263, #547792); color: #fff; font-size: 11px; font-weight: 900; white-space: nowrap; box-shadow: 0 10px 20px rgba(26,50,99,.18); }
+    .feed-item { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: start; }
+    .feed-icon { width: 38px; height: 38px; border-radius: 14px; display: grid; place-items: center; background: #edf3f7; font-size: 18px; }
+    .time { font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .team-card, .employee-card { position: relative; }
+    .team-card h3, .employee-card h3 { margin: 0 0 4px; font-size: 14px; }
+    .team-card p, .employee-card p { margin: 0; font-size: 12px; line-height: 1.5; color: var(--muted); }
+    .status-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .chip { padding: 7px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+    .chip.green { background: #ecfdf3; color: var(--green); }
+    .chip.red { background: #fff0ee; color: var(--red); }
+    .chip.blue { background: #edf3f7; color: var(--navy); }
+    .chip.gold { background: #fff4de; color: var(--amber); }
+    .progress-shell { width: 100%; height: 10px; border-radius: 999px; background: #efe4d4; overflow: hidden; margin-top: 10px; }
+    .progress-bar { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #FFC570 0%, #547792 55%, #1A3263 100%); }
+    .kpi-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; font-size: 12px; color: var(--muted); }
+    .warn-list { display: grid; gap: 10px; }
+    .warn-person { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-radius: 16px; border: 1px solid #f5c4bc; background: #fff7f5; }
+    .warn-person strong { display: block; font-size: 14px; color: var(--navy); margin-bottom: 3px; }
+    .warn-person span { font-size: 12px; color: var(--muted); }
+    .empty-note { padding: 16px; text-align: center; border-radius: 18px; border: 1px dashed #cdb798; background: #fffaf3; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .loading { position: fixed; inset: 0; background: rgba(26,50,99,.30); display:none; align-items:center; justify-content:center; z-index:99; padding:20px;}
+    .loading.active { display:flex; }
+    .loading-card { background:#fff; border-radius:20px; padding:20px; width:100%; max-width:300px; text-align:center; box-shadow: var(--shadow);}
+    .spinner { width:40px; height:40px; border:4px solid #e6edf5; border-top-color: var(--navy); border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 12px;}
+    .empty-mini { color: var(--muted); font-size:12px; padding: 8px 0;}
+    @keyframes spin { to { transform: rotate(360deg);} }
+    @media (max-width: 380px) {
+      .grid-2, .hero-stats { grid-template-columns: 1fr; }
+      .tabs { grid-template-columns: 1fr 1fr; }
+      .live-pill { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="loading" id="loading">
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <div id="loadingText">กำลังโหลดข้อมูล...</div>
+    </div>
+  </div>
+
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <h1>Dashboard Realtime</h1>
+        
+      </div>
+      <div class="live-pill" id="livePill">🟢 LIVE --:--</div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('overview')">ภาพรวม</button>
+      <button class="tab" onclick="showTab('teams')">รายทีม</button>
+      <button class="tab" onclick="showTab('people')">รายพนักงาน</button>
+      <button class="tab" onclick="showTab('missing')">กลุ่มติดตาม</button>
+    </div>
+
+    <section class="screen active" id="screen-overview">
+      <div class="card hero">
+        <h2>ภาพรวมยอดขายวันนี้</h2>
+        
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span>ลูกค้าใหม่อนุมัติรวม</span>
+            <strong id="heroApproved">0</strong>
+          </div>
+          <div class="hero-stat">
+            <span>มาทำงานวันนี้</span>
+            <strong id="heroWorking">0</strong>
+          </div>
+          <div class="hero-stat">
+            <span>เบี้ยรวม</span>
+            <strong id="heroPremium">0</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-head">
+          <div>
+            <h2>ตัวกรองหลัก</h2>
+            
+          </div>
+          <button class="btn" type="button" onclick="loadDashboard()">รีเฟรช</button>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>วันที่</label>
+            <input type="date" id="workDate" />
+          </div>
+          <div class="field">
+            <label>ช่วงเวลา</label>
+            <select id="roundTime">
+              <option value="">Realtime ตอนนี้</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid-2" style="margin-top:10px;">
+          <div class="field">
+            <label>สาขา</label>
+            <select id="branchSelect">
+              <option value="">ทั้งหมด</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>ทีม</label>
+            <select id="teamSelect">
+              <option value="">ทั้งหมด</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="metric" style="background:linear-gradient(135deg, #0f6b3f, #15803d); color:#fff; border-color:rgba(255,255,255,.08); box-shadow:0 16px 30px rgba(21,128,61,.18);">
+          <span style="color:rgba(255,255,255,.78);">ลูกค้าใหม่ที่อนุมัติทั้งหมดของสาขา</span>
+          <strong style="font-size:28px; color:#fff;" id="overviewApprovedMain">0 คน</strong>
+          <small style="color:rgba(255,255,255,.76);">KPI หลักของสาขาในวันนี้</small>
+        </div>
+        <div class="metric">
+          <span>พนักงานที่มาทำงานวันนี้</span>
+          <strong style="font-size:26px;" id="overviewWorking">0 / 0 คน</strong>
+          <small id="overviewWorkingPct">คิดเป็น 0% ของพนักงานทั้งหมดในสาขา</small>
+        </div>
+        <div class="metric">
+          <span>พนักงานที่ยังไม่ได้ลูกค้า</span>
+          <strong id="overviewNoCustomer">0 คน</strong>
+          <small><span class="chip red" style="margin-top:6px; display:inline-flex;">เตือนเร่งด่วน</span></small>
+        </div>
+        <div class="metric">
+          <span>ยังไม่มียอดอนุมัติลูกค้าใหม่</span>
+          <strong id="overviewNoApprove">0 คน</strong>
+          <small><span class="chip gold" style="margin-top:6px; display:inline-flex;">เตือนติดตาม</span></small>
+        </div>
+        <div class="metric">
+          <span>เบี้ยรวมประกัน</span>
+          <strong id="overviewPremium">0</strong>
+          <small>อัปเดตแบบ realtime</small>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-head">
+          <div>
+            <h2>Top Performance ตอนนี้</h2>
+            
+          </div>
+          <div class="badge">Top Approved</div>
+        </div>
+        <div class="top-highlight">
+          <div class="section-head" style="margin-bottom:10px;">
+            <div>
+              <h2 style="font-size:15px; margin-bottom:4px;">พนักงานผลงานดีที่สุด</h2>
+              
+            </div>
+            <div class="top-badge">🏆 Best Performer</div>
+          </div>
+          <div class="top-grid" id="bestPeople"></div>
+        </div>
+
+        <div class="top-highlight" style="margin-top:12px;">
+          <div class="section-head" style="margin-bottom:10px;">
+            <div>
+              <h2 style="font-size:15px; margin-bottom:4px;">ทีมผลงานดีที่สุด</h2>
+              
+            </div>
+            <div class="top-badge">⭐ Best Team</div>
+          </div>
+          <div class="top-grid" id="bestTeams"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-head">
+          <div>
+            <h2>Live Feed ล่าสุด</h2>
+            
+          </div>
+          <div class="badge">Realtime Feed</div>
+        </div>
+        <div id="feedList"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-teams">
+      <div class="card">
+        <div class="section-head">
+          <div>
+            <h2>ภาพรวมรายทีม</h2>
+            <p>เรียงจากยอดอนุมัติลูกค้าใหม่มากไปน้อย และแสดงกลุ่มที่ต้องติดตาม</p>
+          </div>
+          <div class="badge">Team View</div>
+        </div>
+        <div id="teamList"></div>
+      </div>
+
+      <div class="card">
+        <div class="section-head">
+          <div>
+            <h2>กราฟยอดอนุมัติลูกค้าใหม่รายทีม</h2>
+            <p>ทีมที่สูงสุดจะเด่นที่สุด และทีมที่ยังไม่มียอดอนุมัติเลยจะแสดงสัญลักษณ์เตือน</p>
+          </div>
+          <div class="badge">Bar Chart</div>
+        </div>
+        <div class="top-grid" id="teamChart"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-people">
+      <div class="card">
+        <div class="section-head">
+          <div>
+            <h2>ผลงานพนักงานที่มาปฏิบัติงาน</h2>
+            <p>แสดงเฉพาะพนักงานที่ส่งยอดในวันนั้น โดยเรียงจากยอดอนุมัติลูกค้าใหม่มากไปน้อย</p>
+          </div>
+          <div class="badge">People View</div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>ค้นหาพนักงาน</label>
+            <input type="text" id="peopleSearch" placeholder="พิมพ์ชื่อ / รหัสพนักงาน" oninput="renderPeople()" />
+          </div>
+          <div class="field">
+            <label>สถานะ</label>
+            <select id="peopleStatus" onchange="renderPeople()">
+              <option value="">ทั้งหมด</option>
+              <option value="no_customer">ยังไม่ได้ลูกค้า</option>
+              <option value="no_approve">ยังไม่มียอดอนุมัติ</option>
+              <option value="approved">มีลูกค้าใหม่อนุมัติ</option>
+            </select>
+          </div>
+        </div>
+        <div id="peopleList" style="margin-top:12px;"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-missing">
+      <div class="card">
+        <div class="section-head">
+          <div>
+            <h2>กลุ่มที่ต้องติดตามวันนี้</h2>
+            <p>ดึงเฉพาะพนักงานที่ส่งยอดในวันนั้นมาแสดง และแยก 2 กลุ่มชัดเจน</p>
+          </div>
+          <div class="badge">ติดตามทันที</div>
+        </div>
+        <div class="section-head" style="margin-top:6px; margin-bottom:10px;">
+          <div>
+            <h2 style="font-size:15px; margin-bottom:4px;">กลุ่มเร่งด่วน: ยังไม่ได้ลูกค้า</h2>
+            <p>กลุ่มนี้ต้องติดตามก่อน เพราะยังไม่มีลูกค้าเข้ามาเลยในวันนั้น</p>
+          </div>
+          <div class="badge" style="background:#fff0ee; color:#b42318;">สำคัญมาก</div>
+        </div>
+        <div class="warn-list" id="urgentList"></div>
+
+        <div class="section-head" style="margin-top:14px; margin-bottom:10px;">
+          <div>
+            <h2 style="font-size:15px; margin-bottom:4px;">กลุ่มรอง: ยังไม่มียอดอนุมัติลูกค้าใหม่</h2>
+            <p>กลุ่มนี้มีการทำงานแล้ว แต่ยังไม่เกิดยอดอนุมัติลูกค้าใหม่</p>
+          </div>
+          <div class="badge" style="background:#fff4de; color:#a16207;">ติดตามต่อ</div>
+        </div>
+        <div class="warn-list" id="secondaryList"></div>
+      </div>
+
+      <div class="empty-note">
+        ดึงเฉพาะคนที่มีการส่งยอดในวันนั้น ไม่ดึงทั้งสาขา
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxrNgcKtqyUpeXiGLzq_FPrHGzlgBlKUZ05DwS6OCLxmMcYjVozUJCNfaMIFWWRzp2_QQ/exec";
+    let dashboardState = { overview:null, teams:[], people:[], followup:{urgent:[],secondary:[]}, top_people:[], top_teams:[], feed:[] };
+    let bootstrapState = { teams:[], rounds:[], branches:[] };
+
+    function showTab(tab) {
+      document.querySelectorAll('.tab').forEach((el) => el.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach((el) => el.classList.remove('active'));
+      const names = ['overview', 'teams', 'people', 'missing'];
+      document.querySelectorAll('.tab')[names.indexOf(tab)].classList.add('active');
+      document.getElementById(`screen-${tab}`).classList.add('active');
+    }
+
+    function setLoading(active, text='กำลังโหลดข้อมูล...') {
+      document.getElementById('loading').classList.toggle('active', active);
+      document.getElementById('loadingText').textContent = text;
+    }
+
+    function jsonp(params) {
+      return new Promise((resolve, reject) => {
+        const callback = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*10000);
+        const script = document.createElement('script');
+        const qs = new URLSearchParams({ ...params, callback });
+        const timeout = setTimeout(() => {
+          cleanup();
+          reject(new Error('หมดเวลารอข้อมูลจาก API'));
+        }, 20000);
+        function cleanup() {
+          clearTimeout(timeout);
+          script.remove();
+          delete window[callback];
+        }
+        window[callback] = (data) => {
+          cleanup();
+          if (!data || data.ok === false) {
+            reject(new Error(data && data.error ? data.error : 'ไม่สามารถอ่านข้อมูลได้'));
+          } else {
+            resolve(data.data);
+          }
+        };
+        script.onerror = () => {
+          cleanup();
+          reject(new Error('เชื่อมต่อ API ไม่สำเร็จ'));
+        };
+        script.src = API_URL + '?' + qs.toString();
+        document.body.appendChild(script);
+      });
+    }
+
+    function formatNumber(n) {
+      return new Intl.NumberFormat('th-TH').format(Number(n || 0));
+    }
+
+    function formatShortCurrency(n) {
+      const num = Number(n || 0);
+      if (num >= 1000) return (num/1000).toFixed(num % 1000 === 0 ? 0 : 1) + 'K';
+      return formatNumber(num);
+    }
+
+    function toInputDate(d = new Date()) {
+      const tz = new Date(d.getTime() - d.getTimezoneOffset()*60000);
+      return tz.toISOString().slice(0,10);
+    }
+
+    function updateLivePill() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2,'0');
+      const mm = String(now.getMinutes()).padStart(2,'0');
+      document.getElementById('livePill').textContent = `🟢 LIVE ${hh}:${mm}`;
+    }
+
+    async function bootstrap() {
+      setLoading(true, 'กำลังเชื่อมต่อระบบ...');
+      try {
+        document.getElementById('workDate').value = toInputDate();
+        const data = await jsonp({ action: 'bootstrap' });
+        bootstrapState.teams = data.teams || [];
+        bootstrapState.rounds = data.rounds || [];
+        bootstrapState.branches = [...new Set((data.teams || []).map(t => t.branch_name).filter(Boolean))];
+        const roundSelect = document.getElementById('roundTime');
+        roundSelect.innerHTML = '<option value="">Realtime ตอนนี้</option>' + bootstrapState.rounds.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('');
+        const teamSelect = document.getElementById('teamSelect');
+        teamSelect.innerHTML = '<option value="">ทั้งหมด</option>' + bootstrapState.teams.map(t => `<option value="${escapeHtml(t.team_name)}">${escapeHtml(t.team_name)}</option>`).join('');
+        const branchSelect = document.getElementById('branchSelect');
+        branchSelect.innerHTML = '<option value="">ทั้งหมด</option>' + bootstrapState.branches.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
+        await loadDashboard();
+      } catch (err) {
+        alert('เชื่อมต่อระบบไม่สำเร็จ: ' + err.message);
+      } finally {
+        setLoading(false);
+        updateLivePill();
+      }
+    }
+
+    async function loadDashboard() {
+      setLoading(true, 'กำลังอ่านค่าจากระบบ...');
+      try {
+        const params = {
+          action: 'dashboardData',
+          work_date: document.getElementById('workDate').value,
+          round_time: document.getElementById('roundTime').value,
+          branch_name: document.getElementById('branchSelect').value,
+          team_name: document.getElementById('teamSelect').value
+        };
+        const data = await jsonp(params);
+        dashboardState = data;
+        renderOverview();
+        renderTeams();
+        renderPeople();
+        renderFollowup();
+        updateLivePill();
+      } catch (err) {
+        alert('อ่านข้อมูล Dashboard ไม่สำเร็จ: ' + err.message + '\n\nถ้าขึ้น Unknown action ให้ deploy Code.gs เวอร์ชัน Dashboard ก่อน');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function renderOverview() {
+      const o = dashboardState.overview || {};
+      document.getElementById('heroApproved').textContent = formatNumber(o.approved_new_total || 0);
+      document.getElementById('heroWorking').textContent = formatNumber(o.working_employees || 0);
+      document.getElementById('heroPremium').textContent = formatShortCurrency(o.insurance_premium_total || 0);
+      document.getElementById('overviewApprovedMain').textContent = `${formatNumber(o.approved_new_total || 0)} คน`;
+      document.getElementById('overviewWorking').textContent = `${formatNumber(o.working_employees || 0)} / ${formatNumber(o.total_employees || 0)} คน`;
+      document.getElementById('overviewWorkingPct').textContent = `คิดเป็น ${formatNumber(o.working_pct || 0)}% ของพนักงานทั้งหมดในสาขา`;
+      document.getElementById('overviewNoCustomer').textContent = `${formatNumber(o.no_customer_count || 0)} คน`;
+      document.getElementById('overviewNoApprove').textContent = `${formatNumber(o.no_approved_new_count || 0)} คน`;
+      document.getElementById('overviewPremium').textContent = formatNumber(o.insurance_premium_total || 0);
+
+      document.getElementById('bestPeople').innerHTML = renderTopRows(dashboardState.top_people || [], 'person');
+      document.getElementById('bestTeams').innerHTML = renderTopRows(dashboardState.top_teams || [], 'team');
+      document.getElementById('feedList').innerHTML = renderFeed(dashboardState.feed || []);
+    }
+
+    function renderTopRows(items, type) {
+      if (!items.length) return '<div class="empty-mini">ยังไม่มีข้อมูล</div>';
+      return items.map(item => `
+        <div class="top-row">
+          <div class="top-icon">${type === 'team' ? '👥' : '👤'}</div>
+          <div>
+            <h3>${escapeHtml(type === 'team' ? item.team_name : item.display_name)}</h3>
+            <p>${type === 'team'
+              ? `อนุมัติลูกค้าใหม่ ${formatNumber(item.approved_new_count)} คน • เบี้ยรวม ${formatNumber(item.insurance_premium_total)} บาท`
+              : `ทีม ${escapeHtml(item.team_name || '-')} • อนุมัติลูกค้าใหม่ ${formatNumber(item.approved_new_count)} คน • เบี้ยรวม ${formatNumber(item.insurance_premium)} บาท`}</p>
+          </div>
+          <div class="value">
+            <strong>${formatNumber(item.approved_new_count || 0)}</strong>
+            <span>อนุมัติใหม่</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderFeed(items) {
+      if (!items.length) return '<div class="empty-mini">ยังไม่มีความเคลื่อนไหวล่าสุด</div>';
+      return items.map(item => `
+        <div class="feed-item${item._index ? '" style="margin-top:10px;' : ''}">
+          <div class="feed-icon">${escapeHtml(item.icon || '📝')}</div>
+          <div><p><strong>${escapeHtml(item.title || '')}</strong> ${escapeHtml(item.text || '')}</p></div>
+          <div class="time">${escapeHtml(item.time || '')}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderTeams() {
+      const teams = dashboardState.teams || [];
+      const teamList = document.getElementById('teamList');
+      const chart = document.getElementById('teamChart');
+      if (!teams.length) {
+        teamList.innerHTML = '<div class="empty-mini">ยังไม่มีข้อมูลทีมในวันนี้</div>';
+        chart.innerHTML = '';
+        return;
+      }
+      teamList.innerHTML = teams.map((t, i) => `
+        <div class="team-card" style="margin-top:${i ? 10 : 0}px;">
+          <div class="top-badge" style="position:absolute; top:12px; right:12px;">อนุมัติใหม่ ${formatNumber(t.approved_new_count || 0)}</div>
+          <h3>${escapeHtml(t.team_name)}</h3>
+          <p>พนักงานส่งยอด ${formatNumber(t.working_employees || 0)} คน • เบี้ยรวม ${formatNumber(t.insurance_premium_total || 0)} บาท</p>
+          <div class="status-row">
+            <span class="chip green">อัปเดตแล้ว ${formatNumber(t.working_employees || 0)}</span>
+            <span class="chip red">ยังไม่ได้ลูกค้า ${formatNumber(t.no_customer_count || 0)}</span>
+            <span class="chip blue">ยังไม่อนุมัติ ${formatNumber(t.no_approved_new_count || 0)}</span>
+            ${(t.approved_new_count || 0) === 0 ? '<span class="chip gold">⚠️ ยังไม่มียอดใหม่</span>' : ''}
+          </div>
+          <div class="progress-shell"><div class="progress-bar" style="width:${Math.max(0, Math.min(100, t.approved_employee_pct || 0))}%"></div></div>
+          <div class="kpi-line"><span>พนักงานที่มียอดอนุมัติลูกค้าใหม่ / จำนวนพนักงานทั้งหมด</span><strong>${formatNumber(t.approved_employee_count || 0)} / ${formatNumber(t.total_employees || 0)} คน</strong></div>
+        </div>
+      `).join('');
+
+      const max = Math.max(...teams.map(t => Number(t.approved_new_count || 0)), 0) || 1;
+      chart.innerHTML = teams.map(t => {
+        const width = Math.round((Number(t.approved_new_count || 0) / max) * 100);
+        const warn = Number(t.approved_new_count || 0) === 0;
+        return `
+          <div class="top-row" style="grid-template-columns:80px 1fr auto; ${warn ? 'border:1px dashed #f5c4bc; background:#fff7f5;' : ''}">
+            <div><strong ${warn ? 'style="color:#1A3263;"' : ''}>${escapeHtml(t.team_name)}</strong></div>
+            <div class="progress-shell" style="margin-top:0; height:16px; ${warn ? 'background:#f6d7d2;' : ''}">
+              <div class="progress-bar" style="width:${width}%; ${warn ? 'background:#f6d7d2;' : 'background:linear-gradient(90deg, #FFC570 0%, #1A3263 100%);'}"></div>
+            </div>
+            <div class="value"><strong ${warn ? 'style="color:#1A3263;"' : ''}>${formatNumber(t.approved_new_count || 0)}${warn ? ' ⚠️' : ''}</strong><span ${warn ? 'style="color:#547792;"' : ''}>อนุมัติใหม่</span></div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderPeople() {
+      const search = (document.getElementById('peopleSearch').value || '').trim().toLowerCase();
+      const status = document.getElementById('peopleStatus').value;
+      let items = [...(dashboardState.people || [])];
+      if (search) {
+        items = items.filter(p => (`${p.display_name} ${p.employee_id} ${p.team_name}`).toLowerCase().includes(search));
+      }
+      if (status === 'no_customer') items = items.filter(p => p.customer_count === 0);
+      if (status === 'no_approve') items = items.filter(p => p.customer_count > 0 && p.approved_new_count === 0);
+      if (status === 'approved') items = items.filter(p => p.approved_new_count > 0);
+
+      const root = document.getElementById('peopleList');
+      if (!items.length) {
+        root.innerHTML = '<div class="empty-mini">ไม่พบข้อมูลตามเงื่อนไข</div>';
+        return;
+      }
+      root.innerHTML = items.map((p, i) => `
+        <div class="employee-card" style="margin-top:${i ? 10 : 0}px;">
+          <div class="top-badge" style="position:absolute; top:12px; right:12px; ${p.approved_new_count === 0 ? 'background:linear-gradient(135deg, #b42318, #d96a5f);' : ''}">อนุมัติใหม่ ${formatNumber(p.approved_new_count || 0)}</div>
+          <h3>${escapeHtml(p.display_name)}</h3>
+          <p>ทีม ${escapeHtml(p.team_name || '-')} • อัปเดตล่าสุด ${escapeHtml(p.latest_saved_text || '-')} • เบี้ย ${formatNumber(p.insurance_premium || 0)} บาท</p>
+          <div class="status-row">
+            ${p.customer_count === 0 ? '<span class="chip red">ยังไม่ได้ลูกค้า</span>' : `<span class="chip green">👥 ลูกค้า ${formatNumber(p.customer_count)}</span>`}
+            <span class="chip blue">🅿️ ${formatNumber(p.pending_count || 0)}</span>
+            <span class="chip red">❌ ${formatNumber(p.reject_count || 0)}</span>
+            <span class="chip gold">📝 ${formatNumber(p.doc_count || 0)}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderFollowup() {
+      const urgent = dashboardState.followup?.urgent || [];
+      const secondary = dashboardState.followup?.secondary || [];
+      document.getElementById('urgentList').innerHTML = renderFollowupList(urgent, true);
+      document.getElementById('secondaryList').innerHTML = renderFollowupList(secondary, false);
+    }
+
+    function renderFollowupList(items, urgent) {
+      if (!items.length) return '<div class="empty-mini">ไม่พบข้อมูล</div>';
+      return items.map(item => `
+        <div class="warn-person${urgent ? '' : '" style="border-color:#f1d7a8; background:#fffaf1;'}">
+          <div>
+            <strong>${escapeHtml(item.display_name)}</strong>
+            <span>ทีม ${escapeHtml(item.team_name || '-')} • อัปเดตล่าสุด ${escapeHtml(item.latest_saved_text || '-')} • ${urgent ? 'ยังไม่ได้ลูกค้า' : 'ยังไม่มียอดอนุมัติลูกค้าใหม่'} • 🛡️ ประกัน ${formatNumber(item.insurance_premium || 0)} บาท</span>
+          </div>
+          <div class="status-row" style="justify-content:flex-end; margin-top:0;">
+            <span class="chip ${urgent ? 'red' : 'gold'}">${urgent ? 'ยังไม่ได้ลูกค้า' : 'ยังไม่อนุมัติ'}</span>
+            <span class="chip blue">🅿️ ${formatNumber(item.pending_count || 0)}</span>
+            <span class="chip red">❌ ${formatNumber(item.reject_count || 0)}</span>
+            <span class="chip gold">📝 ${formatNumber(item.doc_count || 0)}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(text) {
+      return String(text ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    bootstrap();
+  </script>
+</body>
+</html>
