@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Dashboard Realtime</title>
+  <title>BM Monitor</title>
   <style>
     :root {
       --bg: #f6f1ea;
@@ -42,9 +42,12 @@
     .section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
     .section-head h2 { margin: 0 0 4px; font-size: 17px; font-weight: 800; }
     .section-head p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.45; }
-    .section-head p:empty,.brand p:empty,.hero p:empty{display:none;}
     .badge { padding: 8px 10px; border-radius: 999px; background: #edf3f7; color: var(--navy); font-size: 11px; font-weight: 800; white-space: nowrap; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .filters-top { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; }
+    .team-card, .employee-card { position: relative; padding-top: 18px; }
+    .top-badge.lifted { top: 6px !important; right: 12px; }
+    .field input[type="date"] { min-width: 0; font-size: 14px; padding: 12px 12px; }
     .field { display: flex; flex-direction: column; gap: 7px; }
     .field label { font-size: 12px; font-weight: 800; color: var(--navy); }
     .field input, .field select { width: 100%; padding: 13px 14px; border-radius: 14px; border: 1px solid var(--line); background: #fffdf9; color: var(--text); font-size: 15px; outline: none; }
@@ -115,8 +118,8 @@
   <div class="app">
     <div class="topbar">
       <div class="brand">
-        <h1>Dashboard Realtime</h1>
-        
+        <h1>BM Monitor</h1>
+        <p>Dashboard ติดตามผลงานแบบ Realtime ผ่านมือถือ</p>
       </div>
       <div class="live-pill" id="livePill">🟢 LIVE --:--</div>
     </div>
@@ -131,7 +134,7 @@
     <section class="screen active" id="screen-overview">
       <div class="card hero">
         <h2>ภาพรวมยอดขายวันนี้</h2>
-        
+        <p>มองเห็นทันทีว่าใครได้ยอดแล้ว ใครยังไม่ได้ยอด โดย KPI หลักโฟกัสลูกค้าใหม่แบบนับจำนวนคน และเบี้ยรวมประกัน</p>
         <div class="hero-stats">
           <div class="hero-stat">
             <span>ลูกค้าใหม่อนุมัติรวม</span>
@@ -152,11 +155,11 @@
         <div class="section-head">
           <div>
             <h2>ตัวกรองหลัก</h2>
-            
+            <p>เลือกวัน สาขา ทีม และช่วงเวลาเพื่อรีเฟรชข้อมูล</p>
           </div>
           <button class="btn" type="button" onclick="loadDashboard()">รีเฟรช</button>
         </div>
-        <div class="grid-2">
+        <div class="grid-2 filters-top">
           <div class="field">
             <label>วันที่</label>
             <input type="date" id="workDate" />
@@ -216,7 +219,7 @@
         <div class="section-head">
           <div>
             <h2>Top Performance ตอนนี้</h2>
-            
+            <p>วัดจากจำนวนลูกค้าใหม่ที่อนุมัติแล้วเท่านั้น และถ้ามียอดสูงสุดเท่ากันจะแสดงขึ้นมาทั้งหมด โดยไม่จัดอันดับ</p>
           </div>
           <div class="badge">Top Approved</div>
         </div>
@@ -224,7 +227,7 @@
           <div class="section-head" style="margin-bottom:10px;">
             <div>
               <h2 style="font-size:15px; margin-bottom:4px;">พนักงานผลงานดีที่สุด</h2>
-              
+              <p>แสดงเฉพาะคนที่มียอดอนุมัติลูกค้าใหม่สูงสุดของวัน</p>
             </div>
             <div class="top-badge">🏆 Best Performer</div>
           </div>
@@ -235,7 +238,7 @@
           <div class="section-head" style="margin-bottom:10px;">
             <div>
               <h2 style="font-size:15px; margin-bottom:4px;">ทีมผลงานดีที่สุด</h2>
-              
+              <p>ใช้เงื่อนไขเดียวกัน คือวัดจากจำนวนลูกค้าใหม่ที่อนุมัติแล้วสูงสุด</p>
             </div>
             <div class="top-badge">⭐ Best Team</div>
           </div>
@@ -247,7 +250,7 @@
         <div class="section-head">
           <div>
             <h2>Live Feed ล่าสุด</h2>
-            
+            <p>เห็นความเคลื่อนไหวล่าสุดว่าใครเพิ่งมีลูกค้าใหม่อนุมัติ ใครเพิ่งบันทึกยอด หรือทีมไหนมีเบี้ยรวมขยับขึ้น</p>
           </div>
           <div class="badge">Realtime Feed</div>
         </div>
@@ -345,6 +348,26 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbxrNgcKtqyUpeXiGLzq_FPrHGzlgBlKUZ05DwS6OCLxmMcYjVozUJCNfaMIFWWRzp2_QQ/exec";
     let dashboardState = { overview:null, teams:[], people:[], followup:{urgent:[],secondary:[]}, top_people:[], top_teams:[], feed:[] };
     let bootstrapState = { teams:[], rounds:[], branches:[] };
+
+    function getSelectedBranch() { return document.getElementById('branchSelect').value || ''; }
+    function getSelectedTeam() { return document.getElementById('teamSelect').value || ''; }
+    function applyBranchTeamOptions() {
+      const branch = getSelectedBranch();
+      const teamSelect = document.getElementById('teamSelect');
+      const current = teamSelect.value || '';
+      const teams = (bootstrapState.teams || []).filter(t => !branch || String(t.branch_name || '') === branch);
+      teamSelect.innerHTML = '<option value="">ทั้งหมด</option>' + teams.map(t => `<option value="${escapeHtml(t.team_name)}">${escapeHtml(t.team_name)}</option>`).join('');
+      if (current && teams.some(t => String(t.team_name) === current)) teamSelect.value = current;
+    }
+    function filterBySelections(items) {
+      const branch = getSelectedBranch();
+      const team = getSelectedTeam();
+      return (items || []).filter(item => {
+        const branchOk = !branch || String(item.branch_name || '') === branch;
+        const teamOk = !team || String(item.team_name || '') === team;
+        return branchOk && teamOk;
+      });
+    }
 
     function showTab(tab) {
       document.querySelectorAll('.tab').forEach((el) => el.classList.remove('active'));
@@ -507,7 +530,7 @@
     }
 
     function renderTeams() {
-      const teams = dashboardState.teams || [];
+      const teams = filterBySelections(dashboardState.teams || []);
       const teamList = document.getElementById('teamList');
       const chart = document.getElementById('teamChart');
       if (!teams.length) {
@@ -517,13 +540,13 @@
       }
       teamList.innerHTML = teams.map((t, i) => `
         <div class="team-card" style="margin-top:${i ? 10 : 0}px;">
-          <div class="top-badge" style="position:absolute; top:12px; right:12px;">อนุมัติใหม่ ${formatNumber(t.approved_new_count || 0)}</div>
+          <div class="top-badge lifted" style="position:absolute; top:6px; right:12px;">อนุมัติใหม่ ${formatNumber(t.approved_new_count || 0)}</div>
           <h3>${escapeHtml(t.team_name)}</h3>
           <p>พนักงานส่งยอด ${formatNumber(t.working_employees || 0)} คน • เบี้ยรวม ${formatNumber(t.insurance_premium_total || 0)} บาท</p>
           <div class="status-row">
             <span class="chip green">อัปเดตแล้ว ${formatNumber(t.working_employees || 0)}</span>
-            <span class="chip red">ยังไม่ได้ลูกค้า ${formatNumber(t.no_customer_count || 0)}</span>
-            <span class="chip blue">ยังไม่อนุมัติ ${formatNumber(t.no_approved_new_count || 0)}</span>
+            <span class="chip red" style="background:#1A3263; color:#fff;">ยังไม่ได้ลูกค้า ${formatNumber(t.no_customer_count || 0)}</span>
+            <span class="chip blue" style="background:#a16207; color:#fff;">ยังไม่อนุมัติ ${formatNumber(t.no_approved_new_count || 0)}</span>
             ${(t.approved_new_count || 0) === 0 ? '<span class="chip gold">⚠️ ยังไม่มียอดใหม่</span>' : ''}
           </div>
           <div class="progress-shell"><div class="progress-bar" style="width:${Math.max(0, Math.min(100, t.approved_employee_pct || 0))}%"></div></div>
@@ -536,10 +559,10 @@
         const width = Math.round((Number(t.approved_new_count || 0) / max) * 100);
         const warn = Number(t.approved_new_count || 0) === 0;
         return `
-          <div class="top-row" style="grid-template-columns:80px 1fr auto; ${warn ? 'border:1px dashed #f5c4bc; background:#fff7f5;' : ''}">
+          <div class="top-row" style="grid-template-columns:80px 1fr auto; ${warn ? 'border:1px dashed #d8c7af; background:#fffaf3;' : ''}">
             <div><strong ${warn ? 'style="color:#1A3263;"' : ''}>${escapeHtml(t.team_name)}</strong></div>
-            <div class="progress-shell" style="margin-top:0; height:16px; ${warn ? 'background:#f6d7d2;' : ''}">
-              <div class="progress-bar" style="width:${width}%; ${warn ? 'background:#f6d7d2;' : 'background:linear-gradient(90deg, #FFC570 0%, #1A3263 100%);'}"></div>
+            <div class="progress-shell" style="margin-top:0; height:16px; ${warn ? 'background:#efe4d4;' : ''}">
+              <div class="progress-bar" style="width:${width}%; ${warn ? 'background:#e8dccd;' : 'background:linear-gradient(90deg, #FFC570 0%, #1A3263 100%);'}"></div>
             </div>
             <div class="value"><strong ${warn ? 'style="color:#1A3263;"' : ''}>${formatNumber(t.approved_new_count || 0)}${warn ? ' ⚠️' : ''}</strong><span ${warn ? 'style="color:#547792;"' : ''}>อนุมัติใหม่</span></div>
           </div>
@@ -550,7 +573,7 @@
     function renderPeople() {
       const search = (document.getElementById('peopleSearch').value || '').trim().toLowerCase();
       const status = document.getElementById('peopleStatus').value;
-      let items = [...(dashboardState.people || [])];
+      let items = [...filterBySelections(dashboardState.people || [])];
       if (search) {
         items = items.filter(p => (`${p.display_name} ${p.employee_id} ${p.team_name}`).toLowerCase().includes(search));
       }
@@ -565,11 +588,11 @@
       }
       root.innerHTML = items.map((p, i) => `
         <div class="employee-card" style="margin-top:${i ? 10 : 0}px;">
-          <div class="top-badge" style="position:absolute; top:12px; right:12px; ${p.approved_new_count === 0 ? 'background:linear-gradient(135deg, #b42318, #d96a5f);' : ''}">อนุมัติใหม่ ${formatNumber(p.approved_new_count || 0)}</div>
+          <div class="top-badge lifted" style="position:absolute; top:6px; right:12px; ${p.approved_new_count === 0 ? 'background:linear-gradient(135deg, #1A3263, #547792);' : ''}">อนุมัติใหม่ ${formatNumber(p.approved_new_count || 0)}</div>
           <h3>${escapeHtml(p.display_name)}</h3>
           <p>ทีม ${escapeHtml(p.team_name || '-')} • อัปเดตล่าสุด ${escapeHtml(p.latest_saved_text || '-')} • เบี้ย ${formatNumber(p.insurance_premium || 0)} บาท</p>
           <div class="status-row">
-            ${p.customer_count === 0 ? '<span class="chip red">ยังไม่ได้ลูกค้า</span>' : `<span class="chip green">👥 ลูกค้า ${formatNumber(p.customer_count)}</span>`}
+            ${p.customer_count === 0 ? '<span class="chip red" style="background:#1A3263; color:#fff;">ยังไม่ได้ลูกค้า</span>' : `<span class="chip green">👥 ลูกค้า ${formatNumber(p.customer_count)}</span>`}
             <span class="chip blue">🅿️ ${formatNumber(p.pending_count || 0)}</span>
             <span class="chip red">❌ ${formatNumber(p.reject_count || 0)}</span>
             <span class="chip gold">📝 ${formatNumber(p.doc_count || 0)}</span>
@@ -579,8 +602,8 @@
     }
 
     function renderFollowup() {
-      const urgent = dashboardState.followup?.urgent || [];
-      const secondary = dashboardState.followup?.secondary || [];
+      const urgent = filterBySelections(dashboardState.followup?.urgent || []);
+      const secondary = filterBySelections(dashboardState.followup?.secondary || []);
       document.getElementById('urgentList').innerHTML = renderFollowupList(urgent, true);
       document.getElementById('secondaryList').innerHTML = renderFollowupList(secondary, false);
     }
@@ -588,7 +611,7 @@
     function renderFollowupList(items, urgent) {
       if (!items.length) return '<div class="empty-mini">ไม่พบข้อมูล</div>';
       return items.map(item => `
-        <div class="warn-person${urgent ? '' : '" style="border-color:#f1d7a8; background:#fffaf1;'}">
+        <div class="warn-person${urgent ? '' : '" style="border-color:#f1d7a8; background:#fffaf1; color:#1A3263;'}">
           <div>
             <strong>${escapeHtml(item.display_name)}</strong>
             <span>ทีม ${escapeHtml(item.team_name || '-')} • อัปเดตล่าสุด ${escapeHtml(item.latest_saved_text || '-')} • ${urgent ? 'ยังไม่ได้ลูกค้า' : 'ยังไม่มียอดอนุมัติลูกค้าใหม่'} • 🛡️ ประกัน ${formatNumber(item.insurance_premium || 0)} บาท</span>
