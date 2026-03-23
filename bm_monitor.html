@@ -46,7 +46,7 @@
     .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .filters-top { grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); align-items: end; }
     .filters-bottom { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    #workDate, #roundTime { width: 100%; min-width: 0; }
+    #workDate { width: 100%; min-width: 0; }
     .team-card, .employee-card { position: relative; padding-top: 18px; }
     .top-badge.lifted { top: 6px !important; right: 12px; }
     .field input[type="date"] { min-width: 0; font-size: 13px; padding: 12px 10px; }
@@ -138,30 +138,11 @@
     </div>
 
     <section class="screen active" id="screen-overview">
-      <div class="card hero">
-        <h2>ภาพรวมยอดขายวันนี้</h2>
-        <p>มองเห็นทันทีว่าใครได้ยอดแล้ว ใครยังไม่ได้ยอด โดย KPI หลักโฟกัสลูกค้าใหม่แบบนับจำนวนคน และเบี้ยรวมประกัน</p>
-        <div class="hero-stats">
-          <div class="hero-stat">
-            <span>ลูกค้าใหม่อนุมัติรวม</span>
-            <strong id="heroApproved">0</strong>
-          </div>
-          <div class="hero-stat">
-            <span>มาทำงานวันนี้</span>
-            <strong id="heroWorking">0</strong>
-          </div>
-          <div class="hero-stat">
-            <span>เบี้ยรวม</span>
-            <strong id="heroPremium">0</strong>
-          </div>
-        </div>
-      </div>
-
       <div class="card">
         <div class="section-head">
           <div>
             <h2>ตัวกรองหลัก</h2>
-            <p>เลือกวัน สาขา ทีม และช่วงเวลาเพื่อรีเฟรชข้อมูล</p>
+            <p>เลือกวัน สาขา และทีมเพื่อรีเฟรชข้อมูลล่าสุด</p>
           </div>
           <button class="btn" type="button" onclick="loadDashboard()">รีเฟรช</button>
         </div>
@@ -169,12 +150,6 @@
           <div class="field">
             <label>วันที่</label>
             <input type="date" id="workDate" />
-          </div>
-          <div class="field" style="min-width:0;">
-            <label>ช่วงเวลา</label>
-            <select id="roundTime">
-              <option value="">Realtime ตอนนี้</option>
-            </select>
           </div>
         </div>
         <div class="grid-2 filters-bottom" style="margin-top:10px;">
@@ -191,6 +166,11 @@
             </select>
           </div>
         </div>
+      </div>
+
+      <div class="card hero">
+        <h2>ภาพรวมยอดขายวันนี้</h2>
+        <p>มองเห็นทันทีว่าใครได้ยอดแล้ว ใครยังไม่ได้ยอด โดย KPI หลักโฟกัสลูกค้าใหม่แบบนับจำนวนคน และเบี้ยรวมประกัน</p>
       </div>
 
       <div class="grid-2">
@@ -477,8 +457,6 @@
         bootstrapState.teams = data.teams || [];
         bootstrapState.rounds = data.rounds || [];
         bootstrapState.branches = [...new Set((data.teams || []).map(t => t.branch_name).filter(Boolean))];
-        const roundSelect = document.getElementById('roundTime');
-        roundSelect.innerHTML = '<option value="">Realtime ตอนนี้</option>' + bootstrapState.rounds.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('');
         const teamSelect = document.getElementById('teamSelect');
         teamSelect.innerHTML = '<option value="">ทั้งหมด</option>' + bootstrapState.teams.map(t => `<option value="${escapeHtml(t.team_name)}">${escapeHtml(t.team_name)}</option>`).join('');
         const branchSelect = document.getElementById('branchSelect');
@@ -498,7 +476,6 @@
         const params = {
           action: 'dashboardData',
           work_date: document.getElementById('workDate').value,
-          round_time: document.getElementById('roundTime').value,
           branch_name: document.getElementById('branchSelect').value,
           team_name: document.getElementById('teamSelect').value
         };
@@ -518,9 +495,6 @@
 
     function renderOverview() {
       const o = dashboardState.overview || {};
-      document.getElementById('heroApproved').textContent = formatNumber(o.approved_new_total || 0);
-      document.getElementById('heroWorking').textContent = formatNumber(o.working_employees || 0);
-      document.getElementById('heroPremium').textContent = formatShortCurrency(o.insurance_premium_total || 0);
       document.getElementById('overviewApprovedMain').textContent = `${formatNumber(o.approved_new_total || 0)} คน`;
       const peopleForStatus = filterBySelections(dashboardState.people || []);
       const submittedCustomers = peopleForStatus.reduce((sum, p) => sum + Number(p.customer_count || 0), 0);
