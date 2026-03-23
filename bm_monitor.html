@@ -44,11 +44,11 @@
     .section-head p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.45; }
     .badge { padding: 8px 10px; border-radius: 999px; background: #edf3f7; color: var(--navy); font-size: 11px; font-weight: 800; white-space: nowrap; }
     .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-    .filters-top { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; }
+    .filters-top { grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); align-items: end; }
     #workDate, #roundTime { width: 100%; min-width: 0; }
     .team-card, .employee-card { position: relative; padding-top: 18px; }
     .top-badge.lifted { top: 6px !important; right: 12px; }
-    .field input[type="date"] { min-width: 0; font-size: 14px; padding: 12px 12px; }
+    .field input[type="date"] { min-width: 0; font-size: 13px; padding: 12px 10px; }
     .field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
     .field label { font-size: 12px; font-weight: 800; color: var(--navy); }
     .field input, .field select { width: 100%; padding: 13px 14px; border-radius: 14px; border: 1px solid var(--line); background: #fffdf9; color: var(--text); font-size: 15px; outline: none; min-width: 0; }
@@ -101,6 +101,10 @@
     .spinner { width:40px; height:40px; border:4px solid #e6edf5; border-top-color: var(--navy); border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 12px;}
     .empty-mini { color: var(--muted); font-size:12px; padding: 8px 0;}
     @keyframes spin { to { transform: rotate(360deg);} }
+    @media (max-width: 420px) {
+      .filters-top { grid-template-columns: minmax(0, 0.84fr) minmax(0, 1.16fr); }
+      .field input[type="date"] { font-size: 12px; padding: 12px 8px; }
+    }
     @media (max-width: 380px) {
       .grid-2, .hero-stats { grid-template-columns: 1fr; }
       .tabs { grid-template-columns: 1fr 1fr; }
@@ -213,6 +217,11 @@
           <span>เบี้ยรวมประกัน</span>
           <strong id="overviewPremium">0</strong>
           <small>อัปเดตแบบ realtime</small>
+        </div>
+        <div class="metric">
+          <span>สถานะลูกค้ารวมวันนี้</span>
+          <strong id="overviewStatusLine">❌ 0 • 🅿️ 0 • 📝 0</strong>
+          <small>Reject / Pending / รอเอกสาร</small>
         </div>
       </div>
 
@@ -527,6 +536,11 @@
       document.getElementById('overviewNoCustomer').textContent = `${formatNumber(o.no_customer_count || 0)} คน`;
       document.getElementById('overviewNoApprove').textContent = `${formatNumber(o.no_approved_new_count || 0)} คน`;
       document.getElementById('overviewPremium').textContent = formatNumber(o.insurance_premium_total || 0);
+      const peopleForStatus = dashboardState.people || [];
+      const rejectTotal = peopleForStatus.reduce((sum, p) => sum + Number(p.reject_count || 0), 0);
+      const pendingTotal = peopleForStatus.reduce((sum, p) => sum + Number(p.pending_count || 0), 0);
+      const docTotal = peopleForStatus.reduce((sum, p) => sum + Number(p.doc_count || 0), 0);
+      document.getElementById('overviewStatusLine').textContent = `❌ ${formatNumber(rejectTotal)} • 🅿️ ${formatNumber(pendingTotal)} • 📝 ${formatNumber(docTotal)}`;
 
       document.getElementById('bestPeople').innerHTML = renderTopRows(dashboardState.top_people || [], 'person');
       const insuranceTop = [...(dashboardState.people || [])]
@@ -660,7 +674,7 @@
           <p>ทีม ${escapeHtml(p.team_name || '-')} • อัปเดตล่าสุด ${escapeHtml(p.latest_saved_text || '-')}</p>
           <div class="status-row">
             ${p.customer_count === 0 ? '<span class="chip red" style="background:#b42318; color:#fff;">ยังไม่ได้ลูกค้า</span>' : `<span class="chip green">👥 ลูกค้า ${formatNumber(p.customer_count)}</span>`}
-            <span class="chip green" style="background:#eef8f0; color:#15803d;">🛡️ ${formatNumber(p.insurance_premium || 0)}</span>
+            <span class="chip green" style="background:#eef8f0; color:#15803d;">🛡️ ${formatNumber(p.insurance_premium || 0)} บ.</span>
             <span class="chip blue">🅿️ ${formatNumber(p.pending_count || 0)}</span>
             <span class="chip red">❌ ${formatNumber(p.reject_count || 0)}</span>
             <span class="chip gold">📝 ${formatNumber(p.doc_count || 0)}</span>
