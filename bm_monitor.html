@@ -33,7 +33,7 @@
     .brand h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -.03em; }
     .brand p { margin: 5px 0 0; font-size: 12px; color: var(--muted); line-height: 1.45; }
     .live-pill { padding: 10px 12px; border-radius: 999px; background: rgba(255,255,255,.75); border: 1px solid rgba(26,50,99,.08); box-shadow: var(--shadow); font-size: 12px; font-weight: 800; color: var(--navy); white-space: nowrap; }
-    .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 6px; border-radius: 18px; background: rgba(239,210,176,.52); border: 1px solid rgba(26,50,99,.08); box-shadow: var(--shadow); margin-bottom: 14px; position: sticky; top: 10px; z-index: 10; backdrop-filter: blur(10px); }
+    .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 6px; border-radius: 18px; background: rgba(239,210,176,.52); border: 1px solid rgba(26,50,99,.08); box-shadow: var(--shadow); margin-bottom: 14px; position: sticky; top: 10px; z-index: 10; backdrop-filter: blur(10px); }
     .tab { border: 0; border-radius: 14px; padding: 11px 8px; font-size: 12px; font-weight: 800; color: var(--muted); background: transparent; cursor: pointer; }
     .tab.active { background: linear-gradient(135deg, var(--navy), var(--sea)); color: #fff; box-shadow: 0 10px 20px rgba(26,50,99,.18); }
     .screen { display: none; gap: 14px; flex-direction: column; }
@@ -53,6 +53,13 @@
     .field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
     .field label { font-size: 12px; font-weight: 800; color: var(--navy); }
     .field input, .field select { width: 100%; padding: 13px 14px; border-radius: 14px; border: 1px solid var(--line); background: #fffdf9; color: var(--text); font-size: 15px; outline: none; min-width: 0; }
+    .filter-card.compact { padding: 12px; }
+    .filter-card.compact .section-head { margin-bottom: 10px; }
+    .filter-card.compact .field { gap: 5px; }
+    .filter-card.compact .field label { font-size: 11px; }
+    .filter-card.compact .field input, .filter-card.compact .field select { padding: 10px 12px; font-size: 13px; border-radius: 12px; }
+    .filter-card.compact .btn { padding: 10px 12px; font-size: 13px; border-radius: 12px; box-shadow: 0 8px 16px rgba(26, 50, 99, .18); }
+    .filter-card.compact .grid-2 { gap: 8px; }
     .btn { border: 0; border-radius: 16px; padding: 14px 16px; font-size: 15px; font-weight: 800; letter-spacing: 0.01em; cursor: pointer; background: linear-gradient(135deg, var(--navy), var(--sea)); color: #fff; box-shadow: 0 12px 24px rgba(26, 50, 99, .24); }
     .hero { background: linear-gradient(135deg, #0f6b3f, #15803d); color: #fff; overflow: hidden; position: relative; }
     .hero::after { content: ""; position: absolute; width: 190px; height: 190px; border-radius: 50%; right: -60px; top: -70px; background: rgba(255,255,255,.08); }
@@ -125,7 +132,6 @@
     <div class="topbar">
       <div class="brand">
         <h1>BM Monitor</h1>
-        <p>Dashboard ติดตามผลงานแบบ Realtime ผ่านมือถือ</p>
       </div>
       <div class="live-pill" id="livePill">🟢 LIVE --:--</div>
     </div>
@@ -134,15 +140,13 @@
       <button class="tab active" onclick="showTab('overview')">ภาพรวม</button>
       <button class="tab" onclick="showTab('teams')">รายทีม</button>
       <button class="tab" onclick="showTab('people')">รายพนักงาน</button>
-      <button class="tab" onclick="showTab('missing')">กลุ่มติดตาม</button>
-    </div>
+          </div>
 
     <section class="screen active" id="screen-overview">
-      <div class="card">
+      <div class="card filter-card compact">
         <div class="section-head">
           <div>
             <h2>ตัวกรองหลัก</h2>
-            <p>เลือกวัน สาขา และทีมเพื่อรีเฟรชข้อมูลล่าสุด</p>
           </div>
           <button class="btn" type="button" onclick="loadDashboard()">รีเฟรช</button>
         </div>
@@ -170,7 +174,7 @@
 
       <div class="card hero">
         <h2>ภาพรวมยอดขายวันนี้</h2>
-        <p>มองเห็นทันทีว่าใครได้ยอดแล้ว ใครยังไม่ได้ยอด โดย KPI หลักโฟกัสลูกค้าใหม่แบบนับจำนวนคน และเบี้ยรวมประกัน</p>
+        <p></p>
       </div>
 
       <div class="grid-2">
@@ -200,15 +204,12 @@
         <div class="section-head">
           <div>
             <h2>Top Performance ตอนนี้</h2>
-            <p>วัดจากจำนวนลูกค้าใหม่ที่อนุมัติแล้วเท่านั้น และถ้ามียอดสูงสุดเท่ากันจะแสดงขึ้นมาทั้งหมด โดยไม่จัดอันดับ</p>
           </div>
-          <div class="badge">Top Approved</div>
         </div>
         <div class="top-highlight">
           <div class="section-head" style="margin-bottom:10px;">
             <div>
               <h2 style="font-size:15px; margin-bottom:4px;">พนักงานผลงานดีที่สุด</h2>
-              <p>แสดงเฉพาะคนที่มียอดอนุมัติลูกค้าใหม่สูงสุดของวัน</p>
             </div>
             <div class="top-badge">🏆 Best Performer</div>
           </div>
@@ -219,7 +220,6 @@
           <div class="section-head" style="margin-bottom:10px;">
             <div>
               <h2 style="font-size:15px; margin-bottom:4px;">ผลงานประกันดีเด่น</h2>
-              <p>แสดง 3 อันดับจากเบี้ยรวมประกันสูงสุดของวัน</p>
             </div>
             <div class="top-badge">🛡️ Top Insurance</div>
           </div>
@@ -230,7 +230,6 @@
           <div class="section-head" style="margin-bottom:10px;">
             <div>
               <h2 style="font-size:15px; margin-bottom:4px;">ทีมผลงานดีที่สุด</h2>
-              <p>ใช้เงื่อนไขเดียวกัน คือวัดจากจำนวนลูกค้าใหม่ที่อนุมัติแล้วสูงสุด</p>
             </div>
             <div class="top-badge">⭐ Best Team</div>
           </div>
@@ -242,9 +241,7 @@
         <div class="section-head">
           <div>
             <h2>Live Feed ล่าสุด</h2>
-            <p>เห็นความเคลื่อนไหวล่าสุดว่าใครเพิ่งมีลูกค้าใหม่อนุมัติ ใครเพิ่งบันทึกยอด หรือทีมไหนมีเบี้ยรวมขยับขึ้น</p>
           </div>
-          <div class="badge">Realtime Feed</div>
         </div>
         <div id="feedList"></div>
       </div>
@@ -255,9 +252,7 @@
         <div class="section-head">
           <div>
             <h2>ภาพรวมรายทีม</h2>
-            <p>เรียงจากยอดอนุมัติลูกค้าใหม่มากไปน้อย และแสดงกลุ่มที่ต้องติดตาม</p>
           </div>
-          <div class="badge">Team View</div>
         </div>
         <div id="teamList"></div>
       </div>
@@ -266,9 +261,7 @@
         <div class="section-head">
           <div>
             <h2>กราฟยอดอนุมัติลูกค้าใหม่รายทีม</h2>
-            <p>ทีมที่สูงสุดจะเด่นที่สุด และทีมที่ยังไม่มียอดอนุมัติเลยจะแสดงสัญลักษณ์เตือน</p>
           </div>
-          <div class="badge">Bar Chart</div>
         </div>
         <div class="top-grid" id="teamChart"></div>
       </div>
@@ -279,9 +272,7 @@
         <div class="section-head">
           <div>
             <h2>ผลงานพนักงานที่มาปฏิบัติงาน</h2>
-            <p>แสดงเฉพาะพนักงานที่ส่งยอดในวันนั้น โดยเรียงจากยอดอนุมัติลูกค้าใหม่มากไปน้อย</p>
           </div>
-          <div class="badge">People View</div>
         </div>
         <div class="grid-2">
           <div class="field">
@@ -299,39 +290,6 @@
           </div>
         </div>
         <div id="peopleList" style="margin-top:12px;"></div>
-      </div>
-    </section>
-
-    <section class="screen" id="screen-missing">
-      <div class="card">
-        <div class="section-head">
-          <div>
-            <h2>กลุ่มที่ต้องติดตามวันนี้</h2>
-            <p>ดึงเฉพาะพนักงานที่ส่งยอดในวันนั้นมาแสดง และแยก 2 กลุ่มชัดเจน</p>
-          </div>
-          <div class="badge">ติดตามทันที</div>
-        </div>
-        <div class="section-head" style="margin-top:6px; margin-bottom:10px;">
-          <div>
-            <h2 style="font-size:15px; margin-bottom:4px;">กลุ่มเร่งด่วน: ยังไม่ได้ลูกค้า</h2>
-            <p>กลุ่มนี้ต้องติดตามก่อน เพราะยังไม่มีลูกค้าเข้ามาเลยในวันนั้น</p>
-          </div>
-          <div class="badge" style="background:#fff0ee; color:#b42318;">สำคัญมาก</div>
-        </div>
-        <div class="warn-list" id="urgentList"></div>
-
-        <div class="section-head" style="margin-top:14px; margin-bottom:10px;">
-          <div>
-            <h2 style="font-size:15px; margin-bottom:4px;">กลุ่มรอง: ยังไม่มียอดอนุมัติลูกค้าใหม่</h2>
-            <p>กลุ่มนี้มีการทำงานแล้ว แต่ยังไม่เกิดยอดอนุมัติลูกค้าใหม่</p>
-          </div>
-          <div class="badge" style="background:#fff4de; color:#a16207;">ติดตามต่อ</div>
-        </div>
-        <div class="warn-list" id="secondaryList"></div>
-      </div>
-
-      <div class="empty-note">
-        ดึงเฉพาะคนที่มีการส่งยอดในวันนั้น ไม่ดึงทั้งสาขา
       </div>
     </section>
   </div>
@@ -386,7 +344,7 @@
     function showTab(tab) {
       document.querySelectorAll('.tab').forEach((el) => el.classList.remove('active'));
       document.querySelectorAll('.screen').forEach((el) => el.classList.remove('active'));
-      const names = ['overview', 'teams', 'people', 'missing'];
+      const names = ['overview', 'teams', 'people'];
       document.querySelectorAll('.tab')[names.indexOf(tab)].classList.add('active');
       document.getElementById(`screen-${tab}`).classList.add('active');
     }
@@ -484,7 +442,6 @@
         renderOverview();
         renderTeams();
         renderPeople();
-        renderFollowup();
         updateLivePill();
       } catch (err) {
         alert('อ่านข้อมูล Dashboard ไม่สำเร็จ: ' + err.message + '\n\nถ้าขึ้น Unknown action ให้ deploy Code.gs เวอร์ชัน Dashboard ก่อน');
@@ -572,17 +529,21 @@
         chart.innerHTML = '';
         return;
       }
+      const peopleByTeam = filterBySelections(dashboardState.people || []);
       teamList.innerHTML = teams.map((t, i) => {
         const working = Number(t.working_employees || 0);
         const approvedEmployees = Number(t.approved_employee_count || 0);
         const ratioPct = working > 0 ? Math.round((approvedEmployees / working) * 100) : 0;
+        const teamSubmittedCustomers = peopleByTeam
+          .filter(p => normalizeText(p.team_name) === normalizeText(t.team_name))
+          .reduce((sum, p) => sum + Number(p.customer_count || 0), 0);
         return `
         <div class="team-card" style="margin-top:${i ? 10 : 0}px;">
           <div class="top-badge lifted" style="position:absolute; top:6px; right:12px; background:linear-gradient(135deg, #15803d, #1f9d55);">อนุมัติใหม่ ${formatNumber(t.approved_new_count || 0)}</div>
           <h3>${escapeHtml(t.team_name)}</h3>
           <p>พนักงานส่งยอด ${formatNumber(working)} คน • เบี้ยรวม ${formatNumber(t.insurance_premium_total || 0)} บาท</p>
           <div class="status-row">
-            <span class="chip green" style="background:#edf8ef; color:#15803d;">ลูกค้ายื่นสมัคร= ${formatNumber(t.customer_count || 0)}</span>
+            <span class="chip green" style="background:#edf8ef; color:#15803d;">👥 ลูกค้ายื่นสมัคร ${formatNumber(teamSubmittedCustomers)}</span>
             <span class="chip red" style="background:#b42318; color:#fff;">staff ไม่มีลูกค้า ${formatNumber(t.no_customer_count || 0)}</span>
             <span class="chip blue" style="background:#c96d12; color:#fff;">staff ไม่มียอดอนุมัติ ${formatNumber(t.no_approved_new_count || 0)}</span>
             ${(t.approved_new_count || 0) === 0 ? '<span class="chip gold">⚠️ ยังไม่มียอดใหม่</span>' : ''}
@@ -630,14 +591,22 @@
           : p.approved_new_count === 0
             ? 'background:linear-gradient(135deg, #c96d12, #e69c3f);'
             : 'background:linear-gradient(135deg, #15803d, #1f9d55);';
+        const cardStyle = p.customer_count === 0
+          ? 'background:#fff7f5; border-color:#f1c7bc;'
+          : p.approved_new_count === 0
+            ? 'background:#fff4ea; border-color:#e8c79b; box-shadow:0 12px 24px rgba(166,106,23,.10);'
+            : '';
+        const insuranceBadgeStyle = Number(p.insurance_premium || 0) > 0
+          ? 'background:#eef8f0; color:#15803d;'
+          : 'background:#fff4de; color:#a16207;';
         return `
-        <div class="employee-card" style="margin-top:${i ? 10 : 0}px;">
+        <div class="employee-card" style="margin-top:${i ? 10 : 0}px; ${cardStyle}">
           <div class="top-badge lifted" style="position:absolute; top:6px; right:12px; ${badgeStyle}">อนุมัติใหม่ ${formatNumber(p.approved_new_count || 0)}</div>
           <h3>${escapeHtml(p.display_name)}</h3>
           <p>ทีม ${escapeHtml(p.team_name || '-')} • อัปเดตล่าสุด ${escapeHtml(p.latest_saved_text || '-')}</p>
           <div class="status-row">
             ${p.customer_count === 0 ? '<span class="chip red" style="background:#b42318; color:#fff;">ยังไม่ได้ลูกค้า</span>' : `<span class="chip green">👥 ลูกค้า ${formatNumber(p.customer_count)}</span>`}
-            <span class="chip green" style="background:#eef8f0; color:#15803d;">🛡️ ${formatNumber(p.insurance_premium || 0)} บ.</span>
+            <span class="chip green" style="${insuranceBadgeStyle}">🛡️ ${formatNumber(p.insurance_premium || 0)} บ.</span>
             <span class="chip blue">🅿️ ${formatNumber(p.pending_count || 0)}</span>
             <span class="chip red">❌ ${formatNumber(p.reject_count || 0)}</span>
             <span class="chip gold">📝 ${formatNumber(p.doc_count || 0)}</span>
@@ -659,7 +628,7 @@
         <div class="warn-person${urgent ? '' : '" style="border-color:#f1d7a8; background:#fffaf1; color:#1A3263;'}">
           <div>
             <strong>${escapeHtml(item.display_name)}</strong>
-            <span>ทีม ${escapeHtml(item.team_name || '-')} • อัปเดตล่าสุด ${escapeHtml(item.latest_saved_text || '-')} • ${urgent ? 'ยังไม่ได้ลูกค้า' : 'ยังไม่มียอดอนุมัติลูกค้าใหม่'} • 🛡️ ประกัน ${formatNumber(item.insurance_premium || 0)} บาท</span>
+            <span>ทีม ${escapeHtml(item.team_name || '-')} • อัปเดตล่าสุด ${escapeHtml(item.latest_saved_text || '-')} • ${urgent ? 'ยังไม่ได้ลูกค้า' : '<span style="color:#a16207;font-weight:700;">ยังไม่มียอดอนุมัติลูกค้าใหม่</span>'}<br>🛡️ ประกัน ${formatNumber(item.insurance_premium || 0)} บาท</span>
           </div>
           <div class="status-row" style="justify-content:flex-end; margin-top:0;">
             <span class="chip ${urgent ? 'red' : 'gold'}">${urgent ? 'ยังไม่ได้ลูกค้า' : 'ยังไม่อนุมัติ'}</span>
