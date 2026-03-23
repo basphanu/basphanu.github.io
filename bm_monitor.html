@@ -599,10 +599,13 @@
         const insuranceBadgeStyle = Number(p.insurance_premium || 0) > 0
           ? 'background:#eef8f0; color:#15803d;'
           : 'background:#fff4de; color:#a16207;';
+        const streakText = Number(p.no_approve_streak_days || 0) > 0
+          ? ` <span class="chip red" style="display:inline-flex; align-items:center; gap:4px; margin-left:6px; font-size:10px; padding:4px 8px; vertical-align:middle; white-space:nowrap;">🔴 ไม่มีอนุมัติ ${formatNumber(p.no_approve_streak_days)} วัน</span>`
+          : '';
         return `
         <div class="employee-card" style="margin-top:${i ? 10 : 0}px; ${cardStyle}">
           <div class="top-badge lifted" style="position:absolute; top:6px; right:12px; ${badgeStyle}">อนุมัติใหม่ ${formatNumber(p.approved_new_count || 0)}</div>
-          <h3>${escapeHtml(p.display_name)}</h3>
+          <h3>${escapeHtml(p.display_name)}${streakText}</h3>
           <p>ทีม ${escapeHtml(p.team_name || '-')} • อัปเดตล่าสุด ${escapeHtml(p.latest_saved_text || '-')}</p>
           <div class="status-row">
             ${p.customer_count === 0 ? '<span class="chip red" style="background:#b42318; color:#fff;">ยังไม่ได้ลูกค้า</span>' : `<span class="chip green">👥 ลูกค้า ${formatNumber(p.customer_count)}</span>`}
