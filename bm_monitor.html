@@ -45,12 +45,13 @@
     .badge { padding: 8px 10px; border-radius: 999px; background: #edf3f7; color: var(--navy); font-size: 11px; font-weight: 800; white-space: nowrap; }
     .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .filters-top { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; }
+    #workDate, #roundTime { width: 100%; min-width: 0; }
     .team-card, .employee-card { position: relative; padding-top: 18px; }
     .top-badge.lifted { top: 6px !important; right: 12px; }
     .field input[type="date"] { min-width: 0; font-size: 14px; padding: 12px 12px; }
-    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
     .field label { font-size: 12px; font-weight: 800; color: var(--navy); }
-    .field input, .field select { width: 100%; padding: 13px 14px; border-radius: 14px; border: 1px solid var(--line); background: #fffdf9; color: var(--text); font-size: 15px; outline: none; }
+    .field input, .field select { width: 100%; padding: 13px 14px; border-radius: 14px; border: 1px solid var(--line); background: #fffdf9; color: var(--text); font-size: 15px; outline: none; min-width: 0; }
     .btn { border: 0; border-radius: 16px; padding: 14px 16px; font-size: 15px; font-weight: 800; letter-spacing: 0.01em; cursor: pointer; background: linear-gradient(135deg, var(--navy), var(--sea)); color: #fff; box-shadow: 0 12px 24px rgba(26, 50, 99, .24); }
     .hero { background: linear-gradient(135deg, #0f6b3f, #15803d); color: #fff; overflow: hidden; position: relative; }
     .hero::after { content: ""; position: absolute; width: 190px; height: 190px; border-radius: 50%; right: -60px; top: -70px; background: rgba(255,255,255,.08); }
@@ -351,20 +352,42 @@
 
     function getSelectedBranch() { return document.getElementById('branchSelect').value || ''; }
     function getSelectedTeam() { return document.getElementById('teamSelect').value || ''; }
+    function normalizeText(value) {
+      return String(value || '').replace(/\s+/g, ' ').trim();
+    }
+    function getCanonicalBranchByTeam(teamName) {
+      const target = normalizeText(teamName);
+      if (!target) return '';
+      const found = (bootstrapState.teams || []).find(t => normalizeText(t.team_name) === target);
+      return found ? normalizeText(found.branch_name) : '';
+    }
+    function getEffectiveBranch(item) {
+      return getCanonicalBranchByTeam(item && item.team_name) || normalizeText(item && item.branch_name);
+    }
     function applyBranchTeamOptions() {
       const branch = getSelectedBranch();
       const teamSelect = document.getElementById('teamSelect');
       const current = teamSelect.value || '';
-      const teams = (bootstrapState.teams || []).filter(t => !branch || String(t.branch_name || '') === branch);
+      const seen = new Set();
+      const teams = (bootstrapState.teams || []).filter(t => {
+        const branchName = getCanonicalBranchByTeam(t.team_name) || normalizeText(t.branch_name);
+        const teamName = normalizeText(t.team_name);
+        if (!teamName || seen.has(teamName)) return false;
+        if (branch && branchName !== branch) return false;
+        seen.add(teamName);
+        return true;
+      });
       teamSelect.innerHTML = '<option value="">ทั้งหมด</option>' + teams.map(t => `<option value="${escapeHtml(t.team_name)}">${escapeHtml(t.team_name)}</option>`).join('');
-      if (current && teams.some(t => String(t.team_name) === current)) teamSelect.value = current;
+      if (current && teams.some(t => normalizeText(t.team_name) === normalizeText(current))) teamSelect.value = current;
     }
     function filterBySelections(items) {
-      const branch = getSelectedBranch();
-      const team = getSelectedTeam();
+      const branch = normalizeText(getSelectedBranch());
+      const team = normalizeText(getSelectedTeam());
       return (items || []).filter(item => {
-        const branchOk = !branch || String(item.branch_name || '') === branch;
-        const teamOk = !team || String(item.team_name || '') === team;
+        const itemBranch = getEffectiveBranch(item);
+        const itemTeam = normalizeText(item.team_name);
+        const branchOk = !branch || itemBranch === branch;
+        const teamOk = !team || itemTeam === team;
         return branchOk && teamOk;
       });
     }
@@ -573,7 +596,7 @@
     function renderPeople() {
       const search = (document.getElementById('peopleSearch').value || '').trim().toLowerCase();
       const status = document.getElementById('peopleStatus').value;
-      let items = [...filterBySelections(dashboardState.people || [])];
+      let items = [...filterBySelections(dashboardState.people || [])].sort((a, b) => Number(b.approved_new_count || 0) - Number(a.approved_new_count || 0) || String(a.display_name || '').localeCompare(String(b.display_name || ''), 'th'));
       if (search) {
         items = items.filter(p => (`${p.display_name} ${p.employee_id} ${p.team_name}`).toLowerCase().includes(search));
       }
