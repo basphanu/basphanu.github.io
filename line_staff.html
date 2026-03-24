@@ -96,8 +96,10 @@
     .toggle-box input { width:18px; height:18px; }
     .insurance-box { border-radius:18px; padding:14px; background:linear-gradient(180deg, #fffaf3 0%, #f5ede2 100%); border:1px solid var(--line); }
     .summary-review { display:grid; gap:10px; margin-top:12px; }
+    .follow-summary-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); align-items:start; }
     .summary-row {
       padding:12px 14px; border-radius:14px; border:1px solid var(--line); background:#fffdf9; font-size:13px; color:var(--text);
+      min-width:0;
     }
     .summary-row strong { display:block; margin-bottom:4px; font-size:13px; color:var(--navy); }
     .preview {
@@ -149,7 +151,7 @@
       .notice-modal { max-height:calc(100vh - 24px); padding:16px; border-radius:20px; }
     }
     @media (max-width: 360px) {
-      .grid-2, .inline-actions, .mini-metrics { grid-template-columns:1fr; }
+      .grid-2, .inline-actions, .mini-metrics, .follow-summary-grid { grid-template-columns:1fr; }
       .date-pill { display:none; }
     }
   </style>
@@ -392,7 +394,7 @@
           </div>
         </div>
         <div class="actions" style="margin-top:12px">
-          <button class="btn primary" onclick="lookupFollowCases()">งานที่ค้างในระบบ</button>
+          <button class="btn primary" onclick="lookupFollowCases()">ค้นหาเคสค้างวันนี้</button>
           <button class="btn ghost" onclick="goHomeFollow()">กลับหน้าจอแรก</button>
         </div>
         <div id="followLookupError" class="error-text hidden"></div>
@@ -454,7 +456,7 @@
     <div class="notice-modal" style="max-width:360px; text-align:left;">
       <h3 id="followModalTitle">อัปเดตสถานะเคส</h3>
       <p id="followModalSubtitle">ตรวจสอบข้อมูลก่อนยืนยันบันทึกผล</p>
-      <div class="summary-review" style="margin-top:0;">
+      <div class="summary-review follow-summary-grid" style="margin-top:0;">
         <div class="summary-row"><strong>เจ้าของเคส</strong><span id="followModalOwner"></span></div>
         <div class="summary-row"><strong>ชื่อลูกค้า</strong><span id="followModalCustomer"></span></div>
         <div class="summary-row"><strong>วันที่สมัคร</strong><span id="followModalWorkDate"></span></div>
