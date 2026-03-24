@@ -46,7 +46,7 @@
     .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .filters-top { grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); align-items: end; }
     .filters-bottom { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    #workDate { width: 100%; min-width: 0; }
+    #startDate, #endDate { width: 100%; min-width: 0; }
     .team-card, .employee-card { position: relative; padding-top: 18px; }
     .top-badge.lifted { top: 6px !important; right: 12px; }
     .field input[type="date"] { min-width: 0; font-size: 13px; padding: 12px 10px; }
@@ -152,8 +152,12 @@
         </div>
         <div class="grid-2 filters-top">
           <div class="field">
-            <label>วันที่</label>
-            <input type="date" id="workDate" />
+            <label>วันที่เริ่มต้น</label>
+            <input type="date" id="startDate" />
+          </div>
+          <div class="field">
+            <label>วันที่สิ้นสุด</label>
+            <input type="date" id="endDate" />
           </div>
         </div>
         <div class="grid-2 filters-bottom" style="margin-top:10px;">
@@ -173,7 +177,7 @@
       </div>
 
       <div class="card hero">
-        <h2>ภาพรวมยอดขายวันนี้</h2>
+        <h2>ภาพรวมยอดขายตามช่วงวันที่</h2>
         <p></p>
       </div>
 
@@ -181,17 +185,17 @@
         <div class="metric" style="background:linear-gradient(135deg, #0f6b3f, #15803d); color:#fff; border-color:rgba(255,255,255,.08); box-shadow:0 16px 30px rgba(21,128,61,.18);">
           <span style="color:rgba(255,255,255,.78);">ลูกค้าใหม่ที่อนุมัติทั้งหมดของสาขา</span>
           <strong style="font-size:28px; color:#fff;" id="overviewApprovedMain">0 คน</strong>
-          <small style="color:rgba(255,255,255,.76);">KPI หลักของสาขาในวันนี้ (รวม Follow Approve)</small>
+          <small style="color:rgba(255,255,255,.76);">KPI หลักของสาขาตามช่วงวันที่ที่เลือก</small>
         </div>
         <div class="metric">
-          <span>จำนวนลูกค้าทั้งหมดที่สมัครในวันนี้</span>
+          <span>จำนวนลูกค้าทั้งหมดที่สมัครในช่วงวันที่ที่เลือก</span>
           <strong style="font-size:26px;" id="overviewSubmittedCustomers">0 คน</strong>
-          <small>รวมลูกค้ายื่นสมัครทั้งหมดของสาขาในวันนั้น</small>
+          <small>รวมลูกค้ายื่นสมัครทั้งหมดของสาขาในช่วงวันที่ที่เลือก</small>
         </div>
         <div class="metric">
-          <span>Approve จากงานติดตามวันนี้</span>
+          <span>Approve จากงานติดตามในช่วงวันที่</span>
           <strong id="overviewFollowApprove">0 เคส</strong>
-          <small>เคสเก่าที่วันนี้ปิดเป็น Approve</small>
+          <small>เคสเก่าที่อัปเดตเป็น Approve ในช่วงวันที่ที่เลือก</small>
         </div>
         <div class="metric">
           <span>งานคงค้างทั้งหมดของสาขา</span>
@@ -204,7 +208,7 @@
           <small>อัปเดตแบบ realtime</small>
         </div>
         <div class="metric">
-          <span>สถานะลูกค้าวันนี้</span>
+          <span>สถานะลูกค้าในช่วงวันที่ที่เลือก</span>
           <strong id="overviewStatusLine">❌ 0 • 🅿️ 0 • 📝 0</strong>
           <small>Reject / Pending / รอเอกสาร</small>
         </div>
@@ -405,6 +409,13 @@
       return formatNumber(num);
     }
 
+    function toThaiDateDisplay(iso) {
+      if (!iso) return '-';
+      const parts = String(iso).split('-');
+      if (parts.length !== 3) return iso;
+      return `${Number(parts[2])}/${Number(parts[1])}/${Number(parts[0]) + 543}`;
+    }
+
     function toInputDate(d = new Date()) {
       const tz = new Date(d.getTime() - d.getTimezoneOffset()*60000);
       return tz.toISOString().slice(0,10);
@@ -417,10 +428,31 @@
       document.getElementById('livePill').textContent = `🟢 LIVE ${hh}:${mm}`;
     }
 
+    function getStartDateValue() {
+      return document.getElementById('startDate').value || '';
+    }
+
+    function getEndDateValue() {
+      return document.getElementById('endDate').value || '';
+    }
+
+    function validateDateRange() {
+      const startDate = getStartDateValue();
+      const endDate = getEndDateValue();
+      if (!startDate && !endDate) return true;
+      if (!startDate || !endDate) return true;
+      if (startDate > endDate) {
+        alert('วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด');
+        return false;
+      }
+      return true;
+    }
+
     async function bootstrap() {
       setLoading(true, 'กำลังเชื่อมต่อระบบ...');
       try {
-        document.getElementById('workDate').value = toInputDate();
+        document.getElementById('startDate').value = toInputDate();
+        document.getElementById('endDate').value = toInputDate();
         const data = await jsonp({ action: 'bootstrap' });
         bootstrapState.teams = data.teams || [];
         bootstrapState.rounds = data.rounds || [];
@@ -439,11 +471,20 @@
     }
 
     async function loadDashboard() {
+      if (!validateDateRange()) return;
       setLoading(true, 'กำลังอ่านค่าจากระบบ...');
       try {
+        const rawStartDate = getStartDateValue();
+        const rawEndDate = getEndDateValue();
+        const startDate = rawStartDate || rawEndDate || toInputDate();
+        const endDate = rawEndDate || rawStartDate || startDate;
+        document.getElementById('startDate').value = startDate;
+        document.getElementById('endDate').value = endDate;
         const params = {
           action: 'dashboardData',
-          work_date: document.getElementById('workDate').value,
+          work_date: endDate,
+          start_date: startDate,
+          end_date: endDate,
           branch_name: document.getElementById('branchSelect').value,
           team_name: document.getElementById('teamSelect').value
         };
@@ -473,6 +514,14 @@
       const pendingTotal = peopleForStatus.reduce((sum, p) => sum + Number(p.pending_count || 0), 0);
       const docTotal = peopleForStatus.reduce((sum, p) => sum + Number(p.doc_count || 0), 0);
       document.getElementById('overviewStatusLine').textContent = `❌ ${formatNumber(rejectTotal)} • 🅿️ ${formatNumber(pendingTotal)} • 📝 ${formatNumber(docTotal)}`;
+      const heroDesc = document.querySelector('.hero p');
+      if (heroDesc) {
+        const startDate = (dashboardState.filters || {}).start_date || (dashboardState.filters || {}).work_date || '';
+        const endDate = (dashboardState.filters || {}).end_date || (dashboardState.filters || {}).work_date || '';
+        heroDesc.textContent = startDate && endDate
+          ? `แสดงผลตามช่วงวันที่ ${escapeHtml(toThaiDateDisplay(startDate))} ถึง ${escapeHtml(toThaiDateDisplay(endDate))}`
+          : '';
+      }
 
       document.getElementById('bestPeople').innerHTML = renderTopRows(dashboardState.top_people || [], 'person');
       const insuranceTop = [...(dashboardState.people || [])]
