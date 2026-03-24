@@ -96,8 +96,10 @@
     .toggle-box input { width:18px; height:18px; }
     .insurance-box { border-radius:18px; padding:14px; background:linear-gradient(180deg, #fffaf3 0%, #f5ede2 100%); border:1px solid var(--line); }
     .summary-review { display:grid; gap:10px; margin-top:12px; }
+    .follow-summary-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); align-items:start; }
     .summary-row {
       padding:12px 14px; border-radius:14px; border:1px solid var(--line); background:#fffdf9; font-size:13px; color:var(--text);
+      min-width:0;
     }
     .summary-row strong { display:block; margin-bottom:4px; font-size:13px; color:var(--navy); }
     .preview {
@@ -149,7 +151,7 @@
       .notice-modal { max-height:calc(100vh - 24px); padding:16px; border-radius:20px; }
     }
     @media (max-width: 360px) {
-      .grid-2, .inline-actions, .mini-metrics { grid-template-columns:1fr; }
+      .grid-2, .inline-actions, .mini-metrics, .follow-summary-grid { grid-template-columns:1fr; }
       .date-pill { display:none; }
     }
   </style>
@@ -376,8 +378,8 @@
       <div class="card locked-card">
         <div class="section-head">
           <div>
-            <h2>งานที่ค้างในระบบ / อัปเดตผล</h2>
-            <p>กรอกรหัสพนักงานเพื่อดูเคส Pending และรอเอกสารที่ยังค้างในระบบ รวมถึงเคสที่ปิดเป็น Approve / Cancel แล้วในวันนี้</p>
+            <h2>ติดตามเอกสาร / อัปเดตผล</h2>
+            <p>กรอกรหัสพนักงานเพื่อดูเคส Pending และรอเอกสารที่ยังค้างในระบบ รวมถึงเคสที่ปิดเป็น Approve / Reject / Cancel แล้วในวันนี้</p>
           </div>
           <div class="badge blue">เมนูที่ 3</div>
         </div>
@@ -392,7 +394,7 @@
           </div>
         </div>
         <div class="actions" style="margin-top:12px">
-          <button class="btn primary" onclick="lookupFollowCases()">งานที่ค้างในระบบ</button>
+          <button class="btn primary" onclick="lookupFollowCases()">ค้นหาเคสค้างวันนี้</button>
           <button class="btn ghost" onclick="goHomeFollow()">กลับหน้าจอแรก</button>
         </div>
         <div id="followLookupError" class="error-text hidden"></div>
@@ -400,13 +402,13 @@
       </div>
 
       <div id="followBeforeLookupHint" class="collapsed-hint">
-        ระบบจะแสดงเฉพาะเคสของพนักงานคนนั้นที่ยังค้างสถานะ Pending / รอเอกสาร รวมถึงเคสที่ปิดเป็น Approve หรือ Cancel แล้วในวันนี้ เพื่อให้ติดตามต่อได้จนจบวัน
+        ระบบจะแสดงเฉพาะเคสของพนักงานคนนั้นที่ยังค้างสถานะ Pending / รอเอกสาร รวมถึงเคสที่ปิดเป็น Approve / Reject / Cancel แล้วในวันนี้ เพื่อให้ติดตามต่อได้จนจบวัน
       </div>
 
       <div id="followListCard" class="card hidden">
         <div class="section-head">
           <div>
-            <h2>รายการงานที่ค้างในระบบ</h2>
+            <h2>รายการติดตามเอกสาร</h2>
             <p>แตะที่เคสเพื่อดูรายละเอียดเดิมและเปลี่ยนสถานะล่าสุดของเคสนั้น</p>
           </div>
           <div class="badge orange">Follow</div>
@@ -454,7 +456,7 @@
     <div class="notice-modal" style="max-width:360px; text-align:left;">
       <h3 id="followModalTitle">อัปเดตสถานะเคส</h3>
       <p id="followModalSubtitle">ตรวจสอบข้อมูลก่อนยืนยันบันทึกผล</p>
-      <div class="summary-review" style="margin-top:0;">
+      <div class="summary-review follow-summary-grid" style="margin-top:0;">
         <div class="summary-row"><strong>เจ้าของเคส</strong><span id="followModalOwner"></span></div>
         <div class="summary-row"><strong>ชื่อลูกค้า</strong><span id="followModalCustomer"></span></div>
         <div class="summary-row"><strong>วันที่สมัคร</strong><span id="followModalWorkDate"></span></div>
@@ -470,6 +472,7 @@
           <option value="Pending">Pending</option>
           <option value="รอเอกสาร">รอเอกสาร</option>
           <option value="Approve">Approve</option>
+          <option value="Reject">Reject</option>
           <option value="Cancel">Cancel</option>
         </select>
       </div>
@@ -1094,7 +1097,7 @@
         const cards = [];
         if (Number(item.cr_count || 0)) cards.push('CR ' + Number(item.cr_count || 0));
         if (Number(item.yc_count || 0)) cards.push('YC ' + Number(item.yc_count || 0));
-        const badgeClass = item.latest_status === 'Approve' ? 'green' : (item.latest_status === 'Cancel' ? 'red' : 'orange');
+        const badgeClass = item.latest_status === 'Approve' ? 'green' : ((item.latest_status === 'Cancel' || item.latest_status === 'Reject') ? 'red' : 'orange');
         const cancelLine = item.latest_status === 'Cancel' && item.cancel_reason ? `<div class="helper">เหตุผลยกเลิก: ${escapeHtml(item.cancel_reason)}</div>` : '';
         return `
           <button class="customer-card" type="button" style="text-align:left; cursor:pointer; margin-top:${index ? 10 : 0}px;" onclick="openFollowCase(decodeURIComponent('${encodeURIComponent(item.case_key)}'))">
