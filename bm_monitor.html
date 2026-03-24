@@ -186,7 +186,17 @@
         <div class="metric">
           <span>จำนวนลูกค้าทั้งหมดที่สมัครในวันนี้</span>
           <strong style="font-size:26px;" id="overviewSubmittedCustomers">0 คน</strong>
-          <small>รวมลูกค้าที่ยื่นสมัครทั้งหมดของสาขาในวันนั้น</small>
+          <small>รวมลูกค้ายื่นสมัครทั้งหมดของสาขาในวันนั้น</small>
+        </div>
+        <div class="metric">
+          <span>Approve จากงานติดตามวันนี้</span>
+          <strong id="overviewFollowApprove">0 เคส</strong>
+          <small>เคสเก่าที่วันนี้ปิดเป็น Approve</small>
+        </div>
+        <div class="metric">
+          <span>งานคงค้างทั้งหมดของสาขา</span>
+          <strong id="overviewOpenCases">0 เคส</strong>
+          <small>Pending + รอเอกสาร ที่ยังไม่ปิดงาน</small>
         </div>
         <div class="metric">
           <span>เบี้ยรวมประกัน</span>
@@ -456,6 +466,8 @@
       const peopleForStatus = filterBySelections(dashboardState.people || []);
       const submittedCustomers = peopleForStatus.reduce((sum, p) => sum + Number(p.customer_count || 0), 0);
       document.getElementById('overviewSubmittedCustomers').textContent = `${formatNumber(submittedCustomers)} คน`;
+      document.getElementById('overviewFollowApprove').textContent = `${formatNumber(o.follow_approve_today_count || 0)} เคส`;
+      document.getElementById('overviewOpenCases').textContent = `${formatNumber(o.open_follow_cases_count || 0)} เคส`;
       document.getElementById('overviewPremium').textContent = formatNumber(o.insurance_premium_total || 0);
       const rejectTotal = peopleForStatus.reduce((sum, p) => sum + Number(p.reject_count || 0), 0);
       const pendingTotal = peopleForStatus.reduce((sum, p) => sum + Number(p.pending_count || 0), 0);
@@ -544,6 +556,8 @@
           <p>พนักงานส่งยอด ${formatNumber(working)} คน • เบี้ยรวม ${formatNumber(t.insurance_premium_total || 0)} บาท</p>
           <div class="status-row">
             <span class="chip green" style="background:#edf8ef; color:#15803d;">👥 ลูกค้ายื่นสมัคร ${formatNumber(teamSubmittedCustomers)}</span>
+            <span class="chip blue">✅ Follow วันนี้ ${formatNumber(t.follow_approve_today_count || 0)}</span>
+            <span class="chip gold">📂 คงค้าง ${formatNumber(t.open_follow_cases_count || 0)}</span>
             <span class="chip red" style="background:#b42318; color:#fff;">staff ไม่มีลูกค้า ${formatNumber(t.no_customer_count || 0)}</span>
             <span class="chip blue" style="background:#c96d12; color:#fff;">staff ไม่มียอดอนุมัติ ${formatNumber(t.no_approved_new_count || 0)}</span>
             ${(t.approved_new_count || 0) === 0 ? '<span class="chip gold">⚠️ ยังไม่มียอดใหม่</span>' : ''}
@@ -610,6 +624,8 @@
           <div class="status-row">
             ${p.customer_count === 0 ? '<span class="chip red" style="background:#b42318; color:#fff;">ยังไม่ได้ลูกค้า</span>' : `<span class="chip green">👥 ลูกค้า ${formatNumber(p.customer_count)}</span>`}
             <span class="chip green" style="${insuranceBadgeStyle}">🛡️ ${formatNumber(p.insurance_premium || 0)} บ.</span>
+            <span class="chip blue">✅ Follow วันนี้ ${formatNumber(p.follow_approve_today_count || 0)}</span>
+            <span class="chip gold">📂 คงค้าง ${formatNumber(p.open_follow_cases_count || 0)}</span>
             <span class="chip blue">🅿️ ${formatNumber(p.pending_count || 0)}</span>
             <span class="chip red">❌ ${formatNumber(p.reject_count || 0)}</span>
             <span class="chip gold">📝 ${formatNumber(p.doc_count || 0)}</span>
