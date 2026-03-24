@@ -45,7 +45,7 @@
       border:1px solid rgba(26,50,99,.10); box-shadow:var(--shadow); font-size:12px; color:var(--navy); white-space:nowrap;
     }
     .tabs {
-      display:grid; grid-template-columns:1fr 1fr; background:rgba(239,210,176,.55); border:1px solid rgba(26,50,99,.08);
+      display:grid; grid-template-columns:1fr 1fr 1fr; background:rgba(239,210,176,.55); border:1px solid rgba(26,50,99,.08);
       border-radius:18px; padding:6px; gap:6px; box-shadow:var(--shadow); margin-bottom:18px; position:sticky; top:10px; backdrop-filter:blur(12px); z-index:5;
     }
     .tab { border:0; border-radius:14px; padding:12px; font-size:14px; font-weight:700; color:var(--muted); background:transparent; }
@@ -134,14 +134,20 @@
     .loading-modal p { margin:0; font-size:13px; color:var(--muted); line-height:1.5; }
     .loading-spinner { width:54px; height:54px; border-radius:50%; margin:0 auto 14px; border:5px solid rgba(84,119,146,.18); border-top-color:var(--navy); border-right-color:var(--gold); animation:spin 0.9s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
-    .notice-overlay { position:fixed; inset:0; background:rgba(26,50,99,.34); display:none; align-items:center; justify-content:center; padding:20px; z-index:60; }
+    .notice-overlay { position:fixed; inset:0; background:rgba(26,50,99,.34); display:none; align-items:flex-start; justify-content:center; padding:20px; overflow-y:auto; -webkit-overflow-scrolling:touch; z-index:60; }
     .notice-overlay.show { display:flex; }
-    .notice-modal { width:100%; max-width:320px; border-radius:24px; background:rgba(255,255,255,.98); border:1px solid rgba(255,255,255,.85); box-shadow:0 24px 60px rgba(26,50,99,.22); padding:20px; text-align:center; }
+    .notice-modal { width:100%; max-width:320px; max-height:calc(100vh - 40px); overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:24px; background:rgba(255,255,255,.98); border:1px solid rgba(255,255,255,.85); box-shadow:0 24px 60px rgba(26,50,99,.22); padding:20px; text-align:center; margin:auto 0; }
+    .follow-modal-actions { position:sticky; bottom:0; background:linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.98) 18%, rgba(255,255,255,.98) 100%); padding-top:14px; margin-top:14px; }
     .notice-modal h3 { margin:0 0 8px; font-size:18px; color:var(--navy); }
     .notice-modal p { margin:0 0 14px; font-size:13px; color:var(--muted); line-height:1.5; }
     .hidden { display:none !important; }
     .error-text { color:var(--danger); font-size:12px; margin-top:8px; }
     .success-text { color:var(--navy); font-size:12px; margin-top:8px; }
+
+    @media (max-width: 480px) {
+      .notice-overlay { padding:12px; }
+      .notice-modal { max-height:calc(100vh - 24px); padding:16px; border-radius:20px; }
+    }
     @media (max-width: 360px) {
       .grid-2, .inline-actions, .mini-metrics { grid-template-columns:1fr; }
       .date-pill { display:none; }
@@ -161,6 +167,7 @@
     <div class="tabs">
       <button class="tab active" data-tab="individual" onclick="showTab('individual')">ส่งยอดรายบุคคล</button>
       <button class="tab" data-tab="team" onclick="showTab('team')">สรุปยอดรายทีม</button>
+      <button class="tab" data-tab="follow" onclick="showTab('follow')">ตามเอกสาร</button>
     </div>
 
     <section class="screen active" id="screen-individual">
@@ -364,6 +371,53 @@
         เลือกทีมแล้วกดค้นหาผลงานวันนี้ ระบบจะดึงยอดล่าสุดของแต่ละคนในทีมขึ้นมาให้ตรวจสอบก่อนบันทึกจริง
       </div>
     </section>
+
+    <section class="screen" id="screen-follow">
+      <div class="card locked-card">
+        <div class="section-head">
+          <div>
+            <h2>งานที่ค้างในระบบ / อัปเดตผล</h2>
+            <p>กรอกรหัสพนักงานเพื่อดูเคส Pending และรอเอกสารที่ยังค้างในระบบ รวมถึงเคสที่ปิดเป็น Approve / Cancel แล้วในวันนี้</p>
+          </div>
+          <div class="badge blue">เมนูที่ 3</div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>วันที่</label>
+            <input type="text" id="followDate" readonly />
+          </div>
+          <div class="field">
+            <label>รหัสพนักงาน</label>
+            <input type="text" id="followEmployeeIdInput" placeholder="กรอกรหัสพนักงาน" />
+          </div>
+        </div>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn primary" onclick="lookupFollowCases()">งานที่ค้างในระบบ</button>
+          <button class="btn ghost" onclick="goHomeFollow()">กลับหน้าจอแรก</button>
+        </div>
+        <div id="followLookupError" class="error-text hidden"></div>
+        <div id="followEmployeeSummary" class="employee-summary"></div>
+      </div>
+
+      <div id="followBeforeLookupHint" class="collapsed-hint">
+        ระบบจะแสดงเฉพาะเคสของพนักงานคนนั้นที่ยังค้างสถานะ Pending / รอเอกสาร รวมถึงเคสที่ปิดเป็น Approve หรือ Cancel แล้วในวันนี้ เพื่อให้ติดตามต่อได้จนจบวัน
+      </div>
+
+      <div id="followListCard" class="card hidden">
+        <div class="section-head">
+          <div>
+            <h2>รายการงานที่ค้างในระบบ</h2>
+            <p>แตะที่เคสเพื่อดูรายละเอียดเดิมและเปลี่ยนสถานะล่าสุดของเคสนั้น</p>
+          </div>
+          <div class="badge orange">Follow</div>
+        </div>
+        <div class="summary-row" style="background:#fffaf3; border-style:dashed; margin-bottom:12px;">
+          <strong>ข้อมูลล่าสุด</strong>
+          <span id="followLastSavedText">ยังไม่เคยอัปเดตวันนี้</span>
+        </div>
+        <div id="followCaseList"></div>
+      </div>
+    </section>
   </div>
 
   <div class="save-overlay" id="saveOverlay">
@@ -395,6 +449,48 @@
     </div>
   </div>
 
+
+  <div class="notice-overlay" id="followOverlay">
+    <div class="notice-modal" style="max-width:360px; text-align:left;">
+      <h3 id="followModalTitle">อัปเดตสถานะเคส</h3>
+      <p id="followModalSubtitle">ตรวจสอบข้อมูลก่อนยืนยันบันทึกผล</p>
+      <div class="summary-review" style="margin-top:0;">
+        <div class="summary-row"><strong>เจ้าของเคส</strong><span id="followModalOwner"></span></div>
+        <div class="summary-row"><strong>ชื่อลูกค้า</strong><span id="followModalCustomer"></span></div>
+        <div class="summary-row"><strong>วันที่สมัคร</strong><span id="followModalWorkDate"></span></div>
+        <div class="summary-row"><strong>อัปเดตสถานะล่าสุด</strong><span id="followModalStatusDate"></span></div>
+        <div class="summary-row"><strong>ประเภทลูกค้า</strong><span id="followModalType"></span></div>
+        <div class="summary-row"><strong>บัตรที่สมัคร</strong><span id="followModalCards"></span></div>
+        <div class="summary-row"><strong>สถานะล่าสุด</strong><span id="followModalStatus"></span></div>
+        <div class="summary-row"><strong>หมายเหตุเดิม</strong><span id="followModalNote"></span></div>
+      </div>
+      <div class="field" style="margin-top:12px;">
+        <label>เปลี่ยนสถานะ</label>
+        <select id="followStatusSelect" onchange="handleFollowStatusChange()">
+          <option value="Pending">Pending</option>
+          <option value="รอเอกสาร">รอเอกสาร</option>
+          <option value="Approve">Approve</option>
+          <option value="Cancel">Cancel</option>
+        </select>
+      </div>
+      <div class="field hidden" id="followCancelReasonWrap" style="margin-top:12px;">
+        <label>เหตุผลการยกเลิก</label>
+        <select id="followCancelReasonSelect">
+          <option value="">เลือกเหตุผลการยกเลิก</option>
+          <option value="ลูกค้ายกเลิกการสมัคร">ลูกค้ายกเลิกการสมัคร</option>
+          <option value="ลูกค้าไม่สะดวกส่งเอกสารเพิ่มเติม">ลูกค้าไม่สะดวกส่งเอกสารเพิ่มเติม</option>
+          <option value="ติดต่อลูกค้าไม่ได้">ติดต่อลูกค้าไม่ได้</option>
+          <option value="เคสหมดอายุ">เคสหมดอายุ</option>
+        </select>
+      </div>
+      <div class="inline-actions follow-modal-actions">
+        <button class="btn primary" onclick="saveFollowStatus()">ยืนยันบันทึกผล</button>
+        <button class="btn secondary" onclick="closeFollowModal()">ยกเลิก</button>
+      </div>
+    </div>
+  </div>
+
+
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxrNgcKtqyUpeXiGLzq_FPrHGzlgBlKUZ05DwS6OCLxmMcYjVozUJCNfaMIFWWRzp2_QQ/exec';
     const state = {
@@ -413,6 +509,12 @@
         message: '',
         latestSavedText: 'ยังไม่เคยบันทึกวันนี้'
       },
+      follow: {
+        employee: null,
+        cases: [],
+        selectedCase: null,
+        latestSavedText: 'ยังไม่เคยอัปเดตวันนี้'
+      },
       pendingOverlayTarget: null
     };
 
@@ -423,6 +525,7 @@
       document.getElementById('today-pill').textContent = today;
       document.getElementById('indDate').value = today;
       document.getElementById('teamDate').value = today;
+      document.getElementById('followDate').value = today;
       addCustomerCard();
       loadBootstrap();
     }
@@ -942,6 +1045,145 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+
+    async function lookupFollowCases() {
+      const employeeId = document.getElementById('followEmployeeIdInput').value.trim();
+      const errorBox = document.getElementById('followLookupError');
+      errorBox.classList.add('hidden');
+      if (!employeeId) {
+        errorBox.textContent = 'กรุณากรอกรหัสพนักงาน';
+        errorBox.classList.remove('hidden');
+        return;
+      }
+      openLoadingModal('กำลังโหลดเคสติดตาม', 'ระบบกำลังค้นหาเคสค้างทั้งหมดของพนักงาน รวมถึงเคสจากวันก่อน ๆ ที่ยังไม่ปิดงาน');
+      try {
+        const res = await jsonpRequest({ action: 'followLookup', employee_id: employeeId, work_date: getTodayISO() });
+        if (!res.ok) throw new Error(res.error || 'ค้นหาเคสติดตามไม่สำเร็จ');
+        state.follow.employee = res.data.employee;
+        state.follow.cases = res.data.cases || [];
+        state.follow.latestSavedText = res.data.latest_saved_text || 'ยังไม่เคยอัปเดตวันนี้';
+        renderFollowSummary();
+        renderFollowCases();
+      } catch (err) {
+        errorBox.textContent = err.message;
+        errorBox.classList.remove('hidden');
+      } finally {
+        closeLoadingModal();
+      }
+    }
+
+    function renderFollowSummary() {
+      const box = document.getElementById('followEmployeeSummary');
+      const employee = state.follow.employee || {};
+      const count = state.follow.cases.length;
+      box.innerHTML = `<div><strong>${escapeHtml(employee.nickname || employee.employee_name || '-')} [${escapeHtml(employee.employee_id || '-')}]</strong><span>พบเคสในงานติดตาม ${count} เคส ที่ยังต้องติดตาม</span></div><div class="badge ${count ? 'orange' : 'green'}">${count ? 'มีเคสติดตาม' : 'ไม่มีเคสค้าง'}</div>`;
+      box.classList.add('show');
+      document.getElementById('followBeforeLookupHint').classList.add('hidden');
+      document.getElementById('followListCard').classList.remove('hidden');
+      document.getElementById('followLastSavedText').textContent = state.follow.latestSavedText;
+    }
+
+    function renderFollowCases() {
+      const wrap = document.getElementById('followCaseList');
+      const cases = state.follow.cases || [];
+      if (!cases.length) {
+        wrap.innerHTML = '<div class="empty-state">ไม่มีเคส Pending / รอเอกสาร ที่ต้องติดตามแล้ว</div>';
+        return;
+      }
+      wrap.innerHTML = cases.map((item, index) => {
+        const cards = [];
+        if (Number(item.cr_count || 0)) cards.push('CR ' + Number(item.cr_count || 0));
+        if (Number(item.yc_count || 0)) cards.push('YC ' + Number(item.yc_count || 0));
+        const badgeClass = item.latest_status === 'Approve' ? 'green' : (item.latest_status === 'Cancel' ? 'red' : 'orange');
+        const cancelLine = item.latest_status === 'Cancel' && item.cancel_reason ? `<div class="helper">เหตุผลยกเลิก: ${escapeHtml(item.cancel_reason)}</div>` : '';
+        return `
+          <button class="customer-card" type="button" style="text-align:left; cursor:pointer; margin-top:${index ? 10 : 0}px;" onclick="openFollowCase(decodeURIComponent('${encodeURIComponent(item.case_key)}'))">
+            <div class="customer-top">
+              <div class="customer-index">${escapeHtml(item.customer_name || '-')}</div>
+              <div class="badge ${badgeClass}">${escapeHtml(mapStatusText(item.latest_status))}</div>
+            </div>
+            <div class="helper">เจ้าของเคส: ${escapeHtml(item.nickname || item.employee_name || '-')} • ${escapeHtml(item.customer_type || '-')} • ${escapeHtml(cards.join(' / ') || '-')}</div>
+            <div class="helper">ทีมเจ้าของเคส: ${escapeHtml(item.team_name || '-')}</div>
+            <div class="helper">วันที่สมัคร: ${escapeHtml(item.work_date_display || '-')} • อัปเดตล่าสุด: ${escapeHtml(item.status_update_date_display || '-')}</div>
+            <div class="helper">หมายเหตุ: ${escapeHtml(item.note || '-')}</div>
+            ${cancelLine}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function openFollowCase(caseKey) {
+      const found = (state.follow.cases || []).find(item => item.case_key === caseKey);
+      if (!found) return;
+      state.follow.selectedCase = found;
+      document.getElementById('followModalOwner').textContent = (found.nickname || found.employee_name || '-') + ' [' + (found.employee_id || '-') + '] • ทีม ' + (found.team_name || '-');
+      document.getElementById('followModalCustomer').textContent = found.customer_name || '-';
+      document.getElementById('followModalWorkDate').textContent = found.work_date_display || '-';
+      document.getElementById('followModalStatusDate').textContent = found.status_update_date_display || '-';
+      document.getElementById('followModalType').textContent = found.customer_type || '-';
+      document.getElementById('followModalCards').textContent = [Number(found.cr_count || 0) ? 'CR ' + Number(found.cr_count || 0) : '', Number(found.yc_count || 0) ? 'YC ' + Number(found.yc_count || 0) : ''].filter(Boolean).join(' / ') || '-';
+      document.getElementById('followModalStatus').textContent = mapStatusText(found.latest_status);
+      document.getElementById('followModalNote').textContent = found.note || '-';
+      document.getElementById('followStatusSelect').value = found.latest_status || 'Pending';
+      document.getElementById('followCancelReasonSelect').value = found.cancel_reason || '';
+      handleFollowStatusChange();
+      document.getElementById('followOverlay').classList.add('show');
+    }
+
+    function closeFollowModal() {
+      document.getElementById('followOverlay').classList.remove('show');
+      state.follow.selectedCase = null;
+    }
+
+    function handleFollowStatusChange() {
+      const isCancel = document.getElementById('followStatusSelect').value === 'Cancel';
+      document.getElementById('followCancelReasonWrap').classList.toggle('hidden', !isCancel);
+      if (!isCancel) document.getElementById('followCancelReasonSelect').value = '';
+    }
+
+    async function saveFollowStatus() {
+      const selected = state.follow.selectedCase;
+      if (!selected) return;
+      const newStatus = document.getElementById('followStatusSelect').value;
+      const cancelReason = document.getElementById('followCancelReasonSelect').value;
+      if (newStatus === 'Cancel' && !cancelReason) {
+        showNoticeModal('กรุณาเลือกเหตุผลการยกเลิก', 'หากเลือกสถานะ Cancel กรุณาเลือกเหตุผลการยกเลิกก่อนบันทึก');
+        return;
+      }
+      openLoadingModal('กำลังบันทึกผลติดตาม', 'ระบบกำลังอัปเดตสถานะเคส และบันทึกผลเฉพาะเคสที่มีการเปลี่ยนแปลงในวันนี้');
+      try {
+        const payload = {
+          employee_id: selected.employee_id,
+          work_date: getTodayISO(),
+          case_key: selected.case_key,
+          status: newStatus,
+          cancel_reason: newStatus === 'Cancel' ? cancelReason : ''
+        };
+        const res = await jsonpRequest({ action: 'updateFollowStatus', payload: JSON.stringify(payload) });
+        if (!res.ok) throw new Error(res.error || 'บันทึกผลติดตามไม่สำเร็จ');
+        closeFollowModal();
+        state.follow.latestSavedText = res.data.latest_saved_text || getCurrentTimeDisplay();
+        await lookupFollowCases();
+      } catch (err) {
+        showNoticeModal('บันทึกผลไม่สำเร็จ', err.message || 'เกิดข้อผิดพลาดในการบันทึกผลติดตาม');
+      } finally {
+        closeLoadingModal();
+      }
+    }
+
+    function goHomeFollow() {
+      document.getElementById('followEmployeeIdInput').value = '';
+      document.getElementById('followEmployeeSummary').classList.remove('show');
+      document.getElementById('followLookupError').classList.add('hidden');
+      document.getElementById('followBeforeLookupHint').classList.remove('hidden');
+      document.getElementById('followListCard').classList.add('hidden');
+      document.getElementById('followCaseList').innerHTML = '';
+      state.follow = { employee:null, cases:[], selectedCase:null, latestSavedText:'ยังไม่เคยอัปเดตวันนี้' };
+      closeFollowModal();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+
     function formatNumber(n) {
       return Number(n || 0).toLocaleString('th-TH');
     }
@@ -951,6 +1193,7 @@
       if (status === 'Reject') return '❌ Reject';
       if (status === 'Pending') return '🅿️ Pending';
       if (status === 'รอเอกสาร') return '📄 รอเอกสาร';
+      if (status === 'Cancel') return '⛔ Cancel';
       return status || '-';
     }
 
