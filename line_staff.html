@@ -492,7 +492,7 @@
 
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxrNgcKtqyUpeXiGLzq_FPrHGzlgBlKUZ05DwS6OCLxmMcYjVozUJCNfaMIFWWRzp2_QQ/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwwixXhQmmh05nmqfru7RA9eamgvfwERGlyoH7R6SVCV2W7d_fg5LrJdpFn4L6jDPiQVA/exec';
     const state = {
       activeTab: 'individual',
       bootstrap: { rounds: ['12.00','14.00','16.00','18.00','19.00'], teams: [] },
@@ -887,10 +887,12 @@
         simulateProgress(78);
         const res = await jsonpRequest({ action: 'saveIndividual', payload: JSON.stringify(state.individual.draft) });
         if (!res.ok) throw new Error(res.error || 'บันทึกข้อมูลไม่สำเร็จ');
+        state.individual.lastSaveVersion = res.data.app_version || '';
         state.individual.latestSavedText = res.data.latest_saved_text || getCurrentTimeDisplay();
         state.individual.latest = res.data.latest || null;
         document.getElementById('individualLastSavedText').textContent = state.individual.latestSavedText;
         document.getElementById('individualFormLastSavedText').textContent = state.individual.latestSavedText;
+        warnIfOneLoanWasNotSaved(state.individual.draft, state.individual.latest);
         simulateProgress(100, true);
       } catch (err) {
         closeSaveOverlay();
@@ -1276,6 +1278,22 @@
       if (!cards.length) return '[ไม่ได้สมัครบัตร]';
       const cardStatus = hasCardSale(c) ? ' ' + mapStatusText(c.status) : '';
       return '[' + cards.join(' / ') + ']' + cardStatus;
+    }
+
+    function getOneLoanTotal(customers) {
+      return (customers || []).reduce((sum, c) => sum + (hasOneLoanSale(c) ? Number(c.one_loan_amount || 0) : 0), 0);
+    }
+
+    function warnIfOneLoanWasNotSaved(draft, latest) {
+      const draftOneLoan = getOneLoanTotal(draft?.customers || []);
+      if (!draftOneLoan) return;
+      const savedOneLoan = getOneLoanTotal(latest?.customers || []);
+      if (savedOneLoan === draftOneLoan) return;
+      const apiVersion = state.individual?.lastSaveVersion || 'ไม่พบเวอร์ชัน One Loan จาก API';
+      showNoticeModal(
+        'ยังไม่พบยอด One Loan ในข้อมูลที่บันทึก',
+        'ระบบหน้าเว็บส่งยอด One Loan แล้ว แต่ API ที่ตอบกลับมายังไม่มีข้อมูล One Loan\\n\\nAPI version: ' + apiVersion + '\\n\\nกรุณาตรวจว่า Apps Script ใช้ code.gs เวอร์ชันล่าสุดและ Deploy เป็น New version แล้ว จากนั้นบันทึกใหม่อีกครั้ง'
+      );
     }
 
     function mapStatusText(status) {
