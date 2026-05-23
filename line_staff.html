@@ -377,7 +377,7 @@
         <div class="section-head">
           <div>
             <h2>งานที่ค้างในระบบ / อัปเดตผล</h2>
-            <p>กรอกรหัสพนักงานเพื่อดูเคส Pending และรอเอกสารที่ยังค้างในระบบ รวมถึงเคสที่ปิดเป็น Approve / Cancel แล้วในวันนี้</p>
+            <p>กรอกรหัสพนักงานเพื่อดูเคส Pending และรอเอกสารที่ยังค้างในระบบ รวมถึงเคสที่ปิดเป็น Approve / Reject / Cancel แล้วในวันนี้</p>
           </div>
           <div class="badge blue">เมนูที่ 3</div>
         </div>
@@ -400,7 +400,7 @@
       </div>
 
       <div id="followBeforeLookupHint" class="collapsed-hint">
-        ระบบจะแสดงเฉพาะเคสของพนักงานคนนั้นที่ยังค้างสถานะ Pending / รอเอกสาร รวมถึงเคสที่ปิดเป็น Approve หรือ Cancel แล้วในวันนี้ เพื่อให้ติดตามต่อได้จนจบวัน
+        ระบบจะแสดงเฉพาะเคสของพนักงานคนนั้นที่ยังค้างสถานะ Pending / รอเอกสาร รวมถึงเคสที่ปิดเป็น Approve / Reject / Cancel แล้วในวันนี้ เพื่อให้ติดตามต่อได้จนจบวัน
       </div>
 
       <div id="followListCard" class="card hidden">
@@ -470,6 +470,7 @@
           <option value="Pending">Pending</option>
           <option value="รอเอกสาร">รอเอกสาร</option>
           <option value="Approve">Approve</option>
+          <option value="Reject">Reject</option>
           <option value="Cancel">Cancel</option>
         </select>
       </div>
@@ -492,7 +493,7 @@
 
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzR8ahcJ6z05ueYC56eukFnlyFP3L0nE4QOwfwAoOGmqjLITcoJ_8orIej4iOerAEY8Xw/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaMKyyzcNUwY6O4Lbk7wvad3uPTam40vWIMkkZ6CeMOQbZdM_GFIBTTyBmyytb4WEVWQ/exec';
     const state = {
       activeTab: 'individual',
       bootstrap: { rounds: ['12.00','14.00','16.00','18.00','19.00'], teams: [] },
@@ -578,7 +579,7 @@
           delete window[callbackName];
           script.remove();
           reject(new Error('หมดเวลารอการตอบกลับจาก Web App'));
-        }, 25000);
+        }, 45000);
         script.src = url.toString();
         document.body.appendChild(script);
       });
@@ -1032,7 +1033,13 @@
       openSaveOverlay('กำลังบันทึกข้อมูลทีม', 'ระบบกำลังรวมยอดของทีม ตรวจสอบข้อมูลล่าสุด และบันทึกลงฐานข้อมูล กรุณารอสักครู่', 'team');
       try {
         simulateProgress(78);
-        const res = await jsonpRequest({ action: 'saveTeamSummary', payload: JSON.stringify(state.team.review) });
+        const payload = {
+          team_name: state.team.review.team_name,
+          work_date: state.team.review.work_date,
+          work_date_display: state.team.review.work_date_display,
+          round_time: state.team.review.round_time
+        };
+        const res = await jsonpRequest({ action: 'saveTeamSummary', payload: JSON.stringify(payload) });
         if (!res.ok) throw new Error(res.error || 'บันทึกข้อมูลทีมไม่สำเร็จ');
         state.team.latestSavedText = res.data.latest_saved_text || getCurrentTimeDisplay();
         document.getElementById('teamLastSavedText').textContent = state.team.latestSavedText;
@@ -1168,7 +1175,7 @@
         if (Number(item.cr_count || 0)) cards.push('CR ' + Number(item.cr_count || 0));
         if (Number(item.yc_count || 0)) cards.push('YC ' + Number(item.yc_count || 0));
         if (item.one_loan_applied) cards.push('One Loan ' + formatNumber(item.one_loan_amount || 0) + ' บ. ' + mapStatusText(item.one_loan_status || ''));
-        const badgeClass = item.latest_status === 'Approve' ? 'green' : (item.latest_status === 'Cancel' ? 'red' : 'orange');
+        const badgeClass = item.latest_status === 'Approve' ? 'green' : ((item.latest_status === 'Cancel' || item.latest_status === 'Reject') ? 'red' : 'orange');
         const cancelLine = item.latest_status === 'Cancel' && item.cancel_reason ? `<div class="helper">เหตุผลยกเลิก: ${escapeHtml(item.cancel_reason)}</div>` : '';
         return `
           <button class="customer-card" type="button" style="text-align:left; cursor:pointer; margin-top:${index ? 10 : 0}px;" onclick="openFollowCase(decodeURIComponent('${encodeURIComponent(item.case_key)}'))">
