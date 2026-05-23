@@ -337,18 +337,18 @@
         <div class="section-head">
           <div>
             <h2>รีวิวข้อมูลทีมก่อนดำเนินการ</h2>
-            <p>หน้ารีวิวทีมจะมี 2 ปุ่มคือ บันทึกข้อมูลทีม และ ยกเลิก โดยถ้ากดยกเลิกจะกลับหน้าแรกของระบบ</p>
+            <p>ข้อมูลทีมหน้านี้ดึงจากยอดรายบุคคลล่าสุดเสมอ กดยืนยันเพื่อสร้างข้อความส่งไลน์โดยไม่บันทึกข้อมูลทีมซ้ำ</p>
           </div>
           <div class="badge orange">Review</div>
         </div>
         <div class="summary-row" style="background:#fffaf3; border-style:dashed; margin-bottom:12px;">
-          <strong>บันทึกล่าสุด</strong>
+          <strong>ข้อมูลรายบุคคลล่าสุด</strong>
           <span id="teamLastSavedText">ยังไม่เคยบันทึกวันนี้</span>
         </div>
         <div id="teamMemberList"></div>
         <div id="teamReviewSummary" class="summary-review"></div>
         <div class="inline-actions" style="margin-top:12px;">
-          <button class="btn primary" onclick="saveTeamSummary()">บันทึกข้อมูลทีม</button>
+          <button class="btn primary" onclick="saveTeamSummary()">สร้างข้อความส่งไลน์</button>
           <button class="btn secondary" onclick="cancelTeamReview()">ยกเลิก</button>
         </div>
       </div>
@@ -357,7 +357,7 @@
         <div class="section-head">
           <div>
             <h2>กล่อง Text Message สรุปทีม</h2>
-            <p>กล่องนี้จะขึ้นต่อเมื่อบันทึกข้อมูลทีมสำเร็จ แล้วกดปุ่มสร้างข้อความส่งไลน์จาก pop-up เท่านั้น</p>
+            <p>กล่องนี้จะขึ้นหลังระบบตรวจยอดรายบุคคลล่าสุด และกดปุ่มสร้างข้อความส่งไลน์จาก pop-up เท่านั้น</p>
           </div>
           <div class="badge green">สร้างแล้วจึงแสดง</div>
         </div>
@@ -493,7 +493,7 @@
 
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaMKyyzcNUwY6O4Lbk7wvad3uPTam40vWIMkkZ6CeMOQbZdM_GFIBTTyBmyytb4WEVWQ/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyyAj_2Ix5vDf4pS6ELa5dmbjgyouHTz0VVVJT9v4SsDR-hf9qKEoKqH0ycHfB3ua51Cg/exec';
     const state = {
       activeTab: 'individual',
       bootstrap: { rounds: ['12.00','14.00','16.00','18.00','19.00'], teams: [] },
@@ -1030,7 +1030,7 @@
 
     async function saveTeamSummary() {
       if (!state.team.review) return;
-      openSaveOverlay('กำลังบันทึกข้อมูลทีม', 'ระบบกำลังรวมยอดของทีม ตรวจสอบข้อมูลล่าสุด และบันทึกลงฐานข้อมูล กรุณารอสักครู่', 'team');
+      openSaveOverlay('กำลังสร้างข้อความส่งไลน์', 'ระบบกำลังตรวจสอบยอดรายบุคคลล่าสุดของทีม และเตรียมข้อความส่งไลน์ กรุณารอสักครู่', 'team');
       try {
         simulateProgress(78);
         const payload = {
@@ -1040,7 +1040,7 @@
           round_time: state.team.review.round_time
         };
         const res = await jsonpRequest({ action: 'saveTeamSummary', payload: JSON.stringify(payload) });
-        if (!res.ok) throw new Error(res.error || 'บันทึกข้อมูลทีมไม่สำเร็จ');
+        if (!res.ok) throw new Error(res.error || 'สร้างข้อความส่งไลน์ไม่สำเร็จ');
         state.team.latestSavedText = res.data.latest_saved_text || getCurrentTimeDisplay();
         document.getElementById('teamLastSavedText').textContent = state.team.latestSavedText;
         simulateProgress(100, true);
