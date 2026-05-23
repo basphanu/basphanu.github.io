@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Performance Dashboard</title>
+  <style>
+    :root {
+      --ink: #18213a;
+      --muted: #667085;
+      --line: #e4e7ec;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --card: #eaf2ff;
+      --card-ink: #1d4ed8;
+      --approve: #eafaf0;
+      --approve-ink: #15803d;
+      --loan: #f3edff;
+      --loan-ink: #7c3aed;
+      --ins: #fff6df;
+      --ins-ink: #b45309;
+      --alert: #fee2e2;
+      --alert-ink: #b91c1c;
+      --shadow: 0 12px 30px rgba(16, 24, 40, .06);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .app { max-width: 1280px; margin: 0 auto; padding: 18px 14px 36px; }
+    .topbar { display:flex; justify-content:space-between; align-items:flex-end; gap:12px; margin-bottom:14px; }
+    h1 { margin:0; font-size:26px; line-height:1.12; letter-spacing:0; }
+    .subtitle { margin-top:6px; color:var(--muted); font-size:13px; }
+    .pill { border:1px solid var(--line); background:#fff; border-radius:999px; padding:9px 12px; color:var(--muted); font-size:12px; font-weight:800; white-space:nowrap; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); padding:14px; margin-bottom:14px; }
+    .filters { display:grid; grid-template-columns:140px 1fr 1fr 1fr 1fr auto; gap:10px; align-items:end; }
+    .field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+    label { color:var(--muted); font-size:11px; font-weight:800; }
+    input, select, button { width:100%; border-radius:10px; font-size:13px; outline:none; }
+    input, select { border:1px solid var(--line); background:#fff; color:var(--ink); padding:10px 10px; }
+    button { border:0; padding:11px 14px; background:var(--ink); color:#fff; font-weight:900; cursor:pointer; }
+    .actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .export-btn { width:auto; border:1px solid var(--line); background:#fff; color:var(--ink); padding:9px 11px; font-size:12px; }
+    .summary { display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:10px; }
+    .metric { border:1px solid var(--line); border-radius:12px; padding:12px; background:#fff; min-height:86px; }
+    .metric span { display:block; color:var(--muted); font-size:11px; font-weight:800; line-height:1.35; }
+    .metric strong { display:block; margin-top:8px; font-size:22px; line-height:1; }
+    .metric small { display:block; color:var(--muted); margin-top:7px; font-size:11px; line-height:1.35; }
+    .metric.card { background:var(--card); border-color:#bfdbfe; color:var(--card-ink); }
+    .metric.approve { background:var(--approve); border-color:#bbf7d0; color:var(--approve-ink); }
+    .metric.loan { background:var(--loan); border-color:#ddd6fe; color:var(--loan-ink); }
+    .metric.ins { background:var(--ins); border-color:#fde68a; color:var(--ins-ink); }
+    .section-head { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:10px; }
+    h2 { margin:0; font-size:18px; letter-spacing:0; }
+    .hint { color:var(--muted); font-size:12px; margin-top:4px; }
+    .table-wrap { overflow:auto; border:1px solid var(--line); border-radius:12px; background:#fff; }
+    table { width:100%; min-width:980px; border-collapse:separate; border-spacing:0; font-size:13px; }
+    th, td { padding:11px 10px; border-bottom:1px solid var(--line); vertical-align:top; text-align:right; white-space:nowrap; }
+    th { position:sticky; top:0; z-index:1; background:#f9fafb; color:var(--muted); font-size:11px; font-weight:900; }
+    th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align:left; }
+    tbody tr:last-child td { border-bottom:0; }
+    tbody tr:hover { background:#fafafa; }
+    .rank { display:inline-grid; place-items:center; width:26px; height:26px; border-radius:9px; background:#eef2f7; font-weight:900; }
+    .name { font-weight:900; color:var(--ink); }
+    .sub { color:var(--muted); font-size:11px; margin-top:3px; }
+    .tag { display:inline-flex; align-items:center; gap:4px; border-radius:999px; padding:4px 7px; font-size:11px; font-weight:900; }
+    .tag.card { background:var(--card); color:var(--card-ink); }
+    .tag.approve { background:var(--approve); color:var(--approve-ink); }
+    .tag.loan { background:var(--loan); color:var(--loan-ink); }
+    .tag.ins { background:var(--ins); color:var(--ins-ink); }
+    .tag.alert { background:var(--alert); color:var(--alert-ink); box-shadow:inset 0 0 0 1px #fecaca; }
+    td.alert-cell { background:#fff7f7; }
+    td.alert-cell .sub { color:var(--alert-ink); font-weight:800; }
+    .empty { padding:18px; text-align:center; color:var(--muted); font-size:13px; }
+    .loading { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(24,33,58,.28); z-index:10; }
+    .loading.show { display:flex; }
+    .loading-card { background:#fff; border-radius:14px; padding:18px 20px; box-shadow:var(--shadow); font-weight:900; }
+    @media (max-width: 980px) {
+      .filters { grid-template-columns:1fr 1fr; }
+      .summary { grid-template-columns:1fr 1fr; }
+      .topbar { align-items:flex-start; flex-direction:column; }
+    }
+    @media (max-width: 520px) {
+      .filters, .summary { grid-template-columns:1fr; }
+      h1 { font-size:23px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="loading" id="loading"><div class="loading-card">กำลังโหลดข้อมูล...</div></div>
+  <div class="app">
+    <div class="topbar">
+      <div>
+        <h1>Performance Dashboard</h1>
+        <div class="subtitle">ตารางผลงานรายบุคคลและรายทีม เรียงตามลูกค้าใหม่อนุมัติสูงไปต่ำ</div>
+      </div>
+      <div class="pill" id="rangePill">-</div>
+    </div>
+
+    <div class="panel">
+      <div class="filters">
+        <div class="field">
+          <label>โหมดวันที่</label>
+          <select id="dateMode">
+            <option value="month">รายเดือน</option>
+            <option value="day">รายวัน</option>
+            <option value="custom">กำหนดเอง</option>
+          </select>
+        </div>
+        <div class="field"><label>วันที่เริ่มต้น</label><input type="date" id="startDate" /></div>
+        <div class="field"><label>วันที่สิ้นสุด</label><input type="date" id="endDate" /></div>
+        <div class="field"><label>สาขา</label><select id="branchSelect"><option value="">ทั้งหมด</option></select></div>
+        <div class="field"><label>ทีม</label><select id="teamSelect"><option value="">ทั้งหมด</option></select></div>
+        <button onclick="loadDashboard()">ดึงข้อมูล</button>
+      </div>
+    </div>
+
+    <div class="summary panel">
+      <div class="metric card"><span>ลูกค้าสมัครบัตรทั้งหมด</span><strong id="sumCardApply">0</strong><small id="sumCardSub">CR 0 / YC 0</small></div>
+      <div class="metric approve"><span>ลูกค้าใหม่อนุมัติทั้งหมด</span><strong id="sumNewApprove">0</strong><small>ใช้เป็นลำดับหลัก</small></div>
+      <div class="metric loan"><span>One Loan สมัคร</span><strong id="sumLoanApply">0</strong><small id="sumLoanApplyAmount">0 บาท</small></div>
+      <div class="metric loan"><span>One Loan อนุมัติ</span><strong id="sumLoanApprove">0</strong><small id="sumLoanApproveAmount">0 บาท</small></div>
+      <div class="metric ins"><span>ประกัน</span><strong id="sumInsurance">0</strong><small id="sumInsuranceAmount">0 บาท</small></div>
+    </div>
+
+    <div class="panel">
+      <div class="section-head">
+        <div>
+          <h2>ข้อมูลพนักงานรายบุคคล</h2>
+          <div class="hint">รหัส, ชื่อ, ยอดบัตร, ลูกค้าใหม่อนุมัติ, One Loan และประกัน</div>
+        </div>
+        <div class="actions">
+          <button class="export-btn" onclick="exportTableImage('people')">Export รูปรายบุคคล</button>
+          <div class="pill" id="peopleCount">0 รายการ</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>รหัส / ชื่อ</th>
+              <th>ลูกค้าสมัครบัตรทั้งหมด</th>
+              <th>ลูกค้าใหม่อนุมัติทั้งหมด</th>
+              <th>One Loan สมัคร</th>
+              <th>One Loan อนุมัติ</th>
+              <th>ประกัน</th>
+            </tr>
+          </thead>
+          <tbody id="peopleBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-head">
+        <div>
+          <h2>ข้อมูลรายทีม</h2>
+          <div class="hint">สรุปรวมตามทีม โดยเรียงลำดับด้วยลูกค้าใหม่อนุมัติ</div>
+        </div>
+        <div class="actions">
+          <button class="export-btn" onclick="exportTableImage('team')">Export รูปรายทีม</button>
+          <div class="pill" id="teamCount">0 รายการ</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>ชื่อทีม</th>
+              <th>ลูกค้าสมัครบัตรทั้งหมด</th>
+              <th>ลูกค้าใหม่อนุมัติทั้งหมด</th>
+              <th>One Loan สมัคร</th>
+              <th>One Loan อนุมัติ</th>
+              <th>ประกัน</th>
+            </tr>
+          </thead>
+          <tbody id="teamBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwGgC_8UxlqWUKXi2V9wV9fc3XDG6Bsb3vuR4_F3FEUze4P1_c_ynsyf_QyOEyeSiCh/exec";
+    const state = { teamsMaster: [], people: [], teams: [], overview: {}, filters: {} };
+
+    function jsonp(params) {
+      return new Promise((resolve, reject) => {
+        const callback = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+        const script = document.createElement('script');
+        const qs = new URLSearchParams({ ...params, callback });
+        const timer = setTimeout(() => { cleanup(); reject(new Error('เชื่อมต่อ API ไม่สำเร็จ')); }, 30000);
+        window[callback] = res => { cleanup(); res && res.ok ? resolve(res.data) : reject(new Error(res?.error || 'โหลดข้อมูลไม่สำเร็จ')); };
+        function cleanup() { clearTimeout(timer); delete window[callback]; script.remove(); }
+        script.src = API_URL + '?' + qs.toString();
+        script.onerror = () => { cleanup(); reject(new Error('โหลด API ไม่สำเร็จ')); };
+        document.body.appendChild(script);
+      });
+    }
+
+    function toInputDate(d) {
+      return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    }
+    function format(n) { return Number(n || 0).toLocaleString('th-TH'); }
+    function money(n) { return format(n) + ' บาท'; }
+    function esc(v) { return String(v ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
+    function norm(v) { return String(v || '').replace(/\s+/g, ' ').trim(); }
+    function showLoading(active) { loading.classList.toggle('show', active); }
+
+    function setDatesByMode() {
+      const now = new Date();
+      if (dateMode.value === 'day') {
+        startDate.value = toInputDate(now);
+        endDate.value = toInputDate(now);
+      } else if (dateMode.value === 'month') {
+        startDate.value = toInputDate(new Date(now.getFullYear(), now.getMonth(), 1));
+        endDate.value = toInputDate(now);
+      }
+    }
+
+    async function bootstrap() {
+      dateMode.addEventListener('change', () => { setDatesByMode(); loadDashboard(); });
+      startDate.addEventListener('change', () => { dateMode.value = 'custom'; });
+      endDate.addEventListener('change', () => { dateMode.value = 'custom'; });
+      branchSelect.addEventListener('change', () => { renderTeamOptions(); loadDashboard(); });
+      teamSelect.addEventListener('change', loadDashboard);
+      setDatesByMode();
+      try {
+        const boot = await jsonp({ action:'bootstrap' });
+        state.teamsMaster = boot.teams || [];
+        const branches = [...new Set(state.teamsMaster.map(t => t.branch_name).filter(Boolean))];
+        branchSelect.innerHTML = '<option value="">ทั้งหมด</option>' + branches.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('');
+        renderTeamOptions();
+        await loadDashboard();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    function renderTeamOptions() {
+      const branch = norm(branchSelect.value);
+      const teams = state.teamsMaster.filter(t => !branch || norm(t.branch_name) === branch);
+      teamSelect.innerHTML = '<option value="">ทั้งหมด</option>' + teams.map(t => `<option value="${esc(t.team_name)}">${esc(t.team_name)}</option>`).join('');
+    }
+
+    async function loadDashboard() {
+      if (!startDate.value || !endDate.value) return;
+      if (startDate.value > endDate.value) { alert('วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด'); return; }
+      showLoading(true);
+      try {
+        const data = await jsonp({
+          action:'dashboardData',
+          work_date:endDate.value,
+          start_date:startDate.value,
+          end_date:endDate.value,
+          branch_name:branchSelect.value,
+          team_name:teamSelect.value
+        });
+        state.people = sortRows(data.people || []);
+        state.teams = sortRows(data.teams || []);
+        state.overview = data.overview || {};
+        state.filters = data.filters || {};
+        render();
+      } catch (err) {
+        alert('อ่านข้อมูลไม่สำเร็จ: ' + err.message);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function sortRows(rows) {
+      return [...rows].sort((a, b) =>
+        Number(b.approved_new_count || 0) - Number(a.approved_new_count || 0) ||
+        Number(b.card_customer_count || 0) - Number(a.card_customer_count || 0) ||
+        Number(b.one_loan_count || 0) - Number(a.one_loan_count || 0)
+      );
+    }
+
+    function render() {
+      const o = state.overview;
+      rangePill.textContent = `${state.filters.start_date || startDate.value} ถึง ${state.filters.end_date || endDate.value}`;
+      sumCardApply.textContent = format(o.card_customer_total || 0);
+      sumCardSub.textContent = `CR ${format(o.cr_customer_total || 0)} / YC ${format(o.yc_customer_total || 0)}`;
+      sumNewApprove.textContent = format(o.approved_new_total || 0);
+      sumLoanApply.textContent = format(o.one_loan_total_count || 0);
+      sumLoanApplyAmount.textContent = money(o.one_loan_total_amount || 0);
+      sumLoanApprove.textContent = format(o.one_loan_approve_total_count || 0);
+      sumLoanApproveAmount.textContent = money(o.one_loan_approve_total_amount || 0);
+      sumInsurance.textContent = format(o.insurance_policy_total || 0);
+      sumInsuranceAmount.textContent = money(o.insurance_premium_total || 0);
+      peopleCount.textContent = format(state.people.length) + ' รายการ';
+      teamCount.textContent = format(state.teams.length) + ' รายการ';
+      peopleBody.innerHTML = state.people.length ? state.people.map((p, i) => peopleRow(p, i)).join('') : emptyRow();
+      teamBody.innerHTML = state.teams.length ? state.teams.map((t, i) => teamRow(t, i)).join('') : emptyRow();
+    }
+
+    function peopleRow(p, i) {
+      return `
+        <tr>
+          <td><span class="rank">${i + 1}</span></td>
+          <td>
+            <div class="name">${esc(p.employee_id || '-')} • ${esc(p.nickname || p.employee_name || '-')}</div>
+            <div class="sub">${esc(p.team_name || '-')} / ${esc(p.branch_name || '-')}</div>
+          </td>
+          ${metricCell('card', p.card_customer_count || 0, 'CR ' + format(p.cr_customer_count || 0) + ' / YC ' + format(p.yc_customer_count || 0), true)}
+          ${metricCell('approve', p.approved_new_count || 0, 'ลูกค้าใหม่', true)}
+          ${metricCell('loan', p.one_loan_count || 0, money(p.one_loan_amount || 0), true)}
+          ${metricCell('loan', p.one_loan_approve_count || 0, money(p.one_loan_approve_amount || 0))}
+          ${metricCell('ins', p.insurance_policy_count || 0, money(p.insurance_premium || 0))}
+        </tr>`;
+    }
+
+    function teamRow(t, i) {
+      return `
+        <tr>
+          <td><span class="rank">${i + 1}</span></td>
+          <td>
+            <div class="name">${esc(t.team_name || '-')}</div>
+            <div class="sub">${esc(t.branch_name || '-')} / ส่งยอด ${format(t.working_employees || 0)} คน</div>
+          </td>
+          ${metricCell('card', t.card_customer_count || 0, 'CR ' + format(t.cr_customer_count || 0) + ' / YC ' + format(t.yc_customer_count || 0), true)}
+          ${metricCell('approve', t.approved_new_count || 0, 'ลูกค้าใหม่', true)}
+          ${metricCell('loan', t.one_loan_count || 0, money(t.one_loan_amount || 0), true)}
+          ${metricCell('loan', t.one_loan_approve_count || 0, money(t.one_loan_approve_amount || 0))}
+          ${metricCell('ins', t.insurance_policy_total || 0, money(t.insurance_premium_total || 0))}
+        </tr>`;
+    }
+
+    function metricCell(type, value, sub, alertWhenZero=false) {
+      const alert = alertWhenZero && Number(value || 0) === 0;
+      return `<td class="${alert ? 'alert-cell' : ''}"><span class="tag ${alert ? 'alert' : type}">${format(value)}</span><div class="sub">${alert ? 'ต้องเร่งติดตาม' : esc(sub)}</div></td>`;
+    }
+
+    function emptyRow() {
+      return '<tr><td colspan="7"><div class="empty">ยังไม่มีข้อมูลในช่วงวันที่นี้</div></td></tr>';
+    }
+
+    function exportTableImage(type) {
+      const rows = type === 'people' ? state.people : state.teams;
+      if (!rows.length) { alert('ยังไม่มีข้อมูลสำหรับ Export'); return; }
+      const title = type === 'people' ? 'ตารางผลงานรายบุคคล' : 'ตารางผลงานรายทีม';
+      const columns = type === 'people'
+        ? ['#', 'รหัส / ชื่อ', 'สมัครบัตร', 'ลูกค้าใหม่อนุมัติ', 'One Loan สมัคร', 'One Loan อนุมัติ', 'ประกัน']
+        : ['#', 'ทีม', 'สมัครบัตร', 'ลูกค้าใหม่อนุมัติ', 'One Loan สมัคร', 'One Loan อนุมัติ', 'ประกัน'];
+      const dataRows = rows.map((item, idx) => type === 'people' ? [
+        String(idx + 1),
+        `${item.employee_id || '-'} ${item.nickname || item.employee_name || '-'}\n${item.team_name || '-'} / ${item.branch_name || '-'}`,
+        `${format(item.card_customer_count || 0)} คน\nCR ${format(item.cr_customer_count || 0)} / YC ${format(item.yc_customer_count || 0)}`,
+        `${format(item.approved_new_count || 0)} คน`,
+        `${format(item.one_loan_count || 0)} เคส\n${money(item.one_loan_amount || 0)}`,
+        `${format(item.one_loan_approve_count || 0)} เคส\n${money(item.one_loan_approve_amount || 0)}`,
+        `${format(item.insurance_policy_count || 0)} กรม\n${money(item.insurance_premium || 0)}`
+      ] : [
+        String(idx + 1),
+        `${item.team_name || '-'}\n${item.branch_name || '-'}`,
+        `${format(item.card_customer_count || 0)} คน\nCR ${format(item.cr_customer_count || 0)} / YC ${format(item.yc_customer_count || 0)}`,
+        `${format(item.approved_new_count || 0)} คน`,
+        `${format(item.one_loan_count || 0)} เคส\n${money(item.one_loan_amount || 0)}`,
+        `${format(item.one_loan_approve_count || 0)} เคส\n${money(item.one_loan_approve_amount || 0)}`,
+        `${format(item.insurance_policy_total || 0)} กรม\n${money(item.insurance_premium_total || 0)}`
+      ]);
+
+      const colWidths = [48, 230, 150, 150, 170, 170, 160];
+      const rowHeight = 58;
+      const headerHeight = 46;
+      const titleHeight = 74;
+      const visibleRows = dataRows.slice(0, 40);
+      const width = colWidths.reduce((s, w) => s + w, 0) + 32;
+      const height = titleHeight + headerHeight + visibleRows.length * rowHeight + 32;
+      const canvas = document.createElement('canvas');
+      const scale = 2;
+      canvas.width = width * scale;
+      canvas.height = height * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(scale, scale);
+      ctx.fillStyle = '#f7f8fb';
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = '#ffffff';
+      roundRect(ctx, 16, 16, width - 32, height - 32, 14);
+      ctx.fill();
+      ctx.fillStyle = '#18213a';
+      ctx.font = '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillText(title, 32, 48);
+      ctx.fillStyle = '#667085';
+      ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillText(`${startDate.value} ถึง ${endDate.value} • ${branchSelect.value || 'ทุกสาขา'}${teamSelect.value ? ' • ' + teamSelect.value : ''}`, 32, 68);
+
+      let y = titleHeight;
+      let x = 16;
+      ctx.fillStyle = '#f2f4f7';
+      ctx.fillRect(x, y, width - 32, headerHeight);
+      columns.forEach((label, i) => {
+        drawCellText(ctx, label, x + 10, y + 18, colWidths[i] - 20, '#475467', '700 11px');
+        x += colWidths[i];
+      });
+      y += headerHeight;
+
+      visibleRows.forEach((row, rIdx) => {
+        x = 16;
+        ctx.fillStyle = rIdx % 2 ? '#ffffff' : '#fcfcfd';
+        ctx.fillRect(x, y, width - 32, rowHeight);
+        row.forEach((value, cIdx) => {
+          const isAlert = (cIdx === 2 || cIdx === 3 || cIdx === 4) && String(value).startsWith('0 ');
+          if (isAlert) {
+            ctx.fillStyle = '#fee2e2';
+            ctx.fillRect(x + 4, y + 7, colWidths[cIdx] - 8, rowHeight - 14);
+          }
+          drawCellText(ctx, value, x + 10, y + 18, colWidths[cIdx] - 20, isAlert ? '#b91c1c' : '#18213a', cIdx === 0 ? '700 12px' : '600 12px');
+          x += colWidths[cIdx];
+        });
+        y += rowHeight;
+      });
+
+      const link = document.createElement('a');
+      const date = new Date().toISOString().slice(0, 10);
+      link.download = `${type === 'people' ? 'people' : 'team'}_performance_${date}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    function drawCellText(ctx, text, x, y, maxWidth, color, font) {
+      ctx.font = font + ' -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle = color;
+      String(text).split('\n').forEach((line, idx) => {
+        const clipped = clipText(ctx, line, maxWidth);
+        ctx.fillText(clipped, x, y + idx * 18);
+      });
+    }
+
+    function clipText(ctx, text, maxWidth) {
+      if (ctx.measureText(text).width <= maxWidth) return text;
+      let out = text;
+      while (out.length > 1 && ctx.measureText(out + '...').width > maxWidth) out = out.slice(0, -1);
+      return out + '...';
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    bootstrap();
+  </script>
+</body>
+</html>
