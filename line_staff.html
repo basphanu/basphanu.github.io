@@ -367,6 +367,44 @@
         </div>
       </div>
 
+      <div class="card">
+        <div class="section-head">
+          <div>
+            <h2>สรุปยอดรายสาขา</h2>
+            <p>ดึงยอดรวมจากข้อมูลรายบุคคลล่าสุด แยกตามสาขา และสร้างข้อความพร้อมส่งไลน์</p>
+          </div>
+          <div class="badge blue">Branch</div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>วันที่</label>
+            <input type="text" id="branchDate" readonly />
+          </div>
+        </div>
+        <div class="grid-2" style="margin-top:12px; align-items:end;">
+          <div class="field">
+            <label>สาขา</label>
+            <select id="branchSelect"></select>
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <button class="btn primary" onclick="lookupBranchData()">สร้างข้อความสรุปสาขา</button>
+          </div>
+        </div>
+        <div id="branchLookupError" class="error-text hidden"></div>
+      </div>
+
+      <div id="branchMessageCard" class="card hidden">
+        <div class="section-head">
+          <div>
+            <h2>กล่อง Text Message สรุปสาขา</h2>
+            <p>ข้อความนี้อิงจากยอดรายบุคคลล่าสุดของวันที่เลือก</p>
+          </div>
+          <div class="badge green">พร้อมส่ง</div>
+        </div>
+        <div class="preview"><button class="copy-badge" onclick="handleCopyBadge(this)">คัดลอก</button><span id="branchMessageText"></span></div>
+      </div>
+
       <div id="teamEmptyState" class="empty-state">
         เลือกทีมแล้วกดค้นหาผลงานวันนี้ ระบบจะดึงยอดล่าสุดของแต่ละคนในทีมขึ้นมาให้ตรวจสอบก่อนบันทึกจริง
       </div>
@@ -493,7 +531,7 @@
 
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyyAj_2Ix5vDf4pS6ELa5dmbjgyouHTz0VVVJT9v4SsDR-hf9qKEoKqH0ycHfB3ua51Cg/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwGgC_8UxlqWUKXi2V9wV9fc3XDG6Bsb3vuR4_F3FEUze4P1_c_ynsyf_QyOEyeSiCh/exec';
     const state = {
       activeTab: 'individual',
       bootstrap: { rounds: ['12.00','14.00','16.00','18.00','19.00'], teams: [] },
@@ -526,6 +564,7 @@
       document.getElementById('today-pill').textContent = today;
       document.getElementById('indDate').value = today;
       document.getElementById('teamDate').value = today;
+      document.getElementById('branchDate').value = today;
       document.getElementById('followDate').value = today;
       addCustomerCard();
       loadBootstrap();
@@ -595,6 +634,8 @@
         fillSelectOptions('teamRoundSelect', state.bootstrap.rounds);
         fillSelectOptions('teamTodaySelect', state.bootstrap.teams.map(t => t.team_name));
         fillSelectOptions('teamSelect', state.bootstrap.teams.map(t => t.team_name));
+        const branches = [...new Set((state.bootstrap.teams || []).map(t => t.branch_name).filter(Boolean))];
+        fillSelectOptionsWithBlank('branchSelect', branches, 'ทุกสาขา');
       } catch (err) {
         document.getElementById('employeeLookupError').classList.remove('hidden');
         document.getElementById('employeeLookupError').textContent = err.message;
@@ -604,6 +645,11 @@
     function fillSelectOptions(id, values) {
       const select = document.getElementById(id);
       select.innerHTML = values.map(v => '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>').join('');
+    }
+
+    function fillSelectOptionsWithBlank(id, values, blankLabel) {
+      const select = document.getElementById(id);
+      select.innerHTML = '<option value="">' + escapeHtml(blankLabel || 'ทั้งหมด') + '</option>' + values.map(v => '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>').join('');
     }
 
     function addCustomerCard(data) {
@@ -1024,6 +1070,57 @@
       lines.push(`❌ Reject: ${s.rejectCount} (ใบ)`);
       lines.push(`🛡️ ยอดขายประกัน: ${s.insurancePolicyCount} กรมฯ`);
       lines.push(`💰 เบี้ยประกันรวม: ${formatNumber(s.insurancePremium)} บาท`);
+      lines.push('—————————');
+      return lines.join('\n');
+    }
+
+    async function lookupBranchData() {
+      const errorBox = document.getElementById('branchLookupError');
+      errorBox.classList.add('hidden');
+      document.getElementById('branchMessageCard').classList.add('hidden');
+      try {
+        openLoadingModal('กำลังสรุปยอดรายสาขา', 'ระบบกำลังดึงยอดรายบุคคลล่าสุด และรวมผลงานตามสาขา กรุณารอสักครู่');
+        const res = await jsonpRequest({
+          action: 'branchReview',
+          work_date: getTodayISO(),
+          branch_name: document.getElementById('branchSelect').value
+        });
+        if (!res.ok) throw new Error(res.error || 'สรุปยอดรายสาขาไม่สำเร็จ');
+        document.getElementById('branchMessageText').textContent = buildBranchMessage(res.data);
+        document.getElementById('branchMessageCard').classList.remove('hidden');
+        document.getElementById('branchMessageCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        errorBox.textContent = err.message;
+        errorBox.classList.remove('hidden');
+      } finally {
+        closeLoadingModal();
+      }
+    }
+
+    function buildBranchMessage(data) {
+      return (data.branches || []).map(buildBranchSection).join('\n\n');
+    }
+
+    function buildBranchSection(item) {
+      const s = item.summary || {};
+      const lines = [];
+      lines.push(`#สรุปผลงานรายสาขา ${item.branch_name || '-'}`);
+      lines.push(`📅 วันที่: ${item.work_date_display || '-'}`);
+      lines.push(`🕒 เวลาสรุปล่าสุด: ${item.generated_at_display || item.latest_saved_text || '-'}`);
+      lines.push('—————————');
+      lines.push(`👥 จำนวนลูกค้า ${s.totalCustomers || 0} คน`);
+      lines.push(`🆕 ใหม่ ${s.newCount || 0} คน / เก่า ${s.oldCount || 0} คน`);
+      lines.push(`💳 CR ${s.totalCr || 0} ใบ / YC ${s.totalYc || 0} ใบ`);
+      lines.push(`🏦 One Loan ${s.oneLoanCount || 0} ราย / รวม ${formatNumber(s.oneLoanAmount || 0)} บาท`);
+      lines.push('');
+      lines.push('✅ สรุปข้อมูล Approve');
+      lines.push('บัตร CR/YC');
+      lines.push(`✅ ลูกค้าใหม่ ${s.approveNew || 0} (คน) / ลูกค้าเก่า ${s.approveOld || 0} (คน)`);
+      lines.push(`✅ CR ${s.approveCr || 0} (ใบ) / YC ${s.approveYc || 0} (ใบ)`);
+      lines.push(`✅ One Loan ${s.oneLoanApproveCount || 0} ราย / รวม ${formatNumber(s.oneLoanApproveAmount || 0)} บาท`);
+      lines.push(`❌ Reject: ${s.rejectCount || 0} (ใบ)`);
+      lines.push(`🛡️ ยอดขายประกัน: ${s.insurancePolicyCount || 0} กรมฯ`);
+      lines.push(`💰 เบี้ยประกันรวม: ${formatNumber(s.insurancePremium || 0)} บาท`);
       lines.push('—————————');
       return lines.join('\n');
     }
