@@ -60,6 +60,10 @@
     table { width:100%; min-width:980px; border-collapse:separate; border-spacing:0; font-size:13px; }
     th, td { padding:11px 10px; border-bottom:1px solid var(--line); vertical-align:top; text-align:right; white-space:nowrap; }
     th { position:sticky; top:0; z-index:1; background:#f9fafb; color:var(--muted); font-size:11px; font-weight:900; }
+    th.sortable { cursor:pointer; user-select:none; color:var(--ink); }
+    th.sortable::after { content:" ↕"; color:#98a2b3; font-weight:900; }
+    th.sortable.sorted-desc::after { content:" ↓"; color:var(--ink); }
+    th.sortable.sorted-asc::after { content:" ↑"; color:var(--ink); }
     th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align:left; }
     tbody tr:last-child td { border-bottom:0; }
     tbody tr:hover { background:#fafafa; }
@@ -74,6 +78,12 @@
     .tag.alert { background:var(--alert); color:var(--alert-ink); box-shadow:inset 0 0 0 1px #fecaca; }
     td.alert-cell { background:#fff7f7; }
     td.alert-cell .sub { color:var(--alert-ink); font-weight:800; }
+    tr.total-row td { background:#f8fafc; font-weight:900; border-top:2px solid #cbd5e1; }
+    .tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+    .tab-btn { width:auto; background:#fff; color:var(--muted); border:1px solid var(--line); padding:10px 12px; font-size:12px; }
+    .tab-btn.active { background:var(--ink); color:#fff; border-color:var(--ink); }
+    .view { display:none; }
+    .view.active { display:block; }
     .empty { padding:18px; text-align:center; color:var(--muted); font-size:13px; }
     .loading { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(24,33,58,.28); z-index:10; }
     .loading.show { display:flex; }
@@ -106,7 +116,7 @@
           <label>โหมดวันที่</label>
           <select id="dateMode">
             <option value="month">รายเดือน</option>
-            <option value="day">รายวัน</option>
+            <option value="day" selected>รายวัน</option>
             <option value="custom">กำหนดเอง</option>
           </select>
         </div>
@@ -126,68 +136,155 @@
       <div class="metric ins"><span>ประกัน</span><strong id="sumInsurance">0</strong><small id="sumInsuranceAmount">0 บาท</small></div>
     </div>
 
-    <div class="panel">
-      <div class="section-head">
-        <div>
-          <h2>ข้อมูลพนักงานรายบุคคล</h2>
-          <div class="hint">รหัส, ชื่อ, ยอดบัตร, ลูกค้าใหม่อนุมัติ, One Loan และประกัน</div>
+    <div class="tabs">
+      <button class="tab-btn active" id="mainTab" onclick="showView('main')">ภาพรวม KPI</button>
+      <button class="tab-btn" id="appinTab" onclick="showView('appin')">รายละเอียด App-in / Approve</button>
+    </div>
+
+    <div class="view active" id="mainView">
+      <div class="panel">
+        <div class="section-head">
+          <div>
+            <h2>ข้อมูลพนักงานรายบุคคล</h2>
+            <div class="hint">รหัส, ชื่อ, ยอดบัตร, ลูกค้าใหม่อนุมัติ, One Loan และประกัน</div>
+          </div>
+          <div class="actions">
+            <button class="export-btn" onclick="exportTableImage('people')">Export รูปรายบุคคล</button>
+            <div class="pill" id="peopleCount">0 รายการ</div>
+          </div>
         </div>
-        <div class="actions">
-          <button class="export-btn" onclick="exportTableImage('people')">Export รูปรายบุคคล</button>
-          <div class="pill" id="peopleCount">0 รายการ</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th class="sortable" data-table="people" data-sort="name" onclick="sortTable('people','name')">รหัส / ชื่อ</th>
+                <th class="sortable" data-table="people" data-sort="cardCustomer" onclick="sortTable('people','cardCustomer')">ลูกค้าสมัครบัตรทั้งหมด</th>
+                <th class="sortable" data-table="people" data-sort="approvedNew" onclick="sortTable('people','approvedNew')">ลูกค้าใหม่อนุมัติทั้งหมด</th>
+                <th class="sortable" data-table="people" data-sort="oneLoan" onclick="sortTable('people','oneLoan')">One Loan สมัคร</th>
+                <th class="sortable" data-table="people" data-sort="oneLoanApprove" onclick="sortTable('people','oneLoanApprove')">One Loan อนุมัติ</th>
+                <th class="sortable" data-table="people" data-sort="insurance" onclick="sortTable('people','insurance')">ประกัน</th>
+              </tr>
+            </thead>
+            <tbody id="peopleBody"></tbody>
+          </table>
         </div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>รหัส / ชื่อ</th>
-              <th>ลูกค้าสมัครบัตรทั้งหมด</th>
-              <th>ลูกค้าใหม่อนุมัติทั้งหมด</th>
-              <th>One Loan สมัคร</th>
-              <th>One Loan อนุมัติ</th>
-              <th>ประกัน</th>
-            </tr>
-          </thead>
-          <tbody id="peopleBody"></tbody>
-        </table>
+
+      <div class="panel">
+        <div class="section-head">
+          <div>
+            <h2>ข้อมูลรายทีม</h2>
+            <div class="hint">สรุปรวมตามทีม โดยเรียงลำดับด้วยลูกค้าใหม่อนุมัติ</div>
+          </div>
+          <div class="actions">
+            <button class="export-btn" onclick="exportTableImage('team')">Export รูปรายทีม</button>
+            <div class="pill" id="teamCount">0 รายการ</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th class="sortable" data-table="team" data-sort="name" onclick="sortTable('team','name')">ชื่อทีม</th>
+                <th class="sortable" data-table="team" data-sort="cardCustomer" onclick="sortTable('team','cardCustomer')">ลูกค้าสมัครบัตรทั้งหมด</th>
+                <th class="sortable" data-table="team" data-sort="approvedNew" onclick="sortTable('team','approvedNew')">ลูกค้าใหม่อนุมัติทั้งหมด</th>
+                <th class="sortable" data-table="team" data-sort="oneLoan" onclick="sortTable('team','oneLoan')">One Loan สมัคร</th>
+                <th class="sortable" data-table="team" data-sort="oneLoanApprove" onclick="sortTable('team','oneLoanApprove')">One Loan อนุมัติ</th>
+                <th class="sortable" data-table="team" data-sort="insurance" onclick="sortTable('team','insurance')">ประกัน</th>
+              </tr>
+            </thead>
+            <tbody id="teamBody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <div class="panel">
-      <div class="section-head">
-        <div>
-          <h2>ข้อมูลรายทีม</h2>
-          <div class="hint">สรุปรวมตามทีม โดยเรียงลำดับด้วยลูกค้าใหม่อนุมัติ</div>
+    <div class="view" id="appinView">
+      <div class="panel">
+        <div class="section-head">
+          <div>
+            <h2>รายละเอียด App-in / Approve รายบุคคล</h2>
+            <div class="hint">App-in คือจำนวนใบสมัครของแต่ละ Product ใช้สำหรับประเมินผลงาน Staff</div>
+          </div>
+          <div class="actions">
+            <button class="export-btn" onclick="exportAppInXls('people')">Export XLS รายบุคคล</button>
+          </div>
         </div>
-        <div class="actions">
-          <button class="export-btn" onclick="exportTableImage('team')">Export รูปรายทีม</button>
-          <div class="pill" id="teamCount">0 รายการ</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th class="sortable" data-table="peopleAppIn" data-sort="name" onclick="sortTable('peopleAppIn','name')">รหัส / ชื่อ</th>
+                <th class="sortable" data-table="peopleAppIn" data-sort="appCr" onclick="sortTable('peopleAppIn','appCr')">App-in CR</th>
+                <th class="sortable" data-table="peopleAppIn" data-sort="appYc" onclick="sortTable('peopleAppIn','appYc')">App-in YC</th>
+                <th class="sortable" data-table="peopleAppIn" data-sort="appCardTotal" onclick="sortTable('peopleAppIn','appCardTotal')">App-in CR+YC</th>
+                <th class="sortable" data-table="peopleAppIn" data-sort="oneLoan" onclick="sortTable('peopleAppIn','oneLoan')">App-in One Loan</th>
+                <th class="sortable" data-table="peopleAppIn" data-sort="approveCustomer" onclick="sortTable('peopleAppIn','approveCustomer')">Approve ลูกค้าใหม่/เก่า</th>
+                <th class="sortable" data-table="peopleAppIn" data-sort="approveCr" onclick="sortTable('peopleAppIn','approveCr')">Approve CR ใหม่/เก่า</th>
+                <th class="sortable" data-table="peopleAppIn" data-sort="approveYc" onclick="sortTable('peopleAppIn','approveYc')">Approve YC ใหม่/เก่า</th>
+                <th class="sortable" data-table="peopleAppIn" data-sort="approveTotal" onclick="sortTable('peopleAppIn','approveTotal')">Approve CR+YC ใหม่/เก่า</th>
+                <th class="sortable" data-table="peopleAppIn" data-sort="oneLoanApprove" onclick="sortTable('peopleAppIn','oneLoanApprove')">One Loan อนุมัติ</th>
+                <th class="sortable" data-table="peopleAppIn" data-sort="insurance" onclick="sortTable('peopleAppIn','insurance')">ประกัน</th>
+              </tr>
+            </thead>
+            <tbody id="peopleAppInBody"></tbody>
+          </table>
         </div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>ชื่อทีม</th>
-              <th>ลูกค้าสมัครบัตรทั้งหมด</th>
-              <th>ลูกค้าใหม่อนุมัติทั้งหมด</th>
-              <th>One Loan สมัคร</th>
-              <th>One Loan อนุมัติ</th>
-              <th>ประกัน</th>
-            </tr>
-          </thead>
-          <tbody id="teamBody"></tbody>
-        </table>
+
+      <div class="panel">
+        <div class="section-head">
+          <div>
+            <h2>รายละเอียด App-in / Approve รายทีม</h2>
+            <div class="hint">มีแถว Total สำหรับกรณีกรองรายสาขา/รายทีม และ Export XLS เพื่อนำไปใช้ต่อ</div>
+          </div>
+          <div class="actions">
+            <button class="export-btn" onclick="exportAppInXls('team')">Export XLS รายทีม</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th class="sortable" data-table="teamAppIn" data-sort="name" onclick="sortTable('teamAppIn','name')">ทีม</th>
+                <th class="sortable" data-table="teamAppIn" data-sort="appCr" onclick="sortTable('teamAppIn','appCr')">App-in CR</th>
+                <th class="sortable" data-table="teamAppIn" data-sort="appYc" onclick="sortTable('teamAppIn','appYc')">App-in YC</th>
+                <th class="sortable" data-table="teamAppIn" data-sort="appCardTotal" onclick="sortTable('teamAppIn','appCardTotal')">App-in CR+YC</th>
+                <th class="sortable" data-table="teamAppIn" data-sort="oneLoan" onclick="sortTable('teamAppIn','oneLoan')">App-in One Loan</th>
+                <th class="sortable" data-table="teamAppIn" data-sort="approveCustomer" onclick="sortTable('teamAppIn','approveCustomer')">Approve ลูกค้าใหม่/เก่า</th>
+                <th class="sortable" data-table="teamAppIn" data-sort="approveCr" onclick="sortTable('teamAppIn','approveCr')">Approve CR ใหม่/เก่า</th>
+                <th class="sortable" data-table="teamAppIn" data-sort="approveYc" onclick="sortTable('teamAppIn','approveYc')">Approve YC ใหม่/เก่า</th>
+                <th class="sortable" data-table="teamAppIn" data-sort="approveTotal" onclick="sortTable('teamAppIn','approveTotal')">Approve CR+YC ใหม่/เก่า</th>
+                <th class="sortable" data-table="teamAppIn" data-sort="oneLoanApprove" onclick="sortTable('teamAppIn','oneLoanApprove')">One Loan อนุมัติ</th>
+                <th class="sortable" data-table="teamAppIn" data-sort="insurance" onclick="sortTable('teamAppIn','insurance')">ประกัน</th>
+              </tr>
+            </thead>
+            <tbody id="teamAppInBody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwGgC_8UxlqWUKXi2V9wV9fc3XDG6Bsb3vuR4_F3FEUze4P1_c_ynsyf_QyOEyeSiCh/exec";
-    const state = { teamsMaster: [], people: [], teams: [], overview: {}, filters: {} };
+    const API_URL = "https://script.google.com/macros/s/AKfycbxv_LEhAUE7FxbYuLnaCmHQSE13dogyLUqH_cVBJvT8DrBe2GoK5U328-_ChelEKTiHew/exec";
+    const state = {
+      teamsMaster: [],
+      people: [],
+      teams: [],
+      overview: {},
+      filters: {},
+      sort: {
+        people: { key:'approvedNew', dir:'desc' },
+        team: { key:'approvedNew', dir:'desc' },
+        peopleAppIn: { key:'approvedNew', dir:'desc' },
+        teamAppIn: { key:'approvedNew', dir:'desc' }
+      }
+    };
 
     function jsonp(params) {
       return new Promise((resolve, reject) => {
@@ -212,6 +309,13 @@
     function norm(v) { return String(v || '').replace(/\s+/g, ' ').trim(); }
     function showLoading(active) { loading.classList.toggle('show', active); }
 
+    function showView(view) {
+      mainView.classList.toggle('active', view === 'main');
+      appinView.classList.toggle('active', view === 'appin');
+      mainTab.classList.toggle('active', view === 'main');
+      appinTab.classList.toggle('active', view === 'appin');
+    }
+
     function setDatesByMode() {
       const now = new Date();
       if (dateMode.value === 'day') {
@@ -229,6 +333,7 @@
       endDate.addEventListener('change', () => { dateMode.value = 'custom'; });
       branchSelect.addEventListener('change', () => { renderTeamOptions(); loadDashboard(); });
       teamSelect.addEventListener('change', loadDashboard);
+      dateMode.value = 'day';
       setDatesByMode();
       try {
         const boot = await jsonp({ action:'bootstrap' });
@@ -281,6 +386,57 @@
       );
     }
 
+    function sortTable(table, key) {
+      const current = state.sort[table] || { key:'approvedNew', dir:'desc' };
+      const dir = current.key === key && current.dir === 'desc' ? 'asc' : 'desc';
+      state.sort[table] = { key, dir };
+      const target = table.startsWith('team') ? state.teams : state.people;
+      target.sort((a, b) => compareByKey(a, b, key, dir, table));
+      render();
+    }
+
+    function compareByKey(a, b, key, dir, table) {
+      const av = sortValue(a, key, table);
+      const bv = sortValue(b, key, table);
+      let result;
+      if (typeof av === 'string' || typeof bv === 'string') {
+        result = String(av).localeCompare(String(bv), 'th');
+      } else {
+        result = Number(av || 0) - Number(bv || 0);
+      }
+      if (result === 0) result = Number(a.employee_id || 0) - Number(b.employee_id || 0);
+      return dir === 'asc' ? result : -result;
+    }
+
+    function sortValue(item, key, table) {
+      const isTeam = table.startsWith('team');
+      const values = {
+        name: isTeam ? (item.team_name || '') : (item.nickname || item.employee_name || item.employee_id || ''),
+        cardCustomer: item.card_customer_count || 0,
+        approvedNew: item.approved_new_count || 0,
+        oneLoan: item.one_loan_count || 0,
+        oneLoanApprove: item.one_loan_approve_count || 0,
+        insurance: isTeam ? item.insurance_premium_total || 0 : item.insurance_premium || 0,
+        appCr: item.card_cr_total || 0,
+        appYc: item.card_yc_total || 0,
+        appCardTotal: item.card_total || 0,
+        approveCustomer: Number(item.card_approve_new_customer_count || 0) + Number(item.card_approve_old_customer_count || 0),
+        approveCr: item.card_approve_cr_count || 0,
+        approveYc: item.card_approve_yc_count || 0,
+        approveTotal: item.card_approve_total_count || 0
+      };
+      return values[key] ?? 0;
+    }
+
+    function updateSortHeaders() {
+      document.querySelectorAll('th.sortable').forEach(th => {
+        const table = th.dataset.table;
+        const sort = state.sort[table];
+        th.classList.toggle('sorted-desc', !!sort && sort.key === th.dataset.sort && sort.dir === 'desc');
+        th.classList.toggle('sorted-asc', !!sort && sort.key === th.dataset.sort && sort.dir === 'asc');
+      });
+    }
+
     function render() {
       const o = state.overview;
       rangePill.textContent = `${state.filters.start_date || startDate.value} ถึง ${state.filters.end_date || endDate.value}`;
@@ -295,8 +451,11 @@
       sumInsuranceAmount.textContent = money(o.insurance_premium_total || 0);
       peopleCount.textContent = format(state.people.length) + ' รายการ';
       teamCount.textContent = format(state.teams.length) + ' รายการ';
-      peopleBody.innerHTML = state.people.length ? state.people.map((p, i) => peopleRow(p, i)).join('') : emptyRow();
-      teamBody.innerHTML = state.teams.length ? state.teams.map((t, i) => teamRow(t, i)).join('') : emptyRow();
+      peopleBody.innerHTML = state.people.length ? state.people.map((p, i) => peopleRow(p, i)).join('') + totalRow(state.people, 'people') : emptyRow(7);
+      teamBody.innerHTML = state.teams.length ? state.teams.map((t, i) => teamRow(t, i)).join('') + totalRow(state.teams, 'team') : emptyRow(7);
+      peopleAppInBody.innerHTML = state.people.length ? state.people.map((p, i) => appInRow(p, i, 'people')).join('') + appInTotalRow(state.people, 'people') : emptyRow(12);
+      teamAppInBody.innerHTML = state.teams.length ? state.teams.map((t, i) => appInRow(t, i, 'team')).join('') + appInTotalRow(state.teams, 'team') : emptyRow(12);
+      updateSortHeaders();
     }
 
     function peopleRow(p, i) {
@@ -331,13 +490,95 @@
         </tr>`;
     }
 
+    function totalRow(rows, type) {
+      const t = totals(rows, type);
+      return `<tr class="total-row">
+        <td></td>
+        <td>Total</td>
+        ${metricCell('card', t.cardCustomer, 'CR ' + format(t.crCustomer) + ' / YC ' + format(t.ycCustomer), t.cardCustomer === 0)}
+        ${metricCell('approve', t.approvedNew, 'ลูกค้าใหม่', t.approvedNew === 0)}
+        ${metricCell('loan', t.oneLoanCount, money(t.oneLoanAmount), t.oneLoanCount === 0)}
+        ${metricCell('loan', t.oneLoanApproveCount, money(t.oneLoanApproveAmount))}
+        ${metricCell('ins', t.insPolicy, money(t.insPremium))}
+      </tr>`;
+    }
+
+    function appInRow(item, i, type) {
+      const name = type === 'people'
+        ? `<div class="name">${esc(item.employee_id || '-')} • ${esc(item.nickname || item.employee_name || '-')}</div><div class="sub">${esc(item.team_name || '-')} / ${esc(item.branch_name || '-')}</div>`
+        : `<div class="name">${esc(item.team_name || '-')}</div><div class="sub">${esc(item.branch_name || '-')}</div>`;
+      return `<tr>
+        <td><span class="rank">${i + 1}</span></td>
+        <td>${name}</td>
+        ${metricCell('card', item.card_cr_total || 0, 'ใบสมัคร CR')}
+        ${metricCell('card', item.card_yc_total || 0, 'ใบสมัคร YC')}
+        ${metricCell('card', item.card_total || 0, 'รวม CR+YC', Number(item.card_total || 0) === 0)}
+        ${metricCell('loan', item.one_loan_count || 0, money(item.one_loan_amount || 0), Number(item.one_loan_count || 0) === 0)}
+        ${metricCell('approve', Number(item.card_approve_new_customer_count || 0) + Number(item.card_approve_old_customer_count || 0), 'ใหม่ ' + format(item.card_approve_new_customer_count || 0) + ' / เก่า ' + format(item.card_approve_old_customer_count || 0))}
+        ${metricCell('approve', item.card_approve_cr_count || 0, 'ใหม่ ' + format(item.card_approve_cr_new_count || 0) + ' / เก่า ' + format(item.card_approve_cr_old_count || 0))}
+        ${metricCell('approve', item.card_approve_yc_count || 0, 'ใหม่ ' + format(item.card_approve_yc_new_count || 0) + ' / เก่า ' + format(item.card_approve_yc_old_count || 0))}
+        ${metricCell('approve', item.card_approve_total_count || 0, 'ใหม่ ' + format(item.card_approve_new_cryc_count || 0) + ' / เก่า ' + format(item.card_approve_old_cryc_count || 0))}
+        ${metricCell('loan', item.one_loan_approve_count || 0, money(item.one_loan_approve_amount || 0))}
+        ${metricCell('ins', type === 'team' ? item.insurance_policy_total || 0 : item.insurance_policy_count || 0, money(type === 'team' ? item.insurance_premium_total || 0 : item.insurance_premium || 0))}
+      </tr>`;
+    }
+
+    function appInTotalRow(rows, type) {
+      const t = totals(rows, type);
+      return `<tr class="total-row">
+        <td></td>
+        <td>Total</td>
+        ${metricCell('card', t.cardCr, 'ใบสมัคร CR')}
+        ${metricCell('card', t.cardYc, 'ใบสมัคร YC')}
+        ${metricCell('card', t.cardTotal, 'รวม CR+YC', t.cardTotal === 0)}
+        ${metricCell('loan', t.oneLoanCount, money(t.oneLoanAmount), t.oneLoanCount === 0)}
+        ${metricCell('approve', t.approveCustomerNew + t.approveCustomerOld, 'ใหม่ ' + format(t.approveCustomerNew) + ' / เก่า ' + format(t.approveCustomerOld))}
+        ${metricCell('approve', t.approveCr, 'ใหม่ ' + format(t.approveCrNew) + ' / เก่า ' + format(t.approveCrOld))}
+        ${metricCell('approve', t.approveYc, 'ใหม่ ' + format(t.approveYcNew) + ' / เก่า ' + format(t.approveYcOld))}
+        ${metricCell('approve', t.approveTotal, 'ใหม่ ' + format(t.approveNewCrYc) + ' / เก่า ' + format(t.approveOldCrYc))}
+        ${metricCell('loan', t.oneLoanApproveCount, money(t.oneLoanApproveAmount))}
+        ${metricCell('ins', t.insPolicy, money(t.insPremium))}
+      </tr>`;
+    }
+
+    function totals(rows, type) {
+      const team = type === 'team';
+      return rows.reduce((s, r) => {
+        s.cardCustomer += Number(r.card_customer_count || 0);
+        s.crCustomer += Number(r.cr_customer_count || 0);
+        s.ycCustomer += Number(r.yc_customer_count || 0);
+        s.approvedNew += Number(r.approved_new_count || 0);
+        s.cardCr += Number(r.card_cr_total || 0);
+        s.cardYc += Number(r.card_yc_total || 0);
+        s.cardTotal += Number(r.card_total || 0);
+        s.approveCr += Number(r.card_approve_cr_count || 0);
+        s.approveYc += Number(r.card_approve_yc_count || 0);
+        s.approveTotal += Number(r.card_approve_total_count || 0);
+        s.approveCrNew += Number(r.card_approve_cr_new_count || 0);
+        s.approveCrOld += Number(r.card_approve_cr_old_count || 0);
+        s.approveYcNew += Number(r.card_approve_yc_new_count || 0);
+        s.approveYcOld += Number(r.card_approve_yc_old_count || 0);
+        s.approveNewCrYc += Number(r.card_approve_new_cryc_count || 0);
+        s.approveOldCrYc += Number(r.card_approve_old_cryc_count || 0);
+        s.approveCustomerNew += Number(r.card_approve_new_customer_count || 0);
+        s.approveCustomerOld += Number(r.card_approve_old_customer_count || 0);
+        s.oneLoanCount += Number(r.one_loan_count || 0);
+        s.oneLoanAmount += Number(r.one_loan_amount || 0);
+        s.oneLoanApproveCount += Number(r.one_loan_approve_count || 0);
+        s.oneLoanApproveAmount += Number(r.one_loan_approve_amount || 0);
+        s.insPolicy += Number(team ? r.insurance_policy_total || 0 : r.insurance_policy_count || 0);
+        s.insPremium += Number(team ? r.insurance_premium_total || 0 : r.insurance_premium || 0);
+        return s;
+      }, { cardCustomer:0, crCustomer:0, ycCustomer:0, approvedNew:0, cardCr:0, cardYc:0, cardTotal:0, approveCr:0, approveYc:0, approveTotal:0, approveCrNew:0, approveCrOld:0, approveYcNew:0, approveYcOld:0, approveNewCrYc:0, approveOldCrYc:0, approveCustomerNew:0, approveCustomerOld:0, oneLoanCount:0, oneLoanAmount:0, oneLoanApproveCount:0, oneLoanApproveAmount:0, insPolicy:0, insPremium:0 });
+    }
+
     function metricCell(type, value, sub, alertWhenZero=false) {
       const alert = alertWhenZero && Number(value || 0) === 0;
       return `<td class="${alert ? 'alert-cell' : ''}"><span class="tag ${alert ? 'alert' : type}">${format(value)}</span><div class="sub">${alert ? 'ต้องเร่งติดตาม' : esc(sub)}</div></td>`;
     }
 
-    function emptyRow() {
-      return '<tr><td colspan="7"><div class="empty">ยังไม่มีข้อมูลในช่วงวันที่นี้</div></td></tr>';
+    function emptyRow(cols=7) {
+      return `<tr><td colspan="${cols}"><div class="empty">ยังไม่มีข้อมูลในช่วงวันที่นี้</div></td></tr>`;
     }
 
     function exportTableImage(type) {
@@ -364,11 +605,21 @@
         `${format(item.one_loan_approve_count || 0)} เคส\n${money(item.one_loan_approve_amount || 0)}`,
         `${format(item.insurance_policy_total || 0)} กรม\n${money(item.insurance_premium_total || 0)}`
       ]);
+      const t = totals(rows, type);
+      dataRows.push([
+        '',
+        'TOTAL',
+        `${format(t.cardCustomer)} คน\nCR ${format(t.crCustomer)} / YC ${format(t.ycCustomer)}`,
+        `${format(t.approvedNew)} คน`,
+        `${format(t.oneLoanCount)} เคส\n${money(t.oneLoanAmount)}`,
+        `${format(t.oneLoanApproveCount)} เคส\n${money(t.oneLoanApproveAmount)}`,
+        `${format(t.insPolicy)} กรม\n${money(t.insPremium)}`
+      ]);
 
       const colWidths = [48, 230, 150, 150, 170, 170, 160];
       const rowHeight = 58;
       const headerHeight = 46;
-      const titleHeight = 74;
+      const titleHeight = 92;
       const visibleRows = dataRows.slice(0, 40);
       const width = colWidths.reduce((s, w) => s + w, 0) + 32;
       const height = titleHeight + headerHeight + visibleRows.length * rowHeight + 32;
@@ -389,6 +640,7 @@
       ctx.fillStyle = '#667085';
       ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.fillText(`${startDate.value} ถึง ${endDate.value} • ${branchSelect.value || 'ทุกสาขา'}${teamSelect.value ? ' • ' + teamSelect.value : ''}`, 32, 68);
+      ctx.fillText(`Export: ${formatExportDateTime(new Date())}`, 32, 86);
 
       let y = titleHeight;
       let x = 16;
@@ -402,15 +654,20 @@
 
       visibleRows.forEach((row, rIdx) => {
         x = 16;
-        ctx.fillStyle = rIdx % 2 ? '#ffffff' : '#fcfcfd';
+        const isTotal = row[1] === 'TOTAL';
+        ctx.fillStyle = isTotal ? '#f8fafc' : (rIdx % 2 ? '#ffffff' : '#fcfcfd');
         ctx.fillRect(x, y, width - 32, rowHeight);
+        if (isTotal) {
+          ctx.fillStyle = '#cbd5e1';
+          ctx.fillRect(x, y, width - 32, 2);
+        }
         row.forEach((value, cIdx) => {
-          const isAlert = (cIdx === 2 || cIdx === 3 || cIdx === 4) && String(value).startsWith('0 ');
+          const isAlert = !isTotal && (cIdx === 2 || cIdx === 3 || cIdx === 4) && String(value).startsWith('0 ');
           if (isAlert) {
             ctx.fillStyle = '#fee2e2';
             ctx.fillRect(x + 4, y + 7, colWidths[cIdx] - 8, rowHeight - 14);
           }
-          drawCellText(ctx, value, x + 10, y + 18, colWidths[cIdx] - 20, isAlert ? '#b91c1c' : '#18213a', cIdx === 0 ? '700 12px' : '600 12px');
+          drawCellText(ctx, value, x + 10, y + 18, colWidths[cIdx] - 20, isAlert ? '#b91c1c' : '#18213a', (cIdx === 0 || isTotal) ? '700 12px' : '600 12px');
           x += colWidths[cIdx];
         });
         y += rowHeight;
@@ -423,6 +680,51 @@
       link.click();
     }
 
+    function exportAppInXls(type) {
+      const rows = type === 'people' ? state.people : state.teams;
+      if (!rows.length) { alert('ยังไม่มีข้อมูลสำหรับ Export'); return; }
+      const total = totals(rows, type);
+      const title = type === 'people' ? 'App-in Approve รายบุคคล' : 'App-in Approve รายทีม';
+      const headers = type === 'people'
+        ? ['รหัส', 'ชื่อ', 'ทีม', 'สาขา', 'App-in CR', 'App-in YC', 'App-in CR+YC', 'App-in One Loan เคส', 'App-in One Loan บาท', 'Approve ลูกค้าใหม่ คน', 'Approve ลูกค้าเก่า คน', 'Approve CR ใหม่', 'Approve CR เก่า', 'Approve YC ใหม่', 'Approve YC เก่า', 'Approve CR+YC ใหม่', 'Approve CR+YC เก่า', 'Approve One Loan เคส', 'Approve One Loan บาท', 'ประกัน กรม', 'ประกัน บาท']
+        : ['ทีม', 'สาขา', 'App-in CR', 'App-in YC', 'App-in CR+YC', 'App-in One Loan เคส', 'App-in One Loan บาท', 'Approve ลูกค้าใหม่ คน', 'Approve ลูกค้าเก่า คน', 'Approve CR ใหม่', 'Approve CR เก่า', 'Approve YC ใหม่', 'Approve YC เก่า', 'Approve CR+YC ใหม่', 'Approve CR+YC เก่า', 'Approve One Loan เคส', 'Approve One Loan บาท', 'ประกัน กรม', 'ประกัน บาท'];
+      const body = rows.map(r => type === 'people' ? [
+        r.employee_id || '', r.nickname || r.employee_name || '', r.team_name || '', r.branch_name || '',
+        r.card_cr_total || 0, r.card_yc_total || 0, r.card_total || 0, r.one_loan_count || 0, r.one_loan_amount || 0,
+        r.card_approve_new_customer_count || 0, r.card_approve_old_customer_count || 0,
+        r.card_approve_cr_new_count || 0, r.card_approve_cr_old_count || 0, r.card_approve_yc_new_count || 0, r.card_approve_yc_old_count || 0,
+        r.card_approve_new_cryc_count || 0, r.card_approve_old_cryc_count || 0, r.one_loan_approve_count || 0, r.one_loan_approve_amount || 0,
+        r.insurance_policy_count || 0, r.insurance_premium || 0
+      ] : [
+        r.team_name || '', r.branch_name || '',
+        r.card_cr_total || 0, r.card_yc_total || 0, r.card_total || 0, r.one_loan_count || 0, r.one_loan_amount || 0,
+        r.card_approve_new_customer_count || 0, r.card_approve_old_customer_count || 0,
+        r.card_approve_cr_new_count || 0, r.card_approve_cr_old_count || 0, r.card_approve_yc_new_count || 0, r.card_approve_yc_old_count || 0,
+        r.card_approve_new_cryc_count || 0, r.card_approve_old_cryc_count || 0, r.one_loan_approve_count || 0, r.one_loan_approve_amount || 0,
+        r.insurance_policy_total || 0, r.insurance_premium_total || 0
+      ]);
+      const totalRow = type === 'people'
+        ? ['TOTAL', '', '', '', total.cardCr, total.cardYc, total.cardTotal, total.oneLoanCount, total.oneLoanAmount, total.approveCustomerNew, total.approveCustomerOld, total.approveCrNew, total.approveCrOld, total.approveYcNew, total.approveYcOld, total.approveNewCrYc, total.approveOldCrYc, total.oneLoanApproveCount, total.oneLoanApproveAmount, total.insPolicy, total.insPremium]
+        : ['TOTAL', '', total.cardCr, total.cardYc, total.cardTotal, total.oneLoanCount, total.oneLoanAmount, total.approveCustomerNew, total.approveCustomerOld, total.approveCrNew, total.approveCrOld, total.approveYcNew, total.approveYcOld, total.approveNewCrYc, total.approveOldCrYc, total.oneLoanApproveCount, total.oneLoanApproveAmount, total.insPolicy, total.insPremium];
+      const csvRows = [
+        [title + ' (' + startDate.value + ' ถึง ' + endDate.value + ')'],
+        headers,
+        ...body,
+        totalRow
+      ];
+      const csv = csvRows.map(row => row.map(csvCell).join(',')).join('\r\n');
+      const blob = new Blob(['\ufeff', csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${type === 'people' ? 'staff' : 'team'}_appin_approve_${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function csvCell(value) {
+      return '"' + String(value ?? '').replaceAll('"', '""') + '"';
+    }
+
     function drawCellText(ctx, text, x, y, maxWidth, color, font) {
       ctx.font = font + ' -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.fillStyle = color;
@@ -430,6 +732,17 @@
         const clipped = clipText(ctx, line, maxWidth);
         ctx.fillText(clipped, x, y + idx * 18);
       });
+    }
+
+    function formatExportDateTime(date) {
+      return date.toLocaleString('th-TH', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }) + ' น.';
     }
 
     function clipText(ctx, text, maxWidth) {
