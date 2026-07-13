@@ -100,12 +100,12 @@
         <!-- Fallback/Manual Action Button -->
         <div class="opacity-0 translate-y-4 transition-all duration-1000 ease-out" id="fallback-container">
             <p class="text-xs text-slate-500 mb-2">หากระบบไม่นำทางคุณไปโดยอัตโนมัติ กรุณาคลิกปุ่มด้านล่าง</p>
-            <a href="https://landing-page-portal-seven.vercel.app/" class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl text-sm transition-all duration-300 shadow-lg shadow-indigo-950/50 hover:shadow-indigo-500/30 hover:scale-105 active:scale-95 border border-indigo-400/20">
+            <button onclick="triggerRedirect()" class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl text-sm transition-all duration-300 shadow-lg shadow-indigo-950/50 hover:shadow-indigo-500/30 hover:scale-105 active:scale-95 border border-indigo-400/20">
                 <span>เข้าสู่ระบบพอร์ทัลทันที</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                 </svg>
-            </a>
+            </button>
         </div>
 
     </main>
@@ -120,14 +120,26 @@
 
     <!-- Redirect & Animation Logic -->
     <script>
+        // Destination URL
+        const destination = "https://landing-page-portal-seven.vercel.app/";
+
+        // ฟังก์ชันในการทำงานร่วมกันระหว่างการเปลี่ยนหน้าเว็บและการพยายามสั่งปิดหน้าจอเดิม
+        function triggerRedirect() {
+            // 1. เปลี่ยนหน้าปัจจุบันด้วยเทคนิค replace เพื่อไม่ให้อยู่ใน History และแทนที่หน้าเก่าทันที
+            window.location.replace(destination);
+            
+            // 2. ปลดล็อกและส่งคำสั่งปิดแท็บนี้ลง (หากเบราว์เซอร์อนุญาตให้ปิดแท็บได้ด้วยสคริปต์)
+            setTimeout(() => {
+                window.open('', '_self', '');
+                window.close();
+            }, 250);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const progressBar = document.getElementById('progress-bar');
             const progressText = document.getElementById('progress-text');
             const statusText = document.getElementById('status-text');
             const fallbackContainer = document.getElementById('fallback-container');
-            
-            // Destination URL
-            const destination = "https://landing-page-portal-seven.vercel.app/";
             
             // List of futuristic status messages
             const loadingPhrases = [
@@ -173,14 +185,14 @@
                     clearInterval(timer);
                     // Slight delay for aesthetic satisfaction before redirecting
                     setTimeout(() => {
-                        window.location.href = destination;
+                        triggerRedirect();
                     }, 300);
                 }
             }, intervalDuration);
 
             // Double check: if user is stuck, backup auto-redirect after 5 seconds total
             setTimeout(() => {
-                window.location.href = destination;
+                triggerRedirect();
             }, 5000);
         });
     </script>
