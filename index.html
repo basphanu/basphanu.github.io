@@ -1,162 +1,188 @@
-<!DOCTYPE html><html class="light" lang="th" style=""><head>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>ALEXANDRIA | Minimal Access</title>
-<!-- Fonts & Icons -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            "colors": {
-                    "primary": "#4a4540",
-                    "secondary": "#8c857d",
-                    "background": "#fbf9f4",
-                    "surface": "#ffffff",
-                    "surface-container": "#f5f2eb",
-                    "outline": "#e0ddd5",
-                    "on-surface": "#4a4540",
-                    "on-surface-variant": "#8c857d"
-            },
-            "borderRadius": {
-                    "DEFAULT": "2px",
-                    "lg": "4px",
-                    "xl": "8px",
-                    "full": "9999px"
-            },
-            "fontFamily": {
-                    "headline-md": ["Inter"],
-                    "display-lg": ["Inter"],
-                    "label-sm": ["Inter"],
-                    "body-md": ["Inter"],
-                    "label-md": ["Inter"],
-                    "body-lg": ["Inter"],
-                    "display-lg-mobile": ["Inter"]
-            }
-          },
-        },
-      }
-    </script>
-<style>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connecting to Portal...</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Inter & Sarabun for Thai support) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #fbf9f4;
-            color: #4a4540;
-            -webkit-font-smoothing: antialiased;
-            min-height: 100dvh;
+            font-family: 'Inter', 'Sarabun', sans-serif;
         }
-        
-        .action-card {
-            transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        /* Custom Keyframe Animations for Cosmic Portal */
+        @keyframes orbit {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-
-        .action-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 20px -8px rgba(74, 69, 64, 0.15);
-            background-color: #fcfaf5;
+        @keyframes reverse-orbit {
+            0% { transform: rotate(360deg); }
+            100% { transform: rotate(0deg); }
         }
-
-        .action-card:active {
-            transform: translateY(0px) scale(0.96);
-            transition: all 100ms cubic-bezier(0.4, 0, 0.2, 1);
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
-
-        /* Light Sweep Effect */
-        .action-card::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(
-                to right,
-                transparent,
-                rgba(255, 255, 255, 0.4),
-                transparent
-            );
-            transform: skewX(-25deg);
-            transition: none;
+        .animate-orbit {
+            animation: orbit 6s linear infinite;
         }
-
-        .action-card:hover::after {
-            left: 150%;
-            transition: left 800ms ease-in-out;
+        .animate-reverse-orbit {
+            animation: reverse-orbit 4s linear infinite;
         }
-
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
         }
-
-        .tracking-muji {
-            letter-spacing: 0.25em;
+        /* Radial Gradient Background to create depth */
+        .portal-bg {
+            background: radial-gradient(circle at center, #1e1b4b 0%, #090514 100%);
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col bg-background selection:bg-primary/10">
-<!-- TopAppBar - Elegant and Simple -->
-<nav class="w-full">
-<div class="flex justify-center items-center px-8 py-16 max-w-7xl mx-auto">
-<div class="flex flex-col items-center gap-3">
-<span class="material-symbols-outlined text-primary text-3xl font-light">account_balance</span>
-<span class="font-light text-sm tracking-muji text-primary uppercase">Internal system</span>
-</div>
-</div>
-</nav>
-<!-- Main Content -->
-<main class="flex-grow flex flex-col items-center justify-start px-6 pt-12 pb-20 relative">
-<div class="z-10 w-full max-w-md text-center">
-<div class="mb-24">
-<h1 class="text-3xl font-light text-on-surface tracking-muji uppercase">
-                    Portal Access
-                </h1>
-</div>
-<div class="flex flex-col gap-8">
-<!-- Portal Link 1 -->
-<a class="action-card group flex flex-col items-center justify-center py-14 px-8 border border-outline/60 bg-surface-container" href="https://staff-performance-tracking-db.vercel.app/" onclick="handlePortalClick(event)" target="_blank">
-<span class="material-symbols-outlined text-primary text-3xl mb-6 opacity-80 group-hover:opacity-100 transition-opacity">monitoring</span>
-<span class="text-base font-light text-on-surface tracking-wide">ระบบส่งยอดพนักงาน</span>
-<span class="text-[10px] font-medium uppercase tracking-[0.3em] text-on-surface-variant/50 mt-4 group-hover:text-on-surface-variant/80 transition-colors">Staff Performance Tracking</span>
-</a>
-<!-- Portal Link 2 -->
-<a class="action-card group flex flex-col items-center justify-center py-14 px-8 border border-outline/60 bg-surface-container" href="https://easybroker-hub.vercel.app/" onclick="handlePortalClick(event)" target="_blank">
-<span class="material-symbols-outlined text-primary text-3xl mb-6 opacity-80 group-hover:opacity-100 transition-opacity">badge</span>
-<span class="text-base font-light text-on-surface tracking-wide">ระบบจัดการข้อมูลใบอนุญาต</span>
-<span class="text-[10px] font-medium uppercase tracking-[0.3em] text-on-surface-variant/50 mt-4 group-hover:text-on-surface-variant/80 transition-colors">License Management</span>
-</a>
-</div>
-</div>
-</main>
-<!-- Footer - Minimal Muji Style -->
-<footer class="w-full mt-auto">
-<div class="flex flex-col items-center px-12 py-16 gap-8 w-full max-w-7xl mx-auto">
-<div class="flex flex-wrap justify-center gap-x-12 gap-y-4">
-<a class="text-[10px] font-normal uppercase tracking-[0.2em] text-on-surface-variant/60 hover:text-primary transition-all" href="#">Privacy</a>
-<a class="text-[10px] font-normal uppercase tracking-[0.2em] text-on-surface-variant/60 hover:text-primary transition-all" href="#">Terms</a>
-<a class="text-[10px] font-normal uppercase tracking-[0.2em] text-on-surface-variant/60 hover:text-primary transition-all" href="#">Compliance</a>
+<body class="portal-bg min-h-screen text-white flex flex-col justify-between items-center overflow-hidden p-6 selection:bg-indigo-500 selection:text-white">
 
-</div>
-<p class="text-[9px] font-normal uppercase tracking-[0.3em] text-on-surface-variant/40">
-                © 2026 phanu management Systems
-            </p>
-</div>
-</footer>
-<script>
-        function handlePortalClick(event) {
-            setTimeout(() => {
-                try {
-                    window.close();
-                } catch (e) {
-                    // Silently fail if browser blocks window.close()
+    <!-- Top Spacer for alignment -->
+    <div class="h-10"></div>
+
+    <!-- Main Content Container -->
+    <main class="flex flex-col items-center justify-center max-w-md w-full text-center z-10">
+        
+        <!-- Glowing Cosmic Portal Visual representation -->
+        <div class="relative w-48 h-48 mb-8 flex items-center justify-center animate-float">
+            <!-- Outermost Glow Ring -->
+            <div class="absolute inset-0 rounded-full border border-indigo-500/20 blur-xl animate-pulse"></div>
+            
+            <!-- Outer Spinning Dotted Ring -->
+            <div class="absolute w-44 h-44 rounded-full border-2 border-dashed border-indigo-400/30 animate-orbit"></div>
+            
+            <!-- Middle Spinning Portal Ring with gradients -->
+            <div class="absolute w-36 h-36 rounded-full border-t-4 border-b-4 border-l-2 border-r-2 border-transparent border-t-cyan-400 border-b-violet-500 animate-reverse-orbit opacity-80"></div>
+            
+            <!-- Inner Glowing Aura -->
+            <div class="absolute w-28 h-28 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 opacity-40 blur-md"></div>
+            
+            <!-- Core Portal Circle (Solid Center) -->
+            <div class="absolute w-24 h-24 rounded-full bg-gradient-to-br from-indigo-900 to-slate-950 flex items-center justify-center border border-indigo-500/50 shadow-inner">
+                <!-- Inner Portal Icon (using elegant SVG) -->
+                <svg class="w-10 h-10 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 009 11a13.917 13.917 0 00-2.333-7.314c-.018-.03-.036-.059-.053-.089m3.111 19.5a13.916 13.916 0 01-3.111-19.5m6.222 19.5a13.916 13.916 0 003.111-19.5M3.75 12h16.5M12 3a9 9 0 100 18 9 9 0 000-18z"></path>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Dynamic Loading Status Title -->
+        <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide mb-3 bg-gradient-to-r from-cyan-400 via-indigo-300 to-violet-400 bg-clip-text text-transparent">
+            PORTAL ACCESSING
+        </h1>
+        
+        <!-- Animated subtitle which updates in JS -->
+        <p id="status-text" class="text-slate-400 text-sm md:text-base font-light mb-8 transition-all duration-300 h-6">
+            กำลังเชื่อมโยงโครงข่ายข้อมูลความเร็วสูง...
+        </p>
+
+        <!-- Dynamic Loader Bar -->
+        <div class="w-full bg-slate-950/80 p-1.5 rounded-full border border-slate-800 shadow-2xl mb-8">
+            <div class="relative w-full h-3 bg-slate-900 rounded-full overflow-hidden">
+                <!-- Pulse Glow under the bar -->
+                <div id="progress-bar" class="absolute top-0 left-0 h-full w-0 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-600 transition-all duration-100 ease-out shadow-[0_0_12px_rgba(34,211,238,0.5)]"></div>
+            </div>
+            <!-- Percentage Indicator -->
+            <div class="flex justify-between items-center px-2 mt-2">
+                <span class="text-xs text-slate-500 uppercase tracking-widest font-mono">Synchronizing</span>
+                <span id="progress-text" class="text-xs text-cyan-400 font-mono font-bold">0%</span>
+            </div>
+        </div>
+
+        <!-- Fallback/Manual Action Button -->
+        <div class="opacity-0 translate-y-4 transition-all duration-1000 ease-out" id="fallback-container">
+            <p class="text-xs text-slate-500 mb-2">หากระบบไม่นำทางคุณไปโดยอัตโนมัติ กรุณาคลิกปุ่มด้านล่าง</p>
+            <a href="https://landing-page-portal-seven.vercel.app/" class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl text-sm transition-all duration-300 shadow-lg shadow-indigo-950/50 hover:shadow-indigo-500/30 hover:scale-105 active:scale-95 border border-indigo-400/20">
+                <span>เข้าสู่ระบบพอร์ทัลทันที</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+            </a>
+        </div>
+
+    </main>
+
+    <!-- Footer Security Badge -->
+    <footer class="w-full flex justify-center items-center gap-2 text-xs text-slate-600 py-4 border-t border-slate-900/40">
+        <svg class="w-4 h-4 text-emerald-500/80 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+        </svg>
+        <span class="tracking-widest uppercase font-mono text-[10px]">Secure Gateway Redirect</span>
+    </footer>
+
+    <!-- Redirect & Animation Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const statusText = document.getElementById('status-text');
+            const fallbackContainer = document.getElementById('fallback-container');
+            
+            // Destination URL
+            const destination = "https://landing-page-portal-seven.vercel.app/";
+            
+            // List of futuristic status messages
+            const loadingPhrases = [
+                { limit: 20, text: "กำลังสร้างการเชื่อมต่อเครือข่ายเสมือน..." },
+                { limit: 45, text: "กำลังตรวจสอบความปลอดภัยปลายทาง..." },
+                { limit: 70, text: "จัดระเบียบโครงสร้างเฟรมเวิร์ก..." },
+                { limit: 90, text: "เปิดประตูดิจิทัล (Portal) ปลายทาง..." },
+                { limit: 100, text: "เดินทางเข้าสู่พอร์ทัลหลัก..." }
+            ];
+
+            let progress = 0;
+            
+            // Fast fake-loading duration (around 2.5 seconds total for ideal user experience)
+            const intervalDuration = 25; // millisecond intervals
+            const increment = 1; // percentage increase per interval
+            
+            const timer = setInterval(() => {
+                progress += increment;
+                if (progress > 100) progress = 100;
+                
+                // Update UI elements
+                progressBar.style.width = `${progress}%`;
+                progressText.innerText = `${progress}%`;
+                
+                // Update status text dynamically based on percentage threshold
+                const phrase = loadingPhrases.find(p => progress <= p.limit);
+                if (phrase && statusText.innerText !== phrase.text) {
+                    statusText.style.opacity = 0;
+                    setTimeout(() => {
+                        statusText.innerText = phrase.text;
+                        statusText.style.opacity = 1;
+                    }, 150);
                 }
-            }, 500);
-        }
+
+                // If loading takes slightly longer than 1 second, start fading in the manual button just in case
+                if (progress === 40) {
+                    fallbackContainer.classList.remove('opacity-0', 'translate-y-4');
+                    fallbackContainer.classList.add('opacity-100', 'translate-y-0');
+                }
+
+                // Redirect action upon completion
+                if (progress >= 100) {
+                    clearInterval(timer);
+                    // Slight delay for aesthetic satisfaction before redirecting
+                    setTimeout(() => {
+                        window.location.href = destination;
+                    }, 300);
+                }
+            }, intervalDuration);
+
+            // Double check: if user is stuck, backup auto-redirect after 5 seconds total
+            setTimeout(() => {
+                window.location.href = destination;
+            }, 5000);
+        });
     </script>
-
-
-</body></html>
+</body>
+</html>
